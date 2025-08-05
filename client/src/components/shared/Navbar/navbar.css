@@ -1,0 +1,51 @@
+/* Reset default link styles */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Ensure links stay white in all states */
+.text-white {
+  color: white !important;
+}
+
+/* Simple button styles */
+button {
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Search input focus styles */
+form:focus-within .absolute {
+  border-radius: 0.5rem;
+  width: 20rem;
+}
+
+/* Ensure the search icon stays clickable */
+.group:hover .absolute {
+  pointer-events: none;
+}
+
+.group .absolute {
+  pointer-events: auto;
+}
+
+/* Ensure input is clickable when expanded */
+.group:hover input {
+  pointer-events: auto;
+}
+
+/* Hide the background circle when input is focused */
+form:focus-within .absolute:last-child {
+  opacity: 0;
+}
+
+/* Enhance hover effects */
+a:hover {
+  color: white !important;
+}
+
+/* Mobile menu link color fix */
+.lg\:hidden nav a {
+  color: white !important;
+}
