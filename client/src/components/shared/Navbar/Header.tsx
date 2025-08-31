@@ -1,14 +1,15 @@
 import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { FaUserCircle, FaBars, FaTimes, FaSearch } from "react-icons/fa";
 
-// Define the NavLink type
-type NavLink = {
+// Define the NavigationLink type
+type NavigationLink = {
   id: string;
   label: string;
   href: string;
 };
 
-const navLinks: NavLink[] = [
+const navLinks: NavigationLink[] = [
   { id: "news", label: "News", href: "/" },
   { id: "sports", label: "Sports", href: "/sports" },
   { id: "opinions", label: "Opinions", href: "/opinions" },
@@ -145,14 +146,18 @@ const Header: React.FC = () => {
 
               {/* Navigation Links */}
               {navLinks.map((link) => (
-                <a
+                <NavLink
                   key={link.id}
-                  href={link.href}
-                  className="text-sm text-white hover:text-green-200 transition-colors duration-200 font-medium"
+                  to={link.href}
+                  className={({ isActive }) =>
+                    `text-sm text-white hover:text-green-200 transition-colors duration-200 font-medium ${
+                      isActive ? "text-green-200 font-semibold" : ""
+                    }`
+                  }
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </NavLink>
               ))}
 
               {/* Separator */}

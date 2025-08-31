@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
 import "./navbar.css";
+import Logo from "../../../assets/LOGO.jpg";
 
-// Define the NavLink type
-type NavLink = {
+// Define the NavigationLink type (renamed to avoid conflict with React Router's NavLink)
+type NavigationLink = {
   id: string;
   label: string;
   href: string;
@@ -17,47 +19,58 @@ type DropdownItem = {
   href: string;
 };
 
-const navLinks: NavLink[] = [
-  { 
-    id: "news", 
-    label: "News", 
+const navLinks: NavigationLink[] = [
+  {
+    id: "news",
+    label: "News",
     href: "/news",
     hasDropdown: true,
     dropdownItems: [
       { id: "university", label: "University", href: "/news/university" },
       { id: "local", label: "Local", href: "/news/local" },
       { id: "national", label: "National", href: "/news/national" },
-      { id: "international", label: "International", href: "/news/international" },
-      { id: "sci-tech", label: "Sci-Tech", href: "/news/sci-tech" }
-    ]
+      {
+        id: "international",
+        label: "International",
+        href: "/news/international",
+      },
+      { id: "sci-tech", label: "Sci-Tech", href: "/news/sci-tech" },
+    ],
   },
   { id: "sports", label: "Sports", href: "/sports" },
   { id: "opinions", label: "Opinions", href: "/opinions" },
   { id: "literary", label: "Literary", href: "/literary" },
-  { 
-    id: "print-media", 
-    label: "Print Media", 
+  {
+    id: "print-media",
+    label: "Print Media",
     href: "/print-media",
     hasDropdown: true,
     dropdownItems: [
       { id: "tabloids", label: "Tabloids", href: "/print-media/tabloids" },
       { id: "magazines", label: "Magazines", href: "/print-media/magazines" },
       { id: "folios", label: "Folios", href: "/print-media/folios" },
-      { id: "other-issues", label: "Other Issues", href: "/print-media/other-issues" }
-    ]
+      {
+        id: "other-issues",
+        label: "Other Issues",
+        href: "/print-media/other-issues",
+      },
+    ],
   },
-  { 
-    id: "about", 
-    label: "About", 
+  {
+    id: "about",
+    label: "About",
     href: "/about",
     hasDropdown: true,
     dropdownItems: [
-      { id: "editorial-board", label: "The Editorial Board", href: "/about/editorial-board" },
+      {
+        id: "editorial-board",
+        label: "The Editorial Board",
+        href: "/about/editorial-board",
+      },
       { id: "faqs", label: "FAQs", href: "/about/faqs" },
-      { id: "contact", label: "Contact Us", href: "/about/contact" }
-    ]
+      { id: "contact", label: "Contact Us", href: "/about/contact" },
+    ],
   },
-  { id: "archive", label: "Archive", href: "/archive" },
 ];
 
 const Navbar: React.FC = () => {
@@ -78,12 +91,6 @@ const Navbar: React.FC = () => {
     setHoveredDropdown(linkId);
   };
 
-  const handleDropdownLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setHoveredDropdown(null);
-    }, 150); // Small delay to prevent immediate closing
-  };
-
   const handleDropdownMenuEnter = (linkId: string) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -94,8 +101,17 @@ const Navbar: React.FC = () => {
   const handleDropdownMenuLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setHoveredDropdown(null);
-    }, 150);
+    }, 100); // Shorter delay when leaving dropdown menu
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -104,7 +120,10 @@ const Navbar: React.FC = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 items-center relative">
             {/* Desktop Search Bar - Hidden on Mobile */}
-            <form onSubmit={handleSearch} className="relative group hidden lg:block">
+            <form
+              onSubmit={handleSearch}
+              className="relative group hidden lg:block"
+            >
               <div className="relative flex items-center">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <FaSearch className="text-lg text-green-800 group-hover:text-green-600 transition-all duration-300" />
@@ -118,16 +137,30 @@ const Navbar: React.FC = () => {
                 />
               </div>
             </form>
+            <div 
+              onClick={() => window.location.href = '/'}
+              className="flex items-center justify-center space-x-4 w-full hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
+            >
+              {/* Logo - hidden on mobile */}
+              <div className="hidden sm:flex w-16 h-16 rounded-full overflow-hidden shadow-lg items-center justify-center transform hover:scale-105 transition-transform duration-200">
+                <img
+                  src={Logo}
+                  alt="The Hillside Echo Logo"
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-            <div className="hidden lg:block text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-800 text-center whitespace-nowrap">
-              The Hillside Echo
+              {/* Title */}
+              <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-800 text-center whitespace-nowrap">
+                The Hillside Echo
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Navigation Bar - Sticky on Desktop Only */}
-      <div className="hidden lg:block sticky top-0 z-40 bg-green-800 text-white shadow-lg">
+      <div className="hidden lg:block sticky top-0 z-50 bg-green-800 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             {/* Desktop Navigation */}
@@ -137,43 +170,60 @@ const Navbar: React.FC = () => {
                   <div
                     key={link.id}
                     className="relative group"
-                    onMouseEnter={() => link.hasDropdown && handleDropdownEnter(link.id)}
-                    onMouseLeave={() => link.hasDropdown && handleDropdownLeave()}
+                    onMouseEnter={() =>
+                      link.hasDropdown && handleDropdownEnter(link.id)
+                    }
                   >
-                    <a
-                      href={link.href}
-                      className="text-white hover:text-green-200 transition-all duration-200 font-semibold text-base uppercase tracking-wider hover:transform hover:scale-105 px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-1"
+                    <NavLink
+                      to={link.href}
+                      className={({ isActive }) =>
+                        `text-white hover:text-green-200 transition-all duration-200 font-semibold text-base uppercase tracking-wider hover:transform hover:scale-105 px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-1 ${
+                          isActive ? "bg-green-700 text-green-100" : ""
+                        }`
+                      }
                     >
                       {link.label}
                       {link.hasDropdown && (
                         <FaChevronDown className="text-xs transition-transform duration-200 group-hover:rotate-180" />
                       )}
-                    </a>
-                    
+                    </NavLink>
+
                     {/* Professional Dropdown Menu */}
                     {link.hasDropdown && hoveredDropdown === link.id && (
-                      <div 
-                        className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-white border border-green-200 rounded-lg shadow-xl z-50"
-                        style={{ minWidth: '200px' }}
+                      <div
+                        className="absolute top-full left-1/2 transform -translate-x-1/2 pt-1 w-56"
                         onMouseEnter={() => handleDropdownMenuEnter(link.id)}
                         onMouseLeave={() => handleDropdownMenuLeave()}
+                        style={{ pointerEvents: "auto" }}
                       >
-                        <div className="py-2">
-                          {link.dropdownItems && link.dropdownItems.length > 0 ? (
-                            link.dropdownItems.map((item) => (
-                              <a
-                                key={item.id}
-                                href={item.href}
-                                className="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-800 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
-                              >
-                                {item.label}
-                              </a>
-                            ))
-                          ) : (
-                            <div className="px-4 py-3 text-sm text-gray-500">
-                              No items available
-                            </div>
-                          )}
+                        <div
+                          className="w-full text-black bg-white border border-green-600 rounded-lg shadow-xl z-[60]"
+                          style={{ minWidth: "200px" }}
+                        >
+                          <div className="py-2">
+                            {link.dropdownItems &&
+                            link.dropdownItems.length > 0 ? (
+                              link.dropdownItems.map((item) => (
+                                <NavLink
+                                  key={item.id}
+                                  to={item.href}
+                                  className={({ isActive }) =>
+                                    `block px-4 py-3 text-sm text-gray-700 hover:bg-green-700 hover:text-green-800 transition-colors duration-200 border-b border-gray-100 last:border-b-0 cursor-pointer ${
+                                      isActive
+                                        ? "bg-green-100 text-green-800 font-semibold"
+                                        : ""
+                                    }`
+                                  }
+                                >
+                                  {item.label}
+                                </NavLink>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-sm text-gray-500">
+                                No items available
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}

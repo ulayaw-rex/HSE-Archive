@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { FaFacebook, FaInstagram } from "react-icons/fa";
 import Logo from "../../../assets/LOGO.jpg";
 
@@ -41,14 +42,18 @@ const Footer: React.FC = () => {
           {/* Left Column - Branding */}
           <div className="flex flex-col items-start space-y-6">
             {/* Logo */}
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center transform hover:scale-105 transition-transform duration-200">
+            <div 
+              onClick={() => window.location.href = '/'}
+              className="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
+            >
+              <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg flex items-center justify-center transform hover:scale-105 transition-transform duration-200">
                 <img
                   src={Logo}
                   alt="The Hillside Echo Logo"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
+
               <div>
                 <h3 className="text-3xl font-serif font-bold tracking-wide">
                   The Hillside Echo
@@ -74,13 +79,17 @@ const Footer: React.FC = () => {
                   Main Sections
                 </h4>
                 {leftNavigationLinks.map((link) => (
-                  <a
+                  <NavLink
                     key={link.id}
-                    href={link.href}
-                    className="block text-sm font-medium uppercase tracking-wide hover:text-green-200 transition-all duration-200 hover:translate-x-1"
+                    to={link.href}
+                    className={({ isActive }) =>
+                      `block text-sm font-medium uppercase tracking-wide hover:text-green-200 transition-all duration-200 hover:translate-x-1 ${
+                        isActive ? "text-green-200 font-semibold" : ""
+                      }`
+                    }
                   >
                     {link.text}
-                  </a>
+                  </NavLink>
                 ))}
               </div>
 
@@ -90,13 +99,17 @@ const Footer: React.FC = () => {
                   Resources
                 </h4>
                 {rightNavigationLinks.map((link) => (
-                  <a
+                  <NavLink
                     key={link.id}
-                    href={link.href}
-                    className="block text-sm font-medium uppercase tracking-wide hover:text-green-200 transition-all duration-200 hover:translate-x-1"
+                    to={link.href}
+                    className={({ isActive }) =>
+                      `block text-sm font-medium uppercase tracking-wide hover:text-green-200 transition-all duration-200 hover:translate-x-1 ${
+                        isActive ? "text-green-200 font-semibold" : ""
+                      }`
+                    }
                   >
                     {link.text}
-                  </a>
+                  </NavLink>
                 ))}
               </div>
             </div>
@@ -152,13 +165,13 @@ const Footer: React.FC = () => {
           {/* Social Media Icons */}
           <div className="flex space-x-6">
             <a
-              href={"https://fb.com"}
+              href={"https://www.facebook.com/thehillsidecho"}
               className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-green-700 transition-all duration-200 transform hover:scale-110"
             >
               <FaFacebook />
             </a>
             <a
-              href={"https://ig.com"}
+              href={"https://www.instagram.com/thehillsideecho/"}
               className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-green-700 transition-all duration-200 transform hover:scale-110"
             >
               <FaInstagram />
