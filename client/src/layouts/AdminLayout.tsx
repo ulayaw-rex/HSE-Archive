@@ -10,9 +10,8 @@ type SidebarItem = {
   children?: SidebarItem[];
 };
 
-const SidebarItem: React.FC<{ item: SidebarItem; level?: number }> = ({
+const SidebarItem: React.FC<{ item: SidebarItem }> = ({
   item,
-  level = 0,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
@@ -152,11 +151,6 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItem[] }> = ({
               </svg>
             </button>
             <div className="text-sm text-green-700">Admin Panel</div>
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-xs text-green-700/70">
-                v1.0
-              </span>
-            </div>
           </div>
         </header>
 

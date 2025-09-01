@@ -5,11 +5,12 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -90,4 +91,117 @@ input:focus {
 
 .read-the-docs {
   color: #888;
+}
+
+/* Button Styles */
+.btn {
+  @apply font-semibold rounded-lg transition-all duration-300 text-center inline-flex items-center justify-center;
+  min-width: 120px;
+  min-height: 48px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white border-2 border-blue-600;
+}
+
+.btn-primary:hover {
+  @apply bg-blue-700 border-blue-700;
+}
+
+.btn-secondary {
+  @apply bg-white text-gray-700 border-2 border-gray-300;
+}
+
+.btn-secondary:hover {
+  @apply bg-gray-100 border-gray-400;
+}
+
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Confirmation Modal Styles */
+.modal-btn {
+  @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+}
+
+.modal-btn-cancel {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-800;
+}
+
+.modal-btn-delete {
+  @apply bg-red-600 text-white px-6 py-2.5 font-semibold;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.modal-btn-delete:hover {
+  @apply bg-red-700 transform scale-105;
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.4);
+}
+
+.modal-btn-delete:active {
+  @apply transform scale-100;
+}
+
+/* Responsive Modal Styles */
+.modal-container {
+  @apply fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-[9999] p-4;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-2xl w-full max-w-md mx-auto transform transition-all;
+  min-width: min(90vw, 32rem);
+}
+
+.modal-btn {
+  @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full sm:w-auto;
+}
+
+.modal-btn-cancel {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-800;
+}
+
+.modal-btn-delete {
+  @apply bg-red-600 text-white px-6 py-2.5 font-semibold;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+/* Mobile-first button layout */
+.modal-actions {
+  @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:space-x-3 mt-6;
+}
+
+@media (max-width: 640px) {
+  .modal-btn {
+    width: 100%;
+  }
+}
+
+/* Admin Layout Styles */
+.admin-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+}
+
+.admin-content {
+  @apply bg-white shadow-sm rounded-lg p-6 sm:p-8;
+}
+
+.admin-header {
+  @apply flex justify-between items-center mb-6 pb-4 border-b border-gray-200;
+}
+
+.admin-title {
+  @apply text-2xl font-bold text-gray-900;
 }

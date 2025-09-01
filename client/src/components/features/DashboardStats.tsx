@@ -1,5 +1,13 @@
 import React from 'react';
-import { type DashboardStats } from '../../utils/api';
+
+export interface DashboardStats {
+  totalArticles: number;
+  mostPopularArticle?: {
+    title: string;
+    views: number;
+    date: string;
+  } | null;
+}
 
 interface DashboardStatsCardsProps {
   stats: DashboardStats;

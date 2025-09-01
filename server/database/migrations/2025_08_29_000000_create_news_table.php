@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('news', function (Blueprint $table) {
             $table->id();
             $table->string('title');
@@ -17,11 +19,15 @@ return new class extends Migration {
             $table->longText('content')->nullable();
             $table->timestamps();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('news');
+        Schema::enableForeignKeyConstraints();
     }
 };
 

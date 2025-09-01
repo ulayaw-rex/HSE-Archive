@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::table('news', function (Blueprint $table) {
-            $table->integer('views')->default(0);
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['hillsider', 'alumni', 'admin'])->default('hillsider')->after('password');
         });
 
         Schema::enableForeignKeyConstraints();
@@ -27,8 +27,8 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::table('news', function (Blueprint $table) {
-            $table->dropColumn('views');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
         });
 
         Schema::enableForeignKeyConstraints();

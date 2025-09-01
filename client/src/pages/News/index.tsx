@@ -1,6 +1,33 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CategorySection, { type CategoryItem } from "../../components/features/CategorySection";
-import { fetchNews, mapNewsToCategoryItem, type NewsDTO } from "../../utils/api";
+import AxiosInstance from "../../AxiosInstance";
+
+// Define the types that were previously in utils/api
+export interface NewsDTO {
+  id: number;
+  title: string;
+  excerpt: string;
+  image_url: string;
+  href: string;
+  date: string;
+  content: string;
+  views?: number;
+}
+
+// API functions using AxiosInstance
+const fetchNews = async (): Promise<NewsDTO[]> => {
+  const response = await AxiosInstance.get('/news');
+  return response.data;
+};
+
+const mapNewsToCategoryItem = (news: NewsDTO): CategoryItem => ({
+  id: news.id,
+  title: news.title,
+  excerpt: news.excerpt,
+  imageUrl: news.image_url,
+  href: news.href,
+  date: news.date,
+});
 
 const NewsPage: React.FC = () => {
   const [items, setItems] = useState<NewsDTO[]>([]);
