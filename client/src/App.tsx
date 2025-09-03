@@ -25,6 +25,7 @@ import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PublicationsPage from "./pages/Admin/PublicationsPage";
 
 // Admin Pages (placeholder components for now)
 const ContentPublicationsPage = () => (
@@ -153,7 +154,7 @@ const adminSidebarItems = [
     ),
     children: [
       {
-        to: "/admin/content/publications",
+        to: "/admin/publications", // Update this path
         label: "Publications",
         icon: (
           <svg
@@ -173,7 +174,7 @@ const adminSidebarItems = [
       },
       {
         to: "/admin/content/archives",
-        label: "Archives",
+        label: "Print Media Archives",
         icon: (
           <svg
             className="h-4 w-4"
@@ -186,25 +187,6 @@ const adminSidebarItems = [
               strokeLinejoin="round"
               strokeWidth={2}
               d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-14 0h14"
-            />
-          </svg>
-        ),
-      },
-      {
-        to: "/admin/content/categories",
-        label: "Categories",
-        icon: (
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
             />
           </svg>
         ),
@@ -556,23 +538,16 @@ function App() {
           <Route index element={<AdminPage />} />
 
           {/* Content Management Routes */}
-          <Route
-            path="content/publications"
-            element={<ContentPublicationsPage />}
-          />
+          <Route path="publications" element={<PublicationsPage />} />
           <Route path="content/archives" element={<ContentArchivesPage />} />
-          <Route
-            path="content/categories"
-            element={<ContentCategoriesPage />}
-          />
 
-          {/* User Management Routes */}
+          {/* User Management Route */}
           <Route path="users" element={<UserManagement />} />
 
+          {/* Remove duplicate routes and keep only the ones being used */}
           {/* Feedback Routes */}
           <Route path="feedback/review" element={<FeedbackReviewPage />} />
           <Route path="feedback/moderate" element={<FeedbackModeratePage />} />
-
           {/* Analytics Routes */}
           <Route path="analytics/views" element={<AnalyticsViewsPage />} />
           <Route
@@ -580,12 +555,10 @@ function App() {
             element={<AnalyticsActivityPage />}
           />
           <Route path="analytics/reports" element={<AnalyticsReportsPage />} />
-
           {/* Settings Routes */}
           <Route path="settings/modules" element={<SettingsModulesPage />} />
           <Route path="settings/backup" element={<SettingsBackupPage />} />
           <Route path="settings/security" element={<SettingsSecurityPage />} />
-
           {/* Help Routes */}
           <Route path="help/manuals" element={<HelpManualsPage />} />
           <Route path="help/training" element={<HelpTrainingPage />} />

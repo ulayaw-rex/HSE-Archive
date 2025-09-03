@@ -55,6 +55,45 @@ input:focus {
 }
 
 /* Existing styles */
+
+.user-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.user-modal-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 900px;
+  width: 100%;
+  max-height: 95vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -204,4 +243,38 @@ input:focus {
 
 .admin-title {
   @apply text-2xl font-bold text-gray-900;
+}
+
+/* Custom style for PublicationForm modal width */
+.publication-form-modal {
+  min-width: 900px;
+  padding: 2rem 3rem;
+  position: relative;
+}
+
+/* Fix for close button position */
+.publication-form-modal > button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+/* Fix for Post Article button visibility */
+.publication-form-modal button[type="submit"] {
+  background-color: #047857; /* Tailwind green-700 */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px; /* rounded-full */
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.publication-form-modal button[type="submit"]:hover:not(:disabled) {
+  background-color: #065f46; /* Tailwind green-800 */
+}
+
+.publication-form-modal button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -1,0 +1,145 @@
+import React, { useState, useEffect } from "react";
+import PublicationCard from "../../components/features/PublicationCard";
+import PublicationForm from "../../components/features/PublicationForm";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import { toast } from "react-toastify";
+import type {
+  Publication,
+  CreatePublicationData,
+} from "../../types/Publication";
+import AxiosInstance from "../../AxiosInstance";
+
+const PublicationsPage: React.FC = () => {
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [publicationToEdit, setPublicationToEdit] =
+    useState<Publication | null>(null);
+  const [publicationToDelete, setPublicationToDelete] =
+    useState<Publication | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPublications();
+  }, []);
+
+  const fetchPublications = async () => {
+    try {
+      const response = await AxiosInstance.get("/publications");
+      setPublications(response.data);
+    } catch (error) {
+      toast.error("Failed to fetch publications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async (data: CreatePublicationData) => {
+    try {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (key === "image" && value instanceof File) {
+            formData.append("image", value);
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await AxiosInstance.post("/publications", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setPublications([response.data, ...publications]);
+      setIsFormOpen(false);
+      toast.success("Publication created successfully");
+    } catch (error) {
+      toast.error("Failed to create publication");
+    }
+  };
+
+  const handleEdit = (publication: Publication) => {
+    setPublicationToEdit(publication);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!publicationToDelete) return;
+
+    try {
+      await AxiosInstance.delete(`/publications/${publicationToDelete.id}`);
+      setPublications(
+        publications.filter((p) => p.id !== publicationToDelete.id)
+      );
+      toast.success("Publication deleted successfully");
+      setPublicationToDelete(null);
+    } catch (error) {
+      toast.error("Failed to delete publication");
+    }
+  };
+
+  return (
+    <div className="admin-container">
+      <div className="admin-content">
+        <div className="admin-header">
+          <h1 className="admin-title">Publications</h1>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="btn btn-primary"
+          >
+            Add Article
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="animate-pulse bg-gray-200 h-64 rounded-lg"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {publications.map((publication) => (
+              <PublicationCard
+                key={publication.id}
+                publication={publication}
+                onEdit={handleEdit}
+                onDelete={(id) =>
+                  setPublicationToDelete(
+                    publications.find((p) => p.id === id) || null
+                  )
+                }
+              />
+            ))}
+          </div>
+        )}
+
+        <PublicationForm
+          isOpen={isFormOpen}
+          onClose={() => {
+            setIsFormOpen(false);
+            setPublicationToEdit(null);
+          }}
+          onSubmit={handleCreate}
+          publication={publicationToEdit}
+        />
+
+        <ConfirmationModal
+          isOpen={!!publicationToDelete}
+          onClose={() => setPublicationToDelete(null)}
+          onConfirm={handleDelete}
+          title="Delete Publication"
+          message={`Are you sure you want to delete "${publicationToDelete?.title}"? This action cannot be undone.`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default PublicationsPage;
