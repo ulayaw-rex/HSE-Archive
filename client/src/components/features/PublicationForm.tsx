@@ -60,6 +60,16 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     setLoading(true);
     try {
       await onSubmit({ ...formData, image });
+      // Reset form to initial state after successful submission
+      setFormData({
+        title: "",
+        byline: "",
+        body: "",
+        category: "university",
+        photo_credits: "",
+      });
+      setImage(null);
+      setExistingImageUrl(null);
       onClose();
     } catch (error) {
       console.error("Error submitting publication:", error);

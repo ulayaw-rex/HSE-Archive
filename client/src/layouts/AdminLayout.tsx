@@ -1,18 +1,10 @@
 import React, { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import "./AdminLayout.css";
+import type { SidebarItemType } from "../pages/Admin/SidebarItems"; // ✅ shared type
 
-type SidebarItem = {
-  to?: string;
-  label: string;
-  icon: React.ReactNode;
-  end?: boolean;
-  children?: SidebarItem[];
-};
-
-const SidebarItem: React.FC<{ item: SidebarItem }> = ({
-  item,
-}) => {
+// Sidebar item component
+const SidebarItem: React.FC<{ item: SidebarItemType }> = ({ item }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const isActive = item.to ? window.location.pathname === item.to : false;
@@ -87,7 +79,8 @@ const SidebarItem: React.FC<{ item: SidebarItem }> = ({
   );
 };
 
-const AdminLayout: React.FC<{ sidebarItems: SidebarItem[] }> = ({
+// Admin layout wrapper
+const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
   sidebarItems,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

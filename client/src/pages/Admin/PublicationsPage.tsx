@@ -56,6 +56,8 @@ const PublicationsPage: React.FC = () => {
       setPublications([response.data, ...publications]);
       setIsFormOpen(false);
       toast.success("Publication created successfully");
+      // Trigger a refresh event for homepage or other components
+      window.dispatchEvent(new Event("publicationCreated"));
     } catch (error) {
       toast.error("Failed to create publication");
     }
