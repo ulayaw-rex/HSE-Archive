@@ -38,8 +38,10 @@ const PublicationsPage: React.FC = () => {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          if (key === "image" && value instanceof File) {
-            formData.append("image", value);
+          if (key === "image") {
+            if (value instanceof File) {
+              formData.append("image", value);
+            }
           } else {
             formData.append(key, value.toString());
           }
@@ -59,6 +61,52 @@ const PublicationsPage: React.FC = () => {
     }
   };
 
+  const handleUpdate = async (data: CreatePublicationData) => {
+    if (!publicationToEdit) return;
+    console.log("Updating publication with data:", data);
+    try {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (key === "image" && value instanceof File) {
+            formData.append("image", value);
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      formData.append("_method", "PUT");
+      const response = await AxiosInstance.post(
+        `/publications/${publicationToEdit.publication_id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setPublications(
+        publications.map((pub) =>
+          pub.publication_id === publicationToEdit.publication_id
+            ? response.data
+            : pub
+        )
+      );
+      setIsFormOpen(false);
+      setPublicationToEdit(null);
+      toast.success("Publication updated successfully");
+    } catch (error: any) {
+      console.error("Update error:", error.response?.data || error.message);
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.errors?.[0] ||
+          "Failed to update publication"
+      );
+    }
+  };
+
   const handleEdit = (publication: Publication) => {
     setPublicationToEdit(publication);
     setIsFormOpen(true);
@@ -68,9 +116,13 @@ const PublicationsPage: React.FC = () => {
     if (!publicationToDelete) return;
 
     try {
-      await AxiosInstance.delete(`/publications/${publicationToDelete.id}`);
+      await AxiosInstance.delete(
+        `/publications/${publicationToDelete.publication_id}`
+      );
       setPublications(
-        publications.filter((p) => p.id !== publicationToDelete.id)
+        publications.filter(
+          (p) => p.publication_id !== publicationToDelete.publication_id
+        )
       );
       toast.success("Publication deleted successfully");
       setPublicationToDelete(null);
@@ -85,7 +137,10 @@ const PublicationsPage: React.FC = () => {
         <div className="admin-header">
           <h1 className="admin-title">Publications</h1>
           <button
-            onClick={() => setIsFormOpen(true)}
+            onClick={() => {
+              setPublicationToEdit(null);
+              setIsFormOpen(true);
+            }}
             className="btn btn-primary"
           >
             Add Article
@@ -105,12 +160,12 @@ const PublicationsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {publications.map((publication) => (
               <PublicationCard
-                key={publication.id}
+                key={publication.publication_id}
                 publication={publication}
                 onEdit={handleEdit}
                 onDelete={(id) =>
                   setPublicationToDelete(
-                    publications.find((p) => p.id === id) || null
+                    publications.find((p) => p.publication_id === id) || null
                   )
                 }
               />
@@ -124,8 +179,9 @@ const PublicationsPage: React.FC = () => {
             setIsFormOpen(false);
             setPublicationToEdit(null);
           }}
-          onSubmit={handleCreate}
+          onSubmit={publicationToEdit ? handleUpdate : handleCreate}
           publication={publicationToEdit}
+          mode={publicationToEdit ? "edit" : "add"}
         />
 
         <ConfirmationModal

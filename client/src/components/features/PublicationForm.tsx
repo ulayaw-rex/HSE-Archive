@@ -9,6 +9,7 @@ interface PublicationFormProps {
   onClose: () => void;
   onSubmit: (data: CreatePublicationData) => Promise<void>;
   publication?: Publication | null;
+  mode?: "add" | "edit";
 }
 
 const PublicationForm: React.FC<PublicationFormProps> = ({
@@ -16,6 +17,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   onClose,
   onSubmit,
   publication,
+  mode = "add",
 }) => {
   const [formData, setFormData] = useState<CreatePublicationData>({
     title: "",
@@ -25,6 +27,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     photo_credits: "",
   });
   const [image, setImage] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,6 +39,17 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         category: publication.category,
         photo_credits: publication.photo_credits || "",
       });
+      setExistingImageUrl(publication.image || null);
+    } else {
+      setFormData({
+        title: "",
+        byline: "",
+        body: "",
+        category: "university",
+        photo_credits: "",
+      });
+      setImage(null);
+      setExistingImageUrl(null);
     }
   }, [publication]);
 
@@ -79,7 +93,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
           </svg>
         </button>
         <h2 className="text-3xl font-extrabold mb-6 border-b border-gray-400 pb-2">
-          SECTIONS
+          {mode === "edit" ? "Edit Article" : "Add Article"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -107,6 +121,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <option value="local">Local</option>
                 <option value="national">National</option>
                 <option value="international">International</option>
+                <option value="sci-tech">Sci-Tech</option>
                 <option value="sports">Sports</option>
               </select>
               <input
@@ -161,7 +176,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 12l-4-4m0 0l-4 4m4-4v12"
                 />
               </svg>
-              <span>Upload photo</span>
+              <span>{image ? image.name : "Upload photo"}</span>
               <input
                 id="upload-photo"
                 type="file"
@@ -175,9 +190,19 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
               disabled={loading}
               className="bg-green-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50"
             >
-              POST ARTICLE +
+              {mode === "edit" ? "Update Article" : "Post Article +"}
             </button>
           </div>
+          {mode === "edit" && existingImageUrl && !image && (
+            <div className="mt-4">
+              <p className="text-gray-700 mb-2">Current Photo:</p>
+              <img
+                src={existingImageUrl}
+                alt="Current publication"
+                className="max-w-full h-auto rounded-md border border-gray-300"
+              />
+            </div>
+          )}
         </form>
       </div>
     </div>

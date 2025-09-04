@@ -1,5 +1,5 @@
 export interface Publication {
-  id: number;
+  publication_id: number;
   title: string;
   byline: string;
   body: string;
