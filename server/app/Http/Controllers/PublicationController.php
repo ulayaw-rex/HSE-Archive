@@ -26,6 +26,19 @@ class PublicationController extends Controller
     }
 
     /**
+     * Display the specified publication.
+     */
+    public function show(Publication $publication)
+    {
+        if ($publication->image_path) {
+            $publication->image = asset('storage/' . $publication->image_path);
+        } else {
+            $publication->image = null;
+        }
+        return response()->json($publication);
+    }
+
+    /**
      * Store a newly created publication in storage.
      */
     public function store(Request $request)

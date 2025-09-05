@@ -26,6 +26,11 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
         <p className="text-gray-500 text-xs mt-2">
           {new Date(publication.created_at).toLocaleDateString()}
         </p>
+        {publication.photo_credits && (
+          <p className="text-gray-400 text-xs mt-1">
+            Photo: {publication.photo_credits}
+          </p>
+        )}
       </div>
     </div>
   );

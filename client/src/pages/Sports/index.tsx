@@ -1,49 +1,65 @@
-import React from "react";
-import CategorySection, { type CategoryItem } from "../../components/features/CategorySection";
-
-const mockSports: CategoryItem[] = [
-  {
-    id: 1,
-    title: "Varsity secures championship after thrilling finale",
-    excerpt: "A last-minute goal sealed the season for the Hillers.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 28, 2025",
-  },
-  {
-    id: 2,
-    title: "Intramurals kick off with record participation",
-    excerpt: "Over 30 teams registered across five disciplines.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 27, 2025",
-  },
-  {
-    id: 3,
-    title: "Alumni game highlights weekend festivities",
-    excerpt: "Former stars return to inspire current athletes.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 26, 2025",
-  },
-  {
-    id: 4,
-    title: "Coach unveils development program for rookies",
-    excerpt: "Focus on fundamentals and sportsmanship emphasized.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 25, 2025",
-  },
-];
+import React, { useEffect, useState } from "react";
+import AxiosInstance from "../../AxiosInstance";
+import CategoryPublicationCard from "../../components/features/CategoryPublicationCard";
+import FeaturedPublicationCard from "../../components/features/FeaturedPublicationCard";
+import type { Publication } from "../../types/Publication";
 
 const SportsPage: React.FC = () => {
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPublications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await AxiosInstance.get(
+          "/publications/category/sports"
+        );
+        setPublications(response.data);
+      } catch (err) {
+        console.error("Failed to fetch sports publications:", err);
+        setError("Failed to load sports publications.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPublications();
+  }, []);
+
+  const handleEdit = (publication: Publication) => {
+    // Placeholder for edit action
+    console.log("Edit publication", publication);
+  };
+
+  const handleDelete = (id: number) => {
+    // Placeholder for delete action
+    console.log("Delete publication with id", id);
+  };
+
+  if (loading) return <div>Loading sports news...</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
+
+  const [featured, ...others] = publications;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <CategorySection title="Sports" items={mockSports} />
+      <div className="container mx-auto px-4 space-y-6">
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">Sports</h1>
+        {featured && <FeaturedPublicationCard publication={featured} />}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {others.map((publication) => (
+            <CategoryPublicationCard
+              key={publication.publication_id}
+              publication={publication}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
 export default SportsPage;
-
-

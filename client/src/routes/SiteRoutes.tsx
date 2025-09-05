@@ -19,6 +19,7 @@ import AboutPage from "../pages/About";
 import EditorialBoardPage from "../pages/About/EditorialBoard";
 import FAQsPage from "../pages/About/FAQs";
 import ContactPage from "../pages/About/Contact";
+import ArticleDetail from "../pages/News/ArticleDetail";
 
 export default (
   <>
@@ -29,6 +30,7 @@ export default (
     <Route path="/news/national" element={<NationalNewsPage />} />
     <Route path="/news/international" element={<InternationalNewsPage />} />
     <Route path="/news/sci-tech" element={<SciTechNewsPage />} />
+    <Route path="/news/:idOrSlug" element={<ArticleDetail />} />
     <Route path="/sports" element={<SportsPage />} />
     <Route path="/opinions" element={<OpinionsPage />} />
     <Route path="/literary" element={<LiteraryPage />} />

@@ -25,6 +25,7 @@ Route::delete('/users/{user}', [UserController::class, 'destroy']);
 // Publications routes
 Route::get('/publications', [PublicationController::class, 'index']);
 Route::get('/publications/category/{category}', [PublicationController::class, 'getByCategory']);
+Route::get('/publications/{publication}', [PublicationController::class, 'show']);
 Route::post('/publications', [PublicationController::class, 'store']);
 Route::put('/publications/{publication}', [PublicationController::class, 'update']);
 Route::delete('/publications/{publication}', [PublicationController::class, 'destroy']);
