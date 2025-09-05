@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import type { Publication } from "../../types/Publication";
 
 interface FeaturedPublicationCardProps {
@@ -9,7 +10,10 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
   publication,
 }) => {
   return (
-    <div className="featured-publication-card rounded-lg shadow-md overflow-hidden bg-white">
+    <Link
+      to={`/news/${publication.publication_id}`}
+      className="featured-publication-card rounded-lg shadow-md overflow-hidden bg-white block hover:shadow-lg transition-shadow duration-300"
+    >
       {publication.image && (
         <img
           src={publication.image}
@@ -33,7 +37,7 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
           </p>
         )}
       </div>
-    </div>
+    </Link>
   );
 };
 

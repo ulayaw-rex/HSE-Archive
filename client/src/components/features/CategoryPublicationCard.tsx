@@ -1,5 +1,6 @@
 import React from "react";
 import type { Publication } from "../../types/Publication";
+import { Link } from "react-router-dom";
 
 interface CategoryPublicationCardProps {
   publication: Publication;
@@ -9,7 +10,10 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
   publication,
 }) => {
   return (
-    <div className="flex bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <Link
+      to={`/news/${publication.publication_id}`}
+      className="flex bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+    >
       {/* Left side: Article image */}
       <div className="w-1/3 flex-shrink-0">
         <img
@@ -50,7 +54,7 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
           </p>
         )}
       </div>
-    </div>
+    </Link>
   );
 };
 

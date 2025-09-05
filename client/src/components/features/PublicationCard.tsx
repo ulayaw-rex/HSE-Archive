@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import type { Publication } from "../../types/Publication";
 
 interface PublicationCardProps {
@@ -24,7 +25,10 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
       }
     >
       <div className="publication-card-overlay absolute inset-0"></div>
-      <div className="relative p-4">
+      <Link
+        to={`/news/${publication.publication_id}`}
+        className="relative block p-4 z-10"
+      >
         <div className="inline-block px-2 py-1 mb-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
           {publication.category}
         </div>
@@ -34,21 +38,21 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
           <span className="text-sm">
             {new Date(publication.created_at).toLocaleDateString()}
           </span>
-          <div className="space-x-2">
-            <button
-              onClick={() => onEdit(publication)}
-              className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => onDelete(publication.publication_id)}
-              className="text-red-600 hover:text-red-900 text-sm font-medium"
-            >
-              Delete
-            </button>
-          </div>
         </div>
+      </Link>
+      <div className="absolute bottom-4 right-4 space-x-2 z-20">
+        <button
+          onClick={() => onEdit(publication)}
+          className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => onDelete(publication.publication_id)}
+          className="text-red-600 hover:text-red-900 text-sm font-medium"
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
