@@ -292,6 +292,28 @@ input:focus {
 
 .publication-card.has-background:hover {
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+  color: #1a202c !important; /* force text color to black on hover */
+}
+
+.publication-card.has-background:hover .publication-card-overlay {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Remove any hover text color changes on publication cards */
+.publication-card:hover,
+.publication-card *:hover,
+.featured-publication-card:hover,
+.featured-publication-card *:hover,
+.category-publication-card:hover,
+.category-publication-card *:hover,
+.guest-publication-card:hover,
+.guest-publication-card *:hover,
+.max-w-sm:hover,
+.max-w-sm *:hover {
+  color: #1a202c !important;
+  fill: #1a202c !important;
+  stroke: #1a202c !important;
+  text-decoration: none !important;
 }
 
 .publication-card-overlay {

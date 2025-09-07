@@ -1,49 +1,56 @@
-import React from "react";
-import CategorySection, { type CategoryItem } from "../../components/features/CategorySection";
-
-const mockLiterary: CategoryItem[] = [
-  {
-    id: 1,
-    title: "Beneath the acacia: a short story",
-    excerpt: "Memories and monsoon winds intertwine in this reflective piece.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 28, 2025",
-  },
-  {
-    id: 2,
-    title: "Poem: Echoes in the hallway",
-    excerpt: "A free-verse ode to fleeting semesters.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 27, 2025",
-  },
-  {
-    id: 3,
-    title: "Essay: The art of unlearning",
-    excerpt: "On growth, humility, and starting anew.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 26, 2025",
-  },
-  {
-    id: 4,
-    title: "Poem: Green horizon",
-    excerpt: "Finding hope in quiet mornings.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 25, 2025",
-  },
-];
+import React, { useEffect, useState } from "react";
+import AxiosInstance from "../../AxiosInstance";
+import CategoryPublicationCard from "../../components/features/CategoryPublicationCard";
+import FeaturedPublicationCard from "../../components/features/FeaturedPublicationCard";
+import type { Publication } from "../../types/Publication";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const LiteraryPage: React.FC = () => {
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPublications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await AxiosInstance.get(
+          "/publications/category/literary"
+        );
+        setPublications(response.data);
+      } catch (err) {
+        console.error("Failed to fetch literary publications:", err);
+        setError("Failed to load literary publications.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPublications();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <div className="text-red-600">{error}</div>;
+
+  const [featured, ...others] = publications;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <CategorySection title="Literary" items={mockLiterary} />
+      <div className="container mx-auto px-4 space-y-6">
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">Literary</h1>
+        {featured && <FeaturedPublicationCard publication={featured} />}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {others.map((publication) => (
+            <CategoryPublicationCard
+              key={publication.publication_id}
+              publication={publication}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
 export default LiteraryPage;
-
-

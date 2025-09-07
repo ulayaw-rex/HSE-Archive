@@ -12,7 +12,7 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="featured-publication-card rounded-lg shadow-md overflow-hidden bg-white block hover:shadow-lg transition-shadow duration-300"
+      className="featured-publication-card rounded-lg shadow-md overflow-hidden bg-white block transition-shadow duration-300"
     >
       {publication.image && (
         <img

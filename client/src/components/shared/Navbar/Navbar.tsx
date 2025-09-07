@@ -38,7 +38,7 @@ const navLinks: NavigationLink[] = [
     ],
   },
   { id: "sports", label: "Sports", href: "/sports" },
-  { id: "opinions", label: "Opinions", href: "/opinions" },
+  { id: "opinion", label: "opinion", href: "/opinion" },
   { id: "literary", label: "Literary", href: "/literary" },
   {
     id: "print-media",
@@ -137,8 +137,8 @@ const Navbar: React.FC = () => {
                 />
               </div>
             </form>
-            <div 
-              onClick={() => window.location.href = '/'}
+            <div
+              onClick={() => (window.location.href = "/")}
               className="flex items-center justify-center space-x-4 w-full hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
             >
               {/* Logo - hidden on mobile */}

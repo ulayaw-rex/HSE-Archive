@@ -3,6 +3,7 @@ import AxiosInstance from "../../AxiosInstance";
 import CategoryPublicationCard from "../../components/features/CategoryPublicationCard";
 import FeaturedPublicationCard from "../../components/features/FeaturedPublicationCard";
 import type { Publication } from "../../types/Publication";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const SportsPage: React.FC = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
@@ -39,7 +40,7 @@ const SportsPage: React.FC = () => {
     console.log("Delete publication with id", id);
   };
 
-  if (loading) return <div>Loading sports news...</div>;
+  if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-red-600">{error}</div>;
 
   const [featured, ...others] = publications;

@@ -32,7 +32,7 @@ export default (
     <Route path="/news/sci-tech" element={<SciTechNewsPage />} />
     <Route path="/news/:idOrSlug" element={<ArticleDetail />} />
     <Route path="/sports" element={<SportsPage />} />
-    <Route path="/opinions" element={<OpinionsPage />} />
+    <Route path="/opinion" element={<OpinionsPage />} />
     <Route path="/literary" element={<LiteraryPage />} />
     <Route path="/print-media" element={<PrintMediaPage />} />
     <Route path="/print-media/tabloids" element={<TabloidsPage />} />

@@ -29,7 +29,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         to={`/news/${publication.publication_id}`}
         className="relative block p-4 z-10"
       >
-        <div className="inline-block px-2 py-1 mb-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+        <div className="inline-block px-2 py-1 mb-2 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase">
           {publication.category}
         </div>
         <h3 className="text-lg font-semibold mb-2">{publication.title}</h3>

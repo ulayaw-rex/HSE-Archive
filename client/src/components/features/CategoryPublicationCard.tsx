@@ -53,6 +53,11 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
             Photo: {publication.photo_credits}
           </p>
         )}
+
+        {/* Category badge */}
+        <div className="text-xs font-bold text-blue-700 uppercase mt-2">
+          {publication.category.toUpperCase()}
+        </div>
       </div>
     </Link>
   );

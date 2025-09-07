@@ -26,7 +26,6 @@ type TopLink = {
 };
 
 const topLinks: TopLink[] = [
-  { id: "about", label: "About", href: "#" },
   { id: "ads", label: "Ads", href: "#" },
   { id: "tips", label: "Tips", href: "#" },
   { id: "alumni", label: "Alumni", href: "#" },

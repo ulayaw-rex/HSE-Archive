@@ -133,6 +133,8 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <option value="international">International</option>
                 <option value="sci-tech">Sci-Tech</option>
                 <option value="sports">Sports</option>
+                <option value="opinion">Opinion</option>
+                <option value="literary">Literary</option>
               </select>
               <input
                 type="text"
