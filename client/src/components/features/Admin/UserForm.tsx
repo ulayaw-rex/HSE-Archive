@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import type { User, CreateUserData, UpdateUserData } from "../../types/User";
+import type { User, CreateUserData, UpdateUserData } from "../../../types/User";
 import { toast } from "react-toastify";
-import "../../App.css";
+import "../../../App.css";
 
 interface UserFormProps {
   user?: User | null;

@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Schema::disableForeignKeyConstraints();
 
         Schema::create('publications', function (Blueprint $table) {
             $table->increments('publication_id');
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -33,6 +33,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('publications');
+        Schema::enableForeignKeyConstraints();
     }
 };

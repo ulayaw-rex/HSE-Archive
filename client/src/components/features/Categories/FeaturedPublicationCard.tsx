@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import type { Publication } from "../../types/Publication";
+import type { Publication } from "../../../types/Publication";
 
 interface FeaturedPublicationCardProps {
   publication: Publication;

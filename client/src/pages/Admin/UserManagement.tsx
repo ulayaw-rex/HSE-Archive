@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
-import UserTable from "../../components/features/UserTable";
-import UserForm from "../../components/features/UserForm";
+import UserTable from "../../components/features/Admin/UserTable";
+import UserForm from "../../components/features/Admin/UserForm";
 import type { User, CreateUserData, UpdateUserData } from "../../types/User";
 import "./UserManagement.css";
 

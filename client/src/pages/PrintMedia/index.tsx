@@ -1,5 +1,7 @@
 import React from "react";
-import CategorySection, { type CategoryItem } from "../../components/features/CategorySection";
+import CategorySection, {
+  type CategoryItem,
+} from "../../components/features/Categories/CategorySection";
 
 const mockPrintMedia: CategoryItem[] = [
   {
@@ -45,5 +47,3 @@ const PrintMediaPage: React.FC = () => {
 };
 
 export default PrintMediaPage;
-
-

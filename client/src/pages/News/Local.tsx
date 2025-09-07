@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
-import CategoryPublicationCard from "../../components/features/CategoryPublicationCard";
-import FeaturedPublicationCard from "../../components/features/FeaturedPublicationCard";
+import CategoryPublicationCard from "../../components/features/Categories/CategoryPublicationCard";
+import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import PublicationCard from "../../components/features/PublicationCard";
-import PublicationForm from "../../components/features/PublicationForm";
+import PublicationCard from "../../components/features/Admin/PublicationCard";
+import PublicationForm from "../../components/features/Admin/PublicationForm";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { toast } from "react-toastify";
 import type {

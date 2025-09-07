@@ -316,6 +316,15 @@ input:focus {
   text-decoration: none !important;
 }
 
+/* Modal background blur for publication view modal */
+.publication-view-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  z-index: 40;
+}
+
 .publication-card-overlay {
   position: absolute;
   inset: 0;

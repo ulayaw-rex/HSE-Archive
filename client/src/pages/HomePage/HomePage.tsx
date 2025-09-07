@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
-import PublicationCard from "../../components/features/PublicationCard";
-import GuestPublicationCard from "../../components/features/GuestPublicationCard";
+import PublicationCard from "../../components/features/Admin/PublicationCard";
+import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
 
 const categories = [

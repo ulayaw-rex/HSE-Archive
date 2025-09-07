@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DashboardStatsCards, {
   type DashboardStats,
-} from "../../components/features/DashboardStats";
+} from "../../components/features/Admin/DashboardStats";
 import AxiosInstance from "../../AxiosInstance";
 
 const fetchDashboardStats = async (): Promise<DashboardStats> => {

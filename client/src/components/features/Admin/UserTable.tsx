@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import type { User } from "../../types/User";
+import type { User } from "../../../types/User";
 import { toast } from "react-toastify";
-import ConfirmationModal from "../common/ConfirmationModal";
+import ConfirmationModal from "../../common/ConfirmationModal";
 
 interface UserTableProps {
   users: User[];
