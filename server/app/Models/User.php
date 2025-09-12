@@ -29,7 +29,7 @@ class User extends Authenticatable
      *
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'user_id';
 
     /**
      * Indicates if the IDs are auto-incrementing.

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import type {
   Publication,
   CreatePublicationData,
-} from "../../types/Publication";
+} from "../../../types/Publication";
 
 interface PublicationFormProps {
   isOpen: boolean;
@@ -79,29 +79,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   };
 
   return (
-    <div className="user-modal-overlay">
+    <div
+      className="user-modal-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div className="user-modal-container relative publication-form-modal">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close modal"
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
         <h2 className="text-3xl font-extrabold mb-6 border-b border-gray-400 pb-2">
           {mode === "edit" ? "Edit Article" : "Add Article"}
         </h2>

@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  FaCalendarAlt,
-  FaFacebookF,
-  FaInstagram,
-  FaTwitter,
-} from "react-icons/fa";
+import { FaCalendarAlt, FaFacebookF, FaInstagram } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
@@ -105,7 +100,7 @@ const ArticleDetail: React.FC = () => {
         </div>
 
         {/* Sidebar with social media icons */}
-        <aside className="hidden lg:flex flex-col space-y-4 sticky top-20 self-start">
+        <aside className="hidden lg:flex flex-col space-y-4 top-20 self-start">
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
               window.location.href
@@ -115,7 +110,18 @@ const ArticleDetail: React.FC = () => {
             aria-label="Share on Facebook"
             className="text-blue-600 hover:text-blue-800"
           >
-            <FaFacebookF size={24} />
+            <div
+              style={{
+                background: "#1877F2",
+                borderRadius: "50%",
+                padding: "10px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <FaFacebookF size={24} color="#fff" />
+            </div>{" "}
           </a>
           <a
             href="https://www.instagram.com/"
@@ -124,18 +130,19 @@ const ArticleDetail: React.FC = () => {
             aria-label="Instagram"
             className="text-pink-600 hover:text-pink-800"
           >
-            <FaInstagram size={24} />
-          </a>
-          <a
-            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-              window.location.href
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Share on Twitter"
-            className="text-blue-400 hover:text-blue-600"
-          >
-            <FaTwitter size={24} />
+            <div
+              style={{
+                background:
+                  "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
+                borderRadius: "50%",
+                padding: "8px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <FaInstagram size={24} color="#fff" />
+            </div>
           </a>
         </aside>
       </div>

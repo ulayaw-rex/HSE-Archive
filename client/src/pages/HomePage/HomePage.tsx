@@ -15,7 +15,7 @@ const categories = [
 
 const HomePage: React.FC = () => {
   // Simulated user role: 'guest' or 'admin'
-  const [userRole, setUserRole] = useState<"guest" | "admin">("guest");
+  const [userRole] = useState<"guest" | "admin">("guest");
 
   const [featuredArticle, setFeaturedArticle] = useState<Publication | null>(
     null

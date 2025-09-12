@@ -21,7 +21,7 @@ class News extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'news_id';
 
     /**
      * Indicates if the IDs are auto-incrementing.

@@ -73,7 +73,7 @@ export const adminSidebarItems: SidebarItemType[] = [
         ),
       },
       {
-        to: "/admin/content/archives",
+        to: "/admin/print-media",
         label: "Print Media Archives",
         icon: (
           <svg

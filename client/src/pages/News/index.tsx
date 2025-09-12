@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 
 const categories = ["university", "local", "national", "international"];

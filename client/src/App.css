@@ -252,6 +252,12 @@ input:focus {
   position: relative;
 }
 
+.print-media-form-modal {
+  min-width: 900px;
+  padding: 2rem 3rem;
+  position: relative;
+}
+
 /* Fix for close button position */
 .publication-form-modal > button {
   position: absolute;

@@ -1,47 +1,54 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import CategorySection, {
   type CategoryItem,
 } from "../../components/features/Categories/CategorySection";
-
-const mockPrintMedia: CategoryItem[] = [
-  {
-    id: 1,
-    title: "August Magazine Issue Released",
-    excerpt: "Featuring campus innovators and community stories.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 28, 2025",
-  },
-  {
-    id: 2,
-    title: "Tabloid: Week 34 Highlights",
-    excerpt: "Top headlines and snapshots from the week.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 27, 2025",
-  },
-  {
-    id: 3,
-    title: "Folios: Special Arts Edition",
-    excerpt: "A curated collection of visual and literary pieces.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 26, 2025",
-  },
-  {
-    id: 4,
-    title: "Other Issues: Alumni Spotlight",
-    excerpt: "Tracing paths of notable graduates.",
-    imageUrl: "/vite.svg",
-    href: "#",
-    date: "Aug 25, 2025",
-  },
-];
+import AxiosInstance from "../../AxiosInstance";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import type { PrintMedia } from "../../types/PrintMedia";
 
 const PrintMediaPage: React.FC = () => {
+  const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPrintMedia();
+  }, []);
+
+  const fetchPrintMedia = async () => {
+    try {
+      const response = await AxiosInstance.get("/print-media");
+      setPrintMediaList(response.data);
+    } catch (error) {
+      console.error("Failed to fetch print media:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformToCategoryItem = (item: PrintMedia): CategoryItem => ({
+    id: item.print_media_id,
+    title: item.title,
+    excerpt: item.description,
+    imageUrl: item.image_path || "/vite.svg",
+    href: item.file_path || "#",
+    date: new Date(item.date).toLocaleDateString(),
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 flex justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  const categoryItems: CategoryItem[] = printMediaList.map(
+    transformToCategoryItem
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <CategorySection title="Print Media" items={mockPrintMedia} />
+      <CategorySection title="Print Media" items={categoryItems} />
     </div>
   );
 };

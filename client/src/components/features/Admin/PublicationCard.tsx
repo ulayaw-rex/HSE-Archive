@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import type { Publication } from "../../../types/Publication";
 import PublicationViewModal from "./PublicationViewModal";
 
@@ -45,24 +44,56 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
             </span>
           </div>
         </div>
-        <div className="absolute bottom-4 right-4 space-x-2 z-20">
+        <div className="absolute top-2 right-2 flex space-x-2 z-20">
+          {/* Edit Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onEdit(publication);
             }}
-            className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+            aria-label="Edit"
+            className="p-1 rounded-md bg-transparent hover:bg-transparent focus:outline-none"
           >
-            Edit
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"
+              />
+            </svg>
           </button>
+
+          {/* Delete Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete(publication.publication_id);
             }}
-            className="text-red-600 hover:text-red-900 text-sm font-medium"
+            aria-label="Delete"
+            className="p-1 rounded-md bg-transparent hover:bg-red-100 focus:outline-none"
           >
-            Delete
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z"
+              />
+            </svg>
           </button>
         </div>
       </div>

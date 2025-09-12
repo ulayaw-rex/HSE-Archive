@@ -3,6 +3,7 @@ import { Route } from "react-router-dom";
 import AdminPage from "../pages/Admin";
 import PublicationsPage from "../pages/Admin/PublicationsPage";
 import UserManagement from "../pages/Admin/UserManagement";
+import PrintMediaPage from "../pages/Admin/PrintMediaPage";
 import {
   ContentArchivesPage,
   FeedbackReviewPage,
@@ -23,6 +24,7 @@ export default (
     {/* Content Management */}
     <Route path="publications" element={<PublicationsPage />} />
     <Route path="content/archives" element={<ContentArchivesPage />} />
+    <Route path="print-media" element={<PrintMediaPage />} />
     {/* User Management */}
     <Route path="users" element={<UserManagement />} />
     {/* Feedback */}
