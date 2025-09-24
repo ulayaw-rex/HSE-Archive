@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PrintMediaCard from "../../components/features/Admin/PrintMediaCard";
 import PrintMediaForm from "../../components/features/Admin/PrintMediaForm";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import PDFViewerModal from "../../components/common/PDFViewerModal";
 import { toast } from "react-toastify";
 import type { PrintMedia, CreatePrintMediaData } from "../../types/PrintMedia";
 import AxiosInstance from "../../AxiosInstance";
@@ -13,6 +14,8 @@ const PrintMediaPage: React.FC = () => {
     null
   );
   const [printMediaToDelete, setPrintMediaToDelete] =
+    useState<PrintMedia | null>(null);
+  const [selectedPrintMedia, setSelectedPrintMedia] =
     useState<PrintMedia | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -127,6 +130,10 @@ const PrintMediaPage: React.FC = () => {
     }
   };
 
+  const handleView = (printMedia: PrintMedia) => {
+    setSelectedPrintMedia(printMedia);
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-content">
@@ -164,6 +171,7 @@ const PrintMediaPage: React.FC = () => {
                     printMediaList.find((p) => p.print_media_id === id) || null
                   )
                 }
+                onView={handleView}
               />
             ))}
           </div>
@@ -188,6 +196,15 @@ const PrintMediaPage: React.FC = () => {
           message={`Are you sure you want to delete "${printMediaToDelete?.title}"? This action cannot be undone.`}
           confirmLabel="Delete"
           cancelLabel="Cancel"
+        />
+
+        <PDFViewerModal
+          isOpen={!!selectedPrintMedia}
+          onClose={() => setSelectedPrintMedia(null)}
+          fileUrl={
+            selectedPrintMedia ? `/storage/${selectedPrintMedia.file_path}` : ""
+          }
+          title={selectedPrintMedia?.title || ""}
         />
       </div>
     </div>

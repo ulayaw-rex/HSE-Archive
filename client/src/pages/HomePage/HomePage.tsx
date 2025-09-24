@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
+import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
+import "../../App.css";
 
 const categories = [
   "university",
@@ -17,9 +19,7 @@ const HomePage: React.FC = () => {
   // Simulated user role: 'guest' or 'admin'
   const [userRole] = useState<"guest" | "admin">("guest");
 
-  const [featuredArticle, setFeaturedArticle] = useState<Publication | null>(
-    null
-  );
+  const [featuredArticles, setFeaturedArticles] = useState<Publication[]>([]);
   const [categoryArticles, setCategoryArticles] = useState<
     Record<string, Publication[]>
   >({});
@@ -27,15 +27,13 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     // Function to fetch all publications data
     const fetchPublicationsData = () => {
-      // Fetch latest publication as featured article
+      // Fetch latest 3 publications for featured carousel
       AxiosInstance.get<Publication[]>("/publications")
         .then((res) => {
-          if (res.data.length > 0) {
-            setFeaturedArticle(res.data[0]);
-          }
+          setFeaturedArticles(res.data.slice(0, 3));
         })
         .catch((err) => {
-          console.error("Failed to fetch featured article", err);
+          console.error("Failed to fetch featured articles", err);
         });
 
       // Fetch recent articles for each category
@@ -79,33 +77,13 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 flex flex-col gap-12 pb-20">
-        {/* Featured Article */}
-        {featuredArticle && (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-            <h2 className="text-2xl font-bold text-gray-800 p-6 border-b-2 border-green-600">
-              Featured
-            </h2>
-            <img
-              src={featuredArticle.image || ""}
-              alt={featuredArticle.title || ""}
-              className="w-full h-[400px] object-cover"
-            />
-            <div className="p-6">
-              <h1 className="text-3xl font-bold mb-3">
-                {featuredArticle.title}
-              </h1>
-              <p className="text-gray-700 mb-2 line-clamp-3">
-                {featuredArticle.body}
-              </p>
-              <span className="text-sm text-gray-500">
-                {new Date(featuredArticle.created_at).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-        )}
+    <div className="min-h-screen bg-white">
+      {/* Featured Carousel */}
+      {featuredArticles.length > 0 && (
+        <FeaturedCarousel articles={featuredArticles} />
+      )}
 
+      <div className="container mx-auto px-4">
         {/* Category Sections */}
         {categories.map((category) => (
           <section key={category} className="space-y-6">

@@ -14,6 +14,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: white;
 }
 
 #root {
@@ -308,8 +309,6 @@ input:focus {
 /* Remove any hover text color changes on publication cards */
 .publication-card:hover,
 .publication-card *:hover,
-.featured-publication-card:hover,
-.featured-publication-card *:hover,
 .category-publication-card:hover,
 .category-publication-card *:hover,
 .guest-publication-card:hover,
@@ -337,4 +336,39 @@ input:focus {
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(4px);
   pointer-events: none;
+}
+
+/* Featured Carousel Styles */
+.slick-dots {
+  bottom: 20px !important;
+}
+
+.slick-dots li button:before {
+  color: white !important;
+  font-size: 12px !important;
+  opacity: 0.5;
+}
+
+.slick-dots li.slick-active button:before {
+  opacity: 1;
+}
+
+.slick-prev,
+.slick-next {
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+}
+
+.slick-prev {
+  left: 25px;
+}
+
+.slick-next {
+  right: 25px;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-size: 40px;
 }

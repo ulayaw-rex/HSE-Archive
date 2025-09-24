@@ -7,17 +7,16 @@ interface PrintMediaCardProps {
   printMedia: PrintMedia;
   onEdit: (printMedia: PrintMedia) => void;
   onDelete: (id: number) => void;
+  onView: (printMedia: PrintMedia) => void;
 }
-
-import PrintMediaViewModal from "./PrintMediaViewModal";
 
 const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
   printMedia,
   onEdit,
   onDelete,
+  onView,
 }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isViewOpen, setIsViewOpen] = useState(false);
 
   const openConfirm = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,14 +28,6 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
   const confirmDelete = () => {
     onDelete(printMedia.print_media_id);
     setIsConfirmOpen(false);
-  };
-
-  const openView = () => {
-    setIsViewOpen(true);
-  };
-
-  const closeView = () => {
-    setIsViewOpen(false);
   };
 
   return (
@@ -51,7 +42,7 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
           backgroundPosition: "center",
           minHeight: "150px",
         }}
-        onClick={openView}
+        onClick={() => onView(printMedia)}
       >
         <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm"></div>
         <div className="relative p-4 flex flex-col h-full justify-between">
@@ -127,14 +118,7 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
-
-      <PrintMediaViewModal
-        isOpen={isViewOpen}
-        onClose={closeView}
-        printMedia={printMedia}
-      />
     </>
   );
 };
-
 export default PrintMediaCard;

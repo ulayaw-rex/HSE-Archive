@@ -58,13 +58,13 @@ const UserManagement: React.FC = () => {
       setFormLoading(true);
       console.log("Updating user with data:", userData);
       const response = await AxiosInstance.put(
-        `/users/${editingUser.id}`,
+        `/users/${editingUser.user_id}`,
         userData
       );
       console.log("Update user response:", response.data);
       setUsers((prev) =>
         prev.map((user) =>
-          user.id === editingUser.id ? response.data.user : user
+          user.user_id === editingUser.user_id ? response.data.user : user
         )
       );
       setEditingUser(null);
@@ -81,7 +81,7 @@ const UserManagement: React.FC = () => {
   const handleDeleteUser = async (userId: number) => {
     try {
       await AxiosInstance.delete(`/users/${userId}`);
-      setUsers((prev) => prev.filter((user) => user.id !== userId));
+      setUsers((prev) => prev.filter((user) => user.user_id !== userId));
     } catch (err: any) {
       console.error("Error deleting user:", err);
       console.error("Error details:", err.response?.data);

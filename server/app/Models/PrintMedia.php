@@ -20,10 +20,15 @@ class PrintMedia extends Model
     protected $fillable = [
         'title',
         'type',
-        'date',
         'description',
         'byline',
-        'image_path',
+        'date',
         'file_path',
+        'original_file_path',
+        'original_filename'
+    ];
+
+    protected $casts = [
+        'date' => 'date'
     ];
 }

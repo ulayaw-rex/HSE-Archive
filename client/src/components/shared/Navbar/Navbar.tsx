@@ -118,31 +118,14 @@ const Navbar: React.FC = () => {
       {/* Main Header - Hidden on Mobile */}
       <div className="hidden lg:block bg-white border-b border-green-200 shadow-md">
         <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 items-center relative">
-            {/* Desktop Search Bar - Hidden on Mobile */}
-            <form
-              onSubmit={handleSearch}
-              className="relative group hidden lg:block"
-            >
-              <div className="relative flex items-center">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <FaSearch className="text-lg text-green-800 group-hover:text-green-600 transition-all duration-300" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-9 group-hover:w-[160px] pl-9 pr-3 py-1.5 bg-transparent hover:bg-white hover:border-green-200 hover:border rounded-md text-green-800 placeholder-transparent hover:placeholder-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:w-[160px] focus:placeholder-green-400 focus:bg-white focus:border-green-200 focus:border transition-all duration-300 ease-in-out cursor-pointer"
-                />
-              </div>
-            </form>
+          <div className="flex items-center justify-center relative">
+            {/* Centered Logo and Title */}
             <div
               onClick={() => (window.location.href = "/")}
-              className="flex items-center justify-center space-x-4 w-full hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
+              className="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
             >
-              {/* Logo - hidden on mobile */}
-              <div className="hidden sm:flex w-16 h-16 rounded-full overflow-hidden shadow-lg items-center justify-center transform hover:scale-105 transition-transform duration-200">
+              {/* Logo */}
+              <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg items-center justify-center transform hover:scale-105 transition-transform duration-200">
                 <img
                   src={Logo}
                   alt="The Hillside Echo Logo"
@@ -151,7 +134,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {/* Title */}
-              <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-800 text-center whitespace-nowrap">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-800 whitespace-nowrap">
                 The Hillside Echo
               </div>
             </div>
@@ -160,12 +143,12 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Navigation Bar - Sticky on Desktop Only */}
-      <div className="hidden lg:block sticky top-0 z-50 bg-green-800 text-white shadow-lg">
+      <div className="hidden lg:block sticky top-0 z-50 bg-green-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex lg:items-center justify-center flex-1">
-              <div className="flex items-center justify-evenly w-full max-w-4xl">
+          <div className="flex items-center justify-between">
+            {/* Desktop Navigation - Centered */}
+            <nav className="flex items-center flex-1">
+              <div className="flex items-center justify-center space-x-13 w-full">
                 {navLinks.map((link) => (
                   <div
                     key={link.id}
@@ -177,8 +160,8 @@ const Navbar: React.FC = () => {
                     <NavLink
                       to={link.href}
                       className={({ isActive }) =>
-                        `text-white hover:text-green-200 transition-all duration-200 font-semibold text-base uppercase tracking-wider hover:transform hover:scale-105 px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-1 ${
-                          isActive ? "bg-green-700 text-green-100" : ""
+                        `text-white hover:text-green-200 transition-all duration-200 font-semibold text-base uppercase tracking-wider hover:transform hover:scale-105 px-2 py-2 rounded-md hover:bg-green-700 flex items-center gap-1 whitespace-nowrap ${
+                          isActive ? "bg-green-600 text-green-100" : ""
                         }`
                       }
                     >
@@ -208,7 +191,7 @@ const Navbar: React.FC = () => {
                                   key={item.id}
                                   to={item.href}
                                   className={({ isActive }) =>
-                                    `block px-4 py-3 text-sm text-gray-700 hover:bg-green-700 hover:text-green-800 transition-colors duration-200 border-b border-gray-100 last:border-b-0 cursor-pointer ${
+                                    `block px-4 py-3 text-sm text-gray-700 hover:bg-green-700 hover:text-green-600 transition-colors duration-200 border-b border-gray-100 last:border-b-0 cursor-pointer ${
                                       isActive
                                         ? "bg-green-100 text-green-800 font-semibold"
                                         : ""
@@ -231,6 +214,24 @@ const Navbar: React.FC = () => {
                 ))}
               </div>
             </nav>
+
+            {/* Search Bar - Right Side */}
+            <div className="flex items-center ml-4">
+              <form onSubmit={handleSearch} className="relative group">
+                <div className="relative flex items-center">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <FaSearch className="text-lg text-green-200 group-hover:text-white transition-all duration-300" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-8 group-hover:w-48 pl-9 pr-3 py-1.5 bg-transparent hover:bg-white hover:border-green-200 hover:border rounded-md text-white placeholder-transparent hover:placeholder-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:w-48 focus:placeholder-green-200 focus:bg-white focus:border-green-200 focus:text-green-800 transition-all duration-300 ease-in-out cursor-pointer"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>

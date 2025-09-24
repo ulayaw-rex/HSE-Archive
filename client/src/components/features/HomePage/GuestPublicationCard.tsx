@@ -12,7 +12,7 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="max-w-sm rounded overflow-hidden shadow-lg bg-white block hover:shadow-xl transition-shadow duration-300"
+      className="max-w-sm rounded overflow-hidden  bg-white block hover:shadow-xl transition-shadow duration-300"
     >
       <img
         className="w-full h-48 object-cover"

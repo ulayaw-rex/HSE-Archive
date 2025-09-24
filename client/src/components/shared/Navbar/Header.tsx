@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FaUserCircle, FaBars, FaTimes, FaSearch } from "react-icons/fa";
+import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 
 // Define the NavigationLink type
 type NavigationLink = {
@@ -12,7 +12,7 @@ type NavigationLink = {
 const navLinks: NavigationLink[] = [
   { id: "news", label: "News", href: "/" },
   { id: "sports", label: "Sports", href: "/sports" },
-  { id: "opinions", label: "Opinions", href: "/opinions" },
+  { id: "opinions", label: "Opinion", href: "/opinion" },
   { id: "literary", label: "Literary", href: "/literary" },
   { id: "print-media", label: "Print Media", href: "/print-media" },
   { id: "about", label: "About", href: "/about" },
@@ -33,20 +33,13 @@ const topLinks: TopLink[] = [
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const toggleMobileMenu = (): void => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleSearch = (e: React.FormEvent): void => {
-    e.preventDefault();
-    // Handle search functionality here
-    console.log("Searching for:", searchQuery);
-  };
-
   return (
-    <header className="sticky lg:static top-0 z-50 bg-green-900 text-white shadow-lg">
+    <header className="sticky lg:static top-0 z-50 bg-green-700 text-white shadow-lg">
       {/* Top Bar */}
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between relative">
@@ -93,7 +86,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Center - Mobile Title & Desktop Date */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
             {/* Mobile Title */}
             <div className="lg:hidden">
               <span className="text-lg font-bold text-white">
@@ -103,7 +96,12 @@ const Header: React.FC = () => {
             {/* Desktop Date */}
             <div className="hidden lg:block">
               <span className="text-sm text-white">
-                Thursday, July 31st, 2025
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
               </span>
             </div>
           </div>
@@ -124,25 +122,6 @@ const Header: React.FC = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-green-700">
             <div className="flex flex-col space-y-3 pt-4">
-              {/* Search Bar */}
-              <form onSubmit={handleSearch} className="relative">
-                <div className="relative flex items-center">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <FaSearch className="text-lg text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-                  />
-                </div>
-              </form>
-
-              {/* Separator */}
-              <div className="border-t border-green-700 my-3"></div>
-
               {/* Navigation Links */}
               {navLinks.map((link) => (
                 <NavLink
