@@ -44,17 +44,6 @@ const navLinks: NavigationLink[] = [
     id: "print-media",
     label: "Print Media",
     href: "/print-media",
-    hasDropdown: true,
-    dropdownItems: [
-      { id: "tabloids", label: "Tabloids", href: "/print-media/tabloids" },
-      { id: "magazines", label: "Magazines", href: "/print-media/magazines" },
-      { id: "folios", label: "Folios", href: "/print-media/folios" },
-      {
-        id: "other-issues",
-        label: "Other Issues",
-        href: "/print-media/other-issues",
-      },
-    ],
   },
   {
     id: "about",
