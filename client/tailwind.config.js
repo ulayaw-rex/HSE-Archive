@@ -1,7 +1,11 @@
-module.exports = {
-  // ...existing config
-  plugins: [
-    require("@tailwindcss/aspect-ratio"),
-    // ...other plugins
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}", // This line is the fix
   ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
 };

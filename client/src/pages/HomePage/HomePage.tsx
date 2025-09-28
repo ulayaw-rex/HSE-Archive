@@ -90,7 +90,7 @@ const HomePage: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-800 pb-2 border-b-2 border-green-600 capitalize">
               {category.replace("-", " ")}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-5">
               {categoryArticles[category]?.map(
                 (article: Publication, index: number) =>
                   userRole === "admin" ? (

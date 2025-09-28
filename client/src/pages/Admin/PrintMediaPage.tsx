@@ -4,7 +4,7 @@ import PrintMediaForm from "../../components/features/Admin/PrintMediaForm";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
 import { toast } from "react-toastify";
-import type { PrintMedia, CreatePrintMediaData } from "../../types/PrintMedia";
+import type { PrintMedia, PrintMediaFormData } from "../../types/PrintMedia";
 import AxiosInstance from "../../AxiosInstance";
 
 const PrintMediaPage: React.FC = () => {
@@ -21,6 +21,7 @@ const PrintMediaPage: React.FC = () => {
 
   const fetchPrintMedia = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await AxiosInstance.get<PrintMedia[]>("/print-media");
       setPrintMediaList(response.data);
     } catch (error: unknown) {
@@ -36,36 +37,16 @@ const PrintMediaPage: React.FC = () => {
     void fetchPrintMedia();
   }, [fetchPrintMedia]);
 
-  const handleCreate = async (data: CreatePrintMediaData) => {
+  const handleCreate = async (formData: PrintMediaFormData) => {
     try {
-      const formData = new FormData();
-
-      // Ensure all required fields are present
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if ((key === "file" || key === "image") && value instanceof File) {
-            formData.append(key, value);
-          } else if (key === "date") {
-            // Ensure date is in the correct format
-            formData.append(key, new Date(value).toISOString().split("T")[0]);
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-
-      // Add default date if not provided
-      if (!formData.has("date")) {
-        formData.append("date", new Date().toISOString().split("T")[0]);
-      }
+      const currentDate = new Date().toISOString().split("T")[0];
+      formData.append("date", currentDate);
 
       const response = await AxiosInstance.post("/print-media", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setPrintMediaList([response.data, ...printMediaList]);
+      setPrintMediaList((prevList) => [response.data, ...prevList]);
       setIsFormOpen(false);
       toast.success("Print media archive created successfully");
     } catch (error: unknown) {
@@ -76,31 +57,20 @@ const PrintMediaPage: React.FC = () => {
   };
 
   const handleUpdate = useCallback(
-    async (data: CreatePrintMediaData) => {
+    async (formData: PrintMediaFormData) => {
       if (!printMediaToEdit) return;
       try {
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== null && value !== undefined) {
-            if ((key === "file" || key === "image") && value instanceof File) {
-              formData.append(key, value);
-            } else {
-              formData.append(key, value.toString());
-            }
-          }
-        });
-
-        formData.append("_method", "PUT");
         const response = await AxiosInstance.post(
           `/print-media/${printMediaToEdit.print_media_id}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        setPrintMediaList(
-          printMediaList.map((item) =>
+        // Use the callback form of setState to ensure you have the latest state
+        setPrintMediaList((prevList) =>
+          prevList.map((item) =>
             item.print_media_id === printMediaToEdit.print_media_id
-              ? response.data
+              ? response.data.data
               : item
           )
         );
@@ -112,11 +82,10 @@ const PrintMediaPage: React.FC = () => {
           error instanceof Error
             ? error.message
             : "Failed to update print media archive";
-        console.error("Update error:", errorMessage);
         toast.error(errorMessage);
       }
     },
-    [printMediaList, printMediaToEdit]
+    [printMediaToEdit] // Dependency array was missing printMediaToEdit
   );
 
   const handleEdit = (item: PrintMedia) => {
@@ -124,14 +93,15 @@ const PrintMediaPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = useCallback(async () => {
+  const confirmDelete = useCallback(async () => {
     if (!printMediaToDelete) return;
     try {
       await AxiosInstance.delete(
         `/print-media/${printMediaToDelete.print_media_id}`
       );
-      setPrintMediaList(
-        printMediaList.filter(
+
+      setPrintMediaList((prevList) =>
+        prevList.filter(
           (p) => p.print_media_id !== printMediaToDelete.print_media_id
         )
       );
@@ -142,7 +112,11 @@ const PrintMediaPage: React.FC = () => {
         error instanceof Error ? error.message : "Unknown error occurred";
       toast.error(`Failed to delete print media archive: ${errorMessage}`);
     }
-  }, [printMediaList, printMediaToDelete]);
+  }, [printMediaToDelete]); // Dependency array was missing printMediaToDelete
+
+  const handleDeleteRequest = (item: PrintMedia) => {
+    setPrintMediaToDelete(item);
+  };
 
   const handleView = (printMedia: PrintMedia) => {
     setSelectedPrintMedia(printMedia);
@@ -180,18 +154,13 @@ const PrintMediaPage: React.FC = () => {
                 key={item.print_media_id}
                 printMedia={item}
                 onEdit={handleEdit}
-                onDelete={(id) =>
-                  setPrintMediaToDelete(
-                    printMediaList.find((p) => p.print_media_id === id) || null
-                  )
-                }
+                onDelete={() => handleDeleteRequest(item)}
                 onView={handleView}
               />
             ))}
           </div>
         )}
 
-        {/* Form Modal */}
         <PrintMediaForm
           isOpen={isFormOpen}
           onClose={() => {
@@ -203,18 +172,16 @@ const PrintMediaPage: React.FC = () => {
           mode={printMediaToEdit ? "edit" : "add"}
         />
 
-        {/* Delete Confirmation */}
         <ConfirmationModal
           isOpen={!!printMediaToDelete}
           onClose={() => setPrintMediaToDelete(null)}
-          onConfirm={handleDelete}
+          onConfirm={confirmDelete}
           title="Delete Print Media Archive"
           message={`Are you sure you want to delete "${printMediaToDelete?.title}"? This action cannot be undone.`}
           confirmLabel="Delete"
           cancelLabel="Cancel"
         />
 
-        {/* PDF Viewer */}
         {selectedPrintMedia && (
           <PDFViewerModal
             isOpen={!!selectedPrintMedia}

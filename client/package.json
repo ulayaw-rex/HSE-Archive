@@ -11,10 +11,9 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
-    "@react-pdf-viewer/core": "^3.12.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/vite": "^4.1.11",
-    "@types/react-pdf": "^5.0.7",
+    "@types/react-pdf": "^7.0.0",
     "@types/react-slick": "^0.23.13",
     "axios": "^1.11.0",
     "motion": "^12.23.20",

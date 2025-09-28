@@ -259,6 +259,23 @@ input:focus {
   position: relative;
 }
 
+.print-media-form-modal > button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+/* Fix for Post Article button visibility */
+.print-media-form-modal button[type="submit"] {
+  background-color: #047857; /* Tailwind green-700 */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px; /* rounded-full */
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
 /* Fix for close button position */
 .publication-form-modal > button {
   position: absolute;

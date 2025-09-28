@@ -15,12 +15,17 @@ export interface PrintMedia {
   thumbnail_url?: string; // Optional thumbnail URL
   image_url?: string; // Optional image URL
   original_filename?: string; // Original name of uploaded file
+  thumbnail_path?: string; // Optional thumbnail path
 }
 
 export interface CreatePrintMediaData {
   title: string;
   type: string;
   description: string;
-  byline?: string;
-  file?: File | null;
+  byline: string;
+  file: File | null;
+  thumbnail: File | null;
 }
+
+// Add this new type for form submission
+export type PrintMediaFormData = FormData;

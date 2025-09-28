@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import type {
   PrintMedia,
-  CreatePrintMediaData,
+  CreatePrintMediaData, // This is for the internal state
+  PrintMediaFormData, // Use this for the submission
 } from "../../../types/PrintMedia";
 
 interface PrintMediaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreatePrintMediaData) => Promise<void>;
+  onSubmit: (data: PrintMediaFormData) => Promise<void>;
   printMedia?: PrintMedia | null;
   mode?: "add" | "edit";
 }
@@ -25,19 +26,23 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
     description: "",
     byline: "",
     file: null,
+    thumbnail: null,
   });
   const [file, setFile] = useState<File | null>(null);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   useEffect(() => {
-    if (printMedia) {
+    if (printMedia && mode === "edit") {
       setFormData({
         title: printMedia.title,
         type: printMedia.type,
         description: printMedia.description,
         byline: printMedia.byline || "",
         file: null,
+        thumbnail: null,
       });
       setFile(null);
+      setThumbnail(null);
     } else {
       setFormData({
         title: "",
@@ -45,16 +50,36 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
         description: "",
         byline: "",
         file: null,
+        thumbnail: null,
       });
       setFile(null);
+      setThumbnail(null);
     }
-  }, [printMedia]);
+  }, [printMedia, mode]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({ ...formData, file });
+    const formDataToSend = new FormData();
+
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("type", formData.type);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("byline", formData.byline);
+
+    if (file) {
+      formDataToSend.append("file", file);
+    }
+    if (thumbnail) {
+      formDataToSend.append("thumbnail", thumbnail);
+    }
+
+    if (mode === "edit") {
+      formDataToSend.append("_method", "PUT");
+    }
+
+    await onSubmit(formDataToSend);
   };
 
   return (
@@ -153,25 +178,12 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
             />
           </div>
           <div className="flex justify-between items-center mt-6">
-            <div className="space-x-2">
+            <div className="space-x-2 flex">
               <label
                 htmlFor="upload-file"
                 className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 12l-4-4m0 0l-4 4m4-4v12"
-                  />
-                </svg>
+                {/* SVG for upload file */}
                 <span>{file ? file.name : "Upload file"}</span>
                 <input
                   id="upload-file"
@@ -181,10 +193,25 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                   className="hidden"
                 />
               </label>
+
+              <label
+                htmlFor="upload-thumbnail"
+                className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
+              >
+                {/* SVG for upload thumbnail */}
+                <span>{thumbnail ? thumbnail.name : "Upload thumbnail"}</span>
+                <input
+                  id="upload-thumbnail"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setThumbnail(e.target.files?.[0] || null)}
+                  className="hidden"
+                />
+              </label>
             </div>
             <button
               type="submit"
-              className="bg-green-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-800"
+              className="!bg-green-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50"
             >
               {mode === "edit" ? "Update Archive" : "Post Archive +"}
             </button>

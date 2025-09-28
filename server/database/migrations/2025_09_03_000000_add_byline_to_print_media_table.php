@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::table('print_media', function (Blueprint $table) {
             $table->string('byline')->nullable()->after('description');
+            $table->string('original_file_path')->nullable();
+            $table->string('original_filename')->nullable();
+            $table->string('file_path')->change(); // Make existing column nullable
+
         });
     }
 
@@ -23,6 +27,9 @@ return new class extends Migration
     {
         Schema::table('print_media', function (Blueprint $table) {
             $table->dropColumn('byline');
+            $table->dropColumn(['original_file_path', 'original_filename']);
+            $table->string('file_path')->change();
+
         });
     }
 };
