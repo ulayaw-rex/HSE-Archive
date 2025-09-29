@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
 import "./navbar.css";
-import Logo from "../../../assets/LOGO.jpg";
+import Logo from "../../../assets/LOGO.png";
 
 // Define the NavigationLink type (renamed to avoid conflict with React Router's NavLink)
 type NavigationLink = {
@@ -88,7 +88,7 @@ const Navbar: React.FC = () => {
   };
 
   const handleDropdownMenuLeave = () => {
-    timeoutRef.current = setTimeout(() => {
+    timeoutRef.current = window.setTimeout(() => {
       setHoveredDropdown(null);
     }, 100); // Shorter delay when leaving dropdown menu
   };
@@ -104,34 +104,26 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Main Header - Hidden on Mobile */}
-      <div className="hidden lg:block bg-white border-b border-green-200 shadow-md">
-        <div className="container mx-auto px-4 py-6">
+      {/* Main Header - REMOVED sticky classes */}
+      <div className="hidden lg:block bg-green-800 border-b border-green-200 shadow-md">
+        <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-center relative">
-            {/* Centered Logo and Title */}
+            {/* Centered Logo */}
             <div
               onClick={() => (window.location.href = "/")}
-              className="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
+              className="cursor-pointer"
             >
-              {/* Logo */}
-              <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg items-center justify-center transform hover:scale-105 transition-transform duration-200">
-                <img
-                  src={Logo}
-                  alt="The Hillside Echo Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Title */}
-              <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-800 whitespace-nowrap">
-                The Hillside Echo
-              </div>
+              <img
+                src={Logo}
+                alt="The Hillside Echo Logo"
+                className="h-[60px] w-auto m-2 transform transition-transform duration-200 hover:scale-105"
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Bar - Sticky on Desktop Only */}
+      {/* Navigation Bar - ADDED sticky classes */}
       <div className="hidden lg:block sticky top-0 z-50 bg-green-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">

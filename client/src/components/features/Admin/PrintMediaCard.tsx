@@ -18,8 +18,12 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
 }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // --- LINTER FIX ---
-  // Wrapped functions in useCallback with proper dependency arrays.
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const thumbnailUrl = printMedia.thumbnail_path
+    ? `${apiBaseUrl}/api/print-media/file/${printMedia.thumbnail_path}`
+    : null;
+
   const handleEditClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -50,44 +54,48 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
     <>
       <div className="relative">
         <div
-          className="rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 text-gray-900 block"
-          style={{
-            backgroundImage: printMedia.thumbnail_url
-              ? `url(${printMedia.thumbnail_url})`
-              : undefined,
-            backgroundColor: "#cccccc",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            minHeight: "250px",
-          }}
+          className="rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 relative bg-gray-300"
+          style={{ minHeight: "250px" }}
           onClick={handleCardClick}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
-          <div className="relative p-4 flex flex-col h-full justify-between text-white">
-            <div className="flex-grow">
-              <span className="inline-block bg-blue-200 text-blue-800 text-xs font-semibold uppercase rounded-full px-3 py-1 mb-2">
+          {/* Background Image */}
+          {thumbnailUrl && (
+            <img
+              src={thumbnailUrl}
+              alt={printMedia.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
+
+          {/* Content Overlay */}
+          <div className="relative p-4 flex flex-col h-full text-white">
+            {/* This empty div pushes the content to the bottom */}
+            <div className="flex-grow"></div>
+
+            {/* All text content is now grouped at the bottom */}
+            <div>
+              <span className="inline-block bg-black text-white text-xs font-semibold uppercase rounded-full px-3 py-1 mb-2">
                 {printMedia.type}
               </span>
-              <h3 className="text-xl font-bold mb-1 drop-shadow-md">
+              <h3 className="mt-25 text-xl font-bold mb-1 drop-shadow-md">
                 {printMedia.title}
               </h3>
-              <p className="text-sm text-gray-200 drop-shadow">
+              <p className="text-sm text-gray-200 drop-shadow mb-2">
                 {printMedia.byline}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-gray-300">
-                {new Date(printMedia.date).toLocaleDateString()}
-              </p>
+              </p>{" "}
             </div>
           </div>
         </div>
 
+        {/* Action Buttons */}
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
           <button
             onClick={handleEditClick}
             aria-label="Edit"
-            className="bg-green-500 text-white p-2 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-opacity"
+            className="print-media-edit-btn print-media-btn"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -107,7 +115,7 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
           <button
             onClick={handleDeleteClick}
             aria-label="Delete"
-            className="bg-red-500 text-white p-2 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-opacity"
+            className="print-media-delete-btn print-media-btn"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

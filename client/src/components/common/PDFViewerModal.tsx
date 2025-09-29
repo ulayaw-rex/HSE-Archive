@@ -3,7 +3,6 @@ import { Dialog } from "@headlessui/react";
 import type { PrintMedia } from "../../types/PrintMedia";
 import { Document, Page, pdfjs } from "react-pdf";
 
-// This is the crucial line that points to your local worker file
 pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.mjs`;
 
 export interface PDFViewerModalProps {
@@ -25,6 +24,10 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
 
   if (!printMedia) return null;
 
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL; // e.g., "http://localhost:8000"
+
+  const fullPdfUrl = `${apiBaseUrl}/api/print-media/file/${printMedia.file_path}`;
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
@@ -34,16 +37,10 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
             <Dialog.Title className="text-lg font-semibold text-gray-800">
               {printMedia.title}
             </Dialog.Title>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-800 text-2xl font-bold"
-            >
-              &times;
-            </button>
           </div>
           <div className="flex-grow overflow-y-auto">
             <Document
-              file={printMedia.file_url}
+              file={fullPdfUrl}
               onLoadSuccess={onDocumentLoadSuccess}
               loading={<div className="p-4 text-center">Loading PDF...</div>}
               error={

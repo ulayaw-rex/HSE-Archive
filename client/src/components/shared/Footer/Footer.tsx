@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { FaFacebook, FaInstagram } from "react-icons/fa";
-import Logo from "../../../assets/LOGO.jpg";
+import Logo from "../../../assets/LOGO.png";
 
 // Types for footer data
 type NavigationLink = {
@@ -41,25 +41,16 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column - Branding */}
           <div className="flex flex-col items-start space-y-6">
-            {/* Logo */}
-            <div 
-              onClick={() => window.location.href = '/'}
-              className="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200 focus:outline-none cursor-pointer"
+            {/* 👇 LOGO SECTION UPDATED HERE */}
+            <div
+              onClick={() => (window.location.href = "/")}
+              className="cursor-pointer"
             >
-              <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg flex items-center justify-center transform hover:scale-105 transition-transform duration-200">
-                <img
-                  src={Logo}
-                  alt="The Hillside Echo Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div>
-                <h3 className="text-3xl font-serif font-bold tracking-wide">
-                  The Hillside Echo
-                </h3>
-                <div className="w-16 h-1 bg-white mt-2 rounded-full"></div>
-              </div>
+              <img
+                src={Logo}
+                alt="The Hillside Echo Logo"
+                className="h-12 w-auto transform transition-transform duration-200 hover:scale-105"
+              />
             </div>
 
             {/* Description */}

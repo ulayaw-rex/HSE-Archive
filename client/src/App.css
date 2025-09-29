@@ -55,8 +55,108 @@ input:focus {
   background: #4ade80;
 }
 
-/* Existing styles */
+.filter-tab-btn {
+  /* --- Core Button Styles --- */
+  font-family: "Inter", sans-serif; /* A clean, modern font */
+  font-size: 0.875rem; /* A slightly smaller size (14px) for buttons */
+  font-weight: 600; /* Semi-bold text */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.6rem 1.25rem; /* Generous padding for a good click area */
+  cursor: pointer;
+  background-color: #ffffff; /* White background by default */
+  color: #424242; /* A dark grey text color for contrast */
+}
 
+/* --- Hover State --- */
+/* The button lifts up slightly and the shadow becomes more prominent on hover */
+.filter-tab-btn:hover {
+  background-color: #f5f5f5; /* A light off-white color on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px); /* Lifts the button up */
+}
+
+.filter-tab-btn.active {
+  background-color: #047817; /* Your specified dark green */
+  color: #ffffff; /* White text for high contrast */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* A subtle shadow for depth */
+  transform: translateY(0); /* Resets the hover lift effect */
+}
+
+.pagination-btn {
+  /* --- Core Styles --- */
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  /* Using width and height for a consistent square shape */
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem; /* A standard rounded corner */
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  background-color: #ffffff;
+  color: #424242;
+
+  /* --- Smooth Transitions --- */
+  transition: all 0.2s ease-in-out;
+}
+
+/* --- Hover State --- */
+.pagination-btn:hover {
+  background-color: #f5f5f5;
+  color: #1b5e20; /* Green text on hover */
+  border-color: #cccccc;
+}
+
+/* --- Active/Selected State --- */
+.pagination-btn.active {
+  background-color: #1b5e20;
+  color: #ffffff;
+  border-color: #1b5e20;
+  transform: scale(1.05); /* Slightly enlarges the active button */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 1. A shared base class for both buttons */
+.print-media-btn {
+  /* Sizing and Spacing */
+  padding: 0.5rem; /* Adds space around the icon (8px) */
+  width: 2.25rem; /* Sets a consistent width (36px) */
+  height: 2.25rem; /* Sets a consistent height (36px) */
+
+  /* Centering the icon inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Appearance */
+  color: white;
+  border: none;
+  border-radius: 0.375rem; /* Rounds the corners (6px) */
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Adds a subtle shadow */
+
+  /* Smooth transition for the hover effect */
+  transition: all 0.2s ease-in-out;
+}
+
+/* 2. An interactive hover effect for the base class */
+.print-media-btn:hover {
+  transform: scale(1.1); /* Makes the button slightly larger on hover */
+  filter: brightness(90%); /* Slightly darkens the button color on hover */
+}
+
+/* 3. Your original classes, now just for the colors */
+.print-media-edit-btn {
+  background-color: #48bb78; /* Green */
+}
+
+.print-media-delete-btn {
+  background-color: #f56565; /* Red */
+}
 .user-modal-overlay {
   position: fixed;
   top: 0;

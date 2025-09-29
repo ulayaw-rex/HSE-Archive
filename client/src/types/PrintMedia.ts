@@ -1,4 +1,3 @@
-// types/PrintMedia.ts
 export interface PrintMedia {
   print_media_id: number;
   title: string;
@@ -7,15 +6,15 @@ export interface PrintMedia {
   description: string;
   byline?: string;
   image_path?: string;
-  file_path: string; // ✅ always present
-  original_file_path?: string; // ✅ optional, used for downloads
+  original_file_path?: string;
   created_at: string;
   updated_at: string;
-  file_url: string; // URL for accessing the file
-  thumbnail_url?: string; // Optional thumbnail URL
-  image_url?: string; // Optional image URL
-  original_filename?: string; // Original name of uploaded file
-  thumbnail_path?: string; // Optional thumbnail path
+  file_url: string;
+  file_path: string;
+  thumbnail_url?: string;
+  image_url?: string;
+  original_filename?: string;
+  thumbnail_path?: string;
 }
 
 export interface CreatePrintMediaData {
@@ -27,5 +26,4 @@ export interface CreatePrintMediaData {
   thumbnail: File | null;
 }
 
-// Add this new type for form submission
 export type PrintMediaFormData = FormData;

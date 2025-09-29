@@ -25,3 +25,6 @@ Route::get('publications/category/{category}', [PublicationController::class, 'g
 Route::apiResource('print-media', PrintMediaController::class);
 Route::get('print-media/{id}/view', [PrintMediaController::class, 'viewPdf']);
 Route::get('print-media/{id}/download', [PrintMediaController::class, 'downloadPdf']);
+
+// This new route will handle serving the PDF file through the PrintMediaController
+Route::get('print-media/file/{path}', [PrintMediaController::class, 'serveFile'])->where('path', '.*');

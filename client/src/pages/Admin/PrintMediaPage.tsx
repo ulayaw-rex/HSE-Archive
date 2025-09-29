@@ -66,7 +66,6 @@ const PrintMediaPage: React.FC = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        // Use the callback form of setState to ensure you have the latest state
         setPrintMediaList((prevList) =>
           prevList.map((item) =>
             item.print_media_id === printMediaToEdit.print_media_id
@@ -85,7 +84,7 @@ const PrintMediaPage: React.FC = () => {
         toast.error(errorMessage);
       }
     },
-    [printMediaToEdit] // Dependency array was missing printMediaToEdit
+    [printMediaToEdit]
   );
 
   const handleEdit = (item: PrintMedia) => {
@@ -112,7 +111,7 @@ const PrintMediaPage: React.FC = () => {
         error instanceof Error ? error.message : "Unknown error occurred";
       toast.error(`Failed to delete print media archive: ${errorMessage}`);
     }
-  }, [printMediaToDelete]); // Dependency array was missing printMediaToDelete
+  }, [printMediaToDelete]);
 
   const handleDeleteRequest = (item: PrintMedia) => {
     setPrintMediaToDelete(item);

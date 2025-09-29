@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type {
   PrintMedia,
-  CreatePrintMediaData, // This is for the internal state
-  PrintMediaFormData, // Use this for the submission
+  CreatePrintMediaData,
+  PrintMediaFormData,
 } from "../../../types/PrintMedia";
 
 interface PrintMediaFormProps {

@@ -6,12 +6,11 @@ use App\Models\PrintMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response; 
 
 class PrintMediaController extends Controller
 {
-    /**
-     * Get all media records
-     */
+  
     public function index()
     {
         $media = PrintMedia::all()->map(function ($item) {
@@ -21,18 +20,14 @@ class PrintMediaController extends Controller
         return response()->json($media);
     }
 
-    /**
-     * Show a single record
-     */
+
     public function show($id)
     {
         $media = PrintMedia::findOrFail($id);
         return response()->json($this->transformMedia($media));
     }
 
-    /**
-     * Store a new record
-     */
+
     public function store(Request $request)
     {
         \Log::info('Received data for store:', $request->all());
@@ -42,7 +37,7 @@ class PrintMediaController extends Controller
             'type'        => 'required|string|in:tabloid,magazine,folio,other,Tabloid,Magazine,Folio,Other',
             'description' => 'required|string',
             'byline'      => 'nullable|string|max:255',
-            'date'        => 'required|date', // <-- FIX: Added date validation
+            'date'        => 'required|date',
             'file'        => 'required|file|mimes:pdf,doc,docx|max:20480',
             'thumbnail'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
@@ -59,10 +54,8 @@ class PrintMediaController extends Controller
         }
 
         try {
-            // --- FIX: Added 'date' to the array ---
             $data = $request->only(['title', 'description', 'byline', 'date']);
             
-            // Normalize the type to proper case before saving
             $typeMapping = [
                 'tabloid' => 'Tabloid',
                 'magazine' => 'Magazine', 
@@ -71,7 +64,6 @@ class PrintMediaController extends Controller
             ];
             $data['type'] = $typeMapping[strtolower($request->type)] ?? $request->type;
             
-            // Handle main file upload
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $data['original_filename'] = $file->getClientOriginalName();
@@ -80,7 +72,6 @@ class PrintMediaController extends Controller
                 \Log::info('File stored at: ' . $path);
             }
 
-            // Handle thumbnail upload
             if ($request->hasFile('thumbnail')) {
                 $thumbnailFile = $request->file('thumbnail');
                 $thumbnailPath = $thumbnailFile->store('print_media_thumbnails', 'public');
@@ -100,9 +91,7 @@ class PrintMediaController extends Controller
         }
     }
 
-    /**
-     * Update a record
-     */
+
     public function update(Request $request, $id)
     {
         \Log::info('Received data for update on ID ' . $id . ':', $request->all());
@@ -112,7 +101,7 @@ class PrintMediaController extends Controller
             'type'        => 'required|string|in:tabloid,magazine,folio,other,Tabloid,Magazine,Folio,Other',
             'description' => 'required|string',
             'byline'      => 'nullable|string|max:255',
-            'date'        => 'sometimes|required|date', // Added date validation for update
+            'date'        => 'sometimes|required|date',
             'file'        => 'nullable|file|mimes:pdf,doc,docx|max:20480',
             'thumbnail'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -124,14 +113,11 @@ class PrintMediaController extends Controller
 
         $printMedia = PrintMedia::findOrFail($id);
 
-        // Update fields from request
         $printMedia->fill($request->only(['title', 'description', 'byline', 'date']));
         
-        // Normalize type on update as well
         $typeMapping = ['tabloid' => 'Tabloid', 'magazine' => 'Magazine', 'folio' => 'Folio', 'other' => 'Other'];
         $printMedia->type = $typeMapping[strtolower($request->type)] ?? $request->type;
 
-        // Handle file update
         if ($request->hasFile('file')) {
             if ($printMedia->file_path && Storage::disk('public')->exists($printMedia->file_path)) {
                 Storage::disk('public')->delete($printMedia->file_path);
@@ -142,7 +128,6 @@ class PrintMediaController extends Controller
             $printMedia->file_path = $path;
         }
 
-        // Handle thumbnail update
         if ($request->hasFile('thumbnail')) {
             if ($printMedia->thumbnail_path && Storage::disk('public')->exists($printMedia->thumbnail_path)) {
                 Storage::disk('public')->delete($printMedia->thumbnail_path);
@@ -160,9 +145,6 @@ class PrintMediaController extends Controller
         ]);
     }
 
-    /**
-     * Delete a record
-     */
     public function destroy($id)
     {
         $media = PrintMedia::findOrFail($id);
@@ -179,9 +161,16 @@ class PrintMediaController extends Controller
         return response()->json(['message' => 'Deleted successfully']);
     }
 
-    /**
-     * Transform record into API response with full URLs
-     */
+    public function serveFile(string $path)
+    {
+        if (!Storage::disk('public')->exists($path)) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        return Storage::disk('public')->response($path);
+    }
+
+
     private function transformMedia(PrintMedia $media)
     {
         return [
@@ -191,7 +180,9 @@ class PrintMediaController extends Controller
             'date'              => $media->date,
             'description'       => $media->description,
             'byline'            => $media->byline,
+            'file_path'         => $media->file_path,
             'file_url'          => $media->file_path ? Storage::url($media->file_path) : null,
+            'thumbnail_path'    => $media->thumbnail_path,
             'thumbnail_url'     => $media->thumbnail_path ? Storage::url($media->thumbnail_path) : null,
             'original_filename' => $media->original_filename,
             'created_at'        => $media->created_at,
