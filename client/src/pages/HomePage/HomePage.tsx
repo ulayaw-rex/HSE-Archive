@@ -10,7 +10,7 @@ const categories = [
   "university",
   "local",
   "national",
-  "international",
+  "entertai",
   "sci-tech",
   "sports",
 ];

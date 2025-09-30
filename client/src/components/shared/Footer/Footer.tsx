@@ -14,7 +14,7 @@ type NavigationLink = {
 const leftNavigationLinks: NavigationLink[] = [
   { id: "news", text: "NEWS", href: "/news" },
   { id: "sports", text: "SPORTS", href: "/sports" },
-  { id: "opinions", text: "OPINIONS", href: "/opinions" },
+  { id: "opinions", text: "OPINIONS", href: "/opinion" },
   { id: "literary", text: "LITERARY", href: "/literary" },
   { id: "print-media", text: "PRINT MEDIA", href: "/print-media" },
   { id: "about", text: "ABOUT", href: "/about" },

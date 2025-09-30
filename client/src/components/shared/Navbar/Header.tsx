@@ -88,7 +88,10 @@ const Header: React.FC = () => {
           {/* Center - Mobile Title & Desktop Date */}
           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
             {/* Mobile Title */}
-            <div className="lg:hidden">
+            <div
+              className="lg:hidden"
+              onClick={() => (window.location.href = "/")}
+            >
               <span className="text-lg font-bold text-white">
                 The Hillside Echo
               </span>

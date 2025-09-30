@@ -6,7 +6,7 @@ import NewsPage from "../pages/News";
 import UniversityNewsPage from "../pages/News/University";
 import LocalNewsPage from "../pages/News/Local";
 import NationalNewsPage from "../pages/News/National";
-import InternationalNewsPage from "../pages/News/International";
+import EntertainmentNewsPage from "../pages/News/International";
 import SciTechNewsPage from "../pages/News/SciTech";
 import OpinionsPage from "../pages/Opinions";
 import LiteraryPage from "../pages/Literary";
@@ -28,7 +28,7 @@ export default (
     <Route path="/news/university" element={<UniversityNewsPage />} />
     <Route path="/news/local" element={<LocalNewsPage />} />
     <Route path="/news/national" element={<NationalNewsPage />} />
-    <Route path="/news/international" element={<InternationalNewsPage />} />
+    <Route path="/news/entertainment" element={<EntertainmentNewsPage />} />
     <Route path="/news/sci-tech" element={<SciTechNewsPage />} />
     <Route path="/news/:idOrSlug" element={<ArticleDetail />} />
     <Route path="/sports" element={<SportsPage />} />

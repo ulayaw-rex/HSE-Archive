@@ -18,6 +18,8 @@ const PrintMediaPage: React.FC = () => {
   const [selectedPrintMedia, setSelectedPrintMedia] =
     useState<PrintMedia | null>(null);
   const [loading, setLoading] = useState(true);
+  // 1. Add a new state to track the deletion process
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchPrintMedia = useCallback(async () => {
     try {
@@ -92,8 +94,11 @@ const PrintMediaPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
+  // 2. Update the confirmDelete function to manage the loading state
   const confirmDelete = useCallback(async () => {
     if (!printMediaToDelete) return;
+
+    setIsDeleting(true); // Disable button
     try {
       await AxiosInstance.delete(
         `/print-media/${printMediaToDelete.print_media_id}`
@@ -105,11 +110,13 @@ const PrintMediaPage: React.FC = () => {
         )
       );
       toast.success("Print media archive deleted successfully");
-      setPrintMediaToDelete(null);
+      setPrintMediaToDelete(null); // Close modal on success
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       toast.error(`Failed to delete print media archive: ${errorMessage}`);
+    } finally {
+      setIsDeleting(false); // Re-enable button
     }
   }, [printMediaToDelete]);
 
@@ -175,6 +182,7 @@ const PrintMediaPage: React.FC = () => {
           isOpen={!!printMediaToDelete}
           onClose={() => setPrintMediaToDelete(null)}
           onConfirm={confirmDelete}
+          isLoading={isDeleting} // 3. Pass the loading state to the modal
           title="Delete Print Media Archive"
           message={`Are you sure you want to delete "${printMediaToDelete?.title}"? This action cannot be undone.`}
           confirmLabel="Delete"

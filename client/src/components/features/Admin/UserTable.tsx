@@ -47,7 +47,7 @@ const UserTable: React.FC<UserTableProps> = ({
   const handleConfirmDelete = async () => {
     if (!userToDelete) return;
     try {
-      await onDelete(userToDelete.id);
+      await onDelete(userToDelete.user_id);
       toast.success(`Successfully deleted user ${userToDelete.name}`);
       setUserToDelete(null);
     } catch (error) {
@@ -109,7 +109,7 @@ const UserTable: React.FC<UserTableProps> = ({
                   </tr>
                 ) : (
                   users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user.user_id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {user.name}

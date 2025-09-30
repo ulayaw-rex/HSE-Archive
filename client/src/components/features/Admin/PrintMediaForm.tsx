@@ -30,6 +30,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
   });
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (printMedia && mode === "edit") {
@@ -61,25 +62,33 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formDataToSend = new FormData();
+    setLoading(true); // Disable button
 
-    formDataToSend.append("title", formData.title);
-    formDataToSend.append("type", formData.type);
-    formDataToSend.append("description", formData.description);
-    formDataToSend.append("byline", formData.byline);
+    try {
+      const formDataToSend = new FormData();
 
-    if (file) {
-      formDataToSend.append("file", file);
+      formDataToSend.append("title", formData.title);
+      formDataToSend.append("type", formData.type);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("byline", formData.byline);
+
+      if (file) {
+        formDataToSend.append("file", file);
+      }
+      if (thumbnail) {
+        formDataToSend.append("thumbnail", thumbnail);
+      }
+
+      if (mode === "edit") {
+        formDataToSend.append("_method", "PUT");
+      }
+
+      await onSubmit(formDataToSend);
+    } catch (error) {
+      console.error("Submission failed:", error);
+    } finally {
+      setLoading(false); // Re-enable button
     }
-    if (thumbnail) {
-      formDataToSend.append("thumbnail", thumbnail);
-    }
-
-    if (mode === "edit") {
-      formDataToSend.append("_method", "PUT");
-    }
-
-    await onSubmit(formDataToSend);
   };
 
   return (
@@ -211,6 +220,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
             </div>
             <button
               type="submit"
+              disabled={loading}
               className="!bg-green-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50"
             >
               {mode === "edit" ? "Update Archive" : "Post Archive +"}

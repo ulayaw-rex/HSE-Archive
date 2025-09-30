@@ -5,7 +5,7 @@ import FeaturedPublicationCard from "../../components/features/Categories/Featur
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 
-const InternationalNewsPage: React.FC = () => {
+const EntertainmentNewsPage: React.FC = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,12 +16,12 @@ const InternationalNewsPage: React.FC = () => {
         setLoading(true);
         setError(null);
         const response = await AxiosInstance.get(
-          "/publications/category/international"
+          "/publications/category/entertainment"
         );
         setPublications(response.data);
       } catch (err) {
-        console.error("Failed to fetch international publications:", err);
-        setError("Failed to load international publications.");
+        console.error("Failed to fetch entertainment publications:", err);
+        setError("Failed to load entertainment publications.");
       } finally {
         setLoading(false);
       }
@@ -39,7 +39,7 @@ const InternationalNewsPage: React.FC = () => {
     <div className="min-h-screen bg-white py-8">
       <div className="container mx-auto px-4 space-y-6">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-6">
-          INTERNATIONAL
+          ENTERTAINMENT
         </h1>
         {featured && <FeaturedPublicationCard publication={featured} />}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -55,4 +55,4 @@ const InternationalNewsPage: React.FC = () => {
   );
 };
 
-export default InternationalNewsPage;
+export default EntertainmentNewsPage;

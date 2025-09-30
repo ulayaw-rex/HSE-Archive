@@ -424,18 +424,29 @@ input:focus {
 }
 
 /* Remove any hover text color changes on publication cards */
-.publication-card:hover,
-.publication-card *:hover,
-.category-publication-card:hover,
-.category-publication-card *:hover,
-.guest-publication-card:hover,
-.guest-publication-card *:hover,
-.max-w-sm:hover,
-.max-w-sm *:hover {
-  color: #1a202c !important;
-  fill: #1a202c !important;
-  stroke: #1a202c !important;
-  text-decoration: none !important;
+/* --- PREVENT TEXT COLOR CHANGE ON PUBLICATION CARD HOVER --- */
+
+/* Keeps the main title dark */
+.max-w-sm:hover .font-bold.text-xl {
+  color: #1f2937 !important; /* Tailwind's gray-800 is a good default */
+}
+
+/* Keeps the category text blue */
+.max-w-sm:hover .text-blue-700 {
+  color: #1d4ed8 !important; /* Tailwind's default blue-700 */
+}
+
+/* Keeps the body text gray */
+.max-w-sm:hover .text-gray-700 {
+  color: #374151 !important; /* Tailwind's default gray-700 */
+}
+
+/* Keeps the date and photo credit text light gray */
+.max-w-sm:hover .text-gray-500 {
+  color: #6b7280 !important; /* Tailwind's default gray-500 */
+}
+.max-w-sm:hover .text-gray-400 {
+  color: #9ca3af !important; /* Tailwind's default gray-400 */
 }
 
 /* Modal background blur for publication view modal */

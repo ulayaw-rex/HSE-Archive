@@ -17,6 +17,8 @@ const PublicationsPage: React.FC = () => {
   const [publicationToDelete, setPublicationToDelete] =
     useState<Publication | null>(null);
   const [loading, setLoading] = useState(true);
+  // 1. Add a new state to track the deletion process
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchPublications();
@@ -34,6 +36,7 @@ const PublicationsPage: React.FC = () => {
   };
 
   const handleCreate = async (data: CreatePublicationData) => {
+    // ... (handleCreate function remains the same)
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -56,7 +59,6 @@ const PublicationsPage: React.FC = () => {
       setPublications([response.data, ...publications]);
       setIsFormOpen(false);
       toast.success("Publication created successfully");
-      // Trigger a refresh event for homepage or other components
       window.dispatchEvent(new Event("publicationCreated"));
     } catch (error) {
       toast.error("Failed to create publication");
@@ -64,8 +66,8 @@ const PublicationsPage: React.FC = () => {
   };
 
   const handleUpdate = async (data: CreatePublicationData) => {
+    // ... (handleUpdate function remains the same)
     if (!publicationToEdit) return;
-    console.log("Updating publication with data:", data);
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -77,18 +79,12 @@ const PublicationsPage: React.FC = () => {
           }
         }
       });
-
       formData.append("_method", "PUT");
       const response = await AxiosInstance.post(
         `/publications/${publicationToEdit.publication_id}`,
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-
       setPublications(
         publications.map((pub) =>
           pub.publication_id === publicationToEdit.publication_id
@@ -114,9 +110,11 @@ const PublicationsPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
+  // 2. Update the handleDelete function to manage the loading state
   const handleDelete = async () => {
     if (!publicationToDelete) return;
 
+    setIsDeleting(true); // Disable button
     try {
       await AxiosInstance.delete(
         `/publications/${publicationToDelete.publication_id}`
@@ -127,9 +125,11 @@ const PublicationsPage: React.FC = () => {
         )
       );
       toast.success("Publication deleted successfully");
-      setPublicationToDelete(null);
+      setPublicationToDelete(null); // This closes the modal
     } catch (error) {
       toast.error("Failed to delete publication");
+    } finally {
+      setIsDeleting(false); // Re-enable button
     }
   };
 
@@ -190,6 +190,7 @@ const PublicationsPage: React.FC = () => {
           isOpen={!!publicationToDelete}
           onClose={() => setPublicationToDelete(null)}
           onConfirm={handleDelete}
+          isLoading={isDeleting} // 3. Pass the loading state to the modal
           title="Delete Publication"
           message={`Are you sure you want to delete "${publicationToDelete?.title}"? This action cannot be undone.`}
           confirmLabel="Delete"

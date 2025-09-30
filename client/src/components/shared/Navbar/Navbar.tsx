@@ -4,7 +4,6 @@ import { FaSearch, FaChevronDown } from "react-icons/fa";
 import "./navbar.css";
 import Logo from "../../../assets/LOGO.png";
 
-// Define the NavigationLink type (renamed to avoid conflict with React Router's NavLink)
 type NavigationLink = {
   id: string;
   label: string;
@@ -30,9 +29,9 @@ const navLinks: NavigationLink[] = [
       { id: "local", label: "Local", href: "/news/local" },
       { id: "national", label: "National", href: "/news/national" },
       {
-        id: "international",
-        label: "International",
-        href: "/news/international",
+        id: "entertainment",
+        label: "Entertainment",
+        href: "/news/entertainment",
       },
       { id: "sci-tech", label: "Sci-Tech", href: "/news/sci-tech" },
     ],
