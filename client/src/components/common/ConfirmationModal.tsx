@@ -8,7 +8,7 @@ interface ConfirmationModalProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  isLoading?: boolean; // 1. Add isLoading to the props interface
+  isLoading?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -19,73 +19,54 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   message,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  isLoading = false, // 2. Receive the prop with a default value
+  isLoading = false,
 }) => {
   if (!isOpen) return null;
 
   return (
-    // 3. Disable closing via overlay click while loading
-    <div className="modal-container" onClick={isLoading ? undefined : onClose}>
+    <div className="confirmation-modal-container">
       <div
-        className="modal-content p-4 sm:p-6"
+        className="confirmation-modal-overlay"
+        onClick={isLoading ? undefined : onClose}
+      />
+      <div
+        className="confirmation-modal-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-          {title}
-        </h3>
-        <div className="my-4">
-          <div className="flex items-center space-x-3 text-red-600 mb-3">
-            {/* ... SVG icon ... */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+        <div className="confirmation-modal-header">
+          <div className="confirmation-modal-icon confirmation-modal-icon--warning">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
-            <p className="text-gray-600 font-medium text-sm sm:text-base">
-              {message}
-            </p>
           </div>
+          <h2 className="confirmation-modal-title">{title}</h2>
         </div>
-        <div className="modal-actions">
-          {/* 4. Disable the cancel button while loading */}
+
+        <div className="confirmation-modal-body">
+          <p className="confirmation-modal-message">{message}</p>
+        </div>
+
+        <div className="confirmation-modal-footer">
           <button
+            type="button"
+            className="confirmation-modal-button confirmation-modal-button--cancel"
             onClick={onClose}
             disabled={isLoading}
-            className="modal-btn modal-btn-cancel disabled:opacity-50"
           >
             {cancelLabel}
           </button>
-          {/* 5. Disable the confirm button while loading */}
           <button
+            type="button"
+            className="confirmation-modal-button confirmation-modal-button--confirm"
             onClick={onConfirm}
             disabled={isLoading}
-            className="modal-btn modal-btn-delete flex items-center justify-center space-x-2 disabled:opacity-50"
           >
-            {/* ... SVG icon ... */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-            <span>{isLoading ? "Deleting..." : confirmLabel}</span>
+            {isLoading ? "Processing..." : confirmLabel}
           </button>
         </div>
       </div>

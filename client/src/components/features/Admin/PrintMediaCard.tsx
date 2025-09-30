@@ -18,10 +18,10 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
 }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  // Use proxy from vite.config.ts
 
   const thumbnailUrl = printMedia.thumbnail_path
-    ? `${apiBaseUrl}/api/print-media/file/${printMedia.thumbnail_path}`
+    ? `/api/print-media/file/${printMedia.thumbnail_path}`
     : null;
 
   const handleEditClick = useCallback(

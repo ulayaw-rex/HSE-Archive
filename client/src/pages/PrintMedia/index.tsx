@@ -15,11 +15,11 @@ const PrintMediaPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(null);
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
   const fetchPrintMedia = useCallback(async () => {
     try {
+      console.log("Fetching print media...");
       const response = await AxiosInstance.get<PrintMedia[]>("/print-media");
+      console.log("Print media response:", response.data);
       setPrintMediaList(response.data);
     } catch (error: unknown) {
       const errorMessage =
@@ -71,8 +71,18 @@ const PrintMediaPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {currentItems.map((item) => {
                 const thumbnailUrl = item.thumbnail_path
-                  ? `${apiBaseUrl}/api/print-media/file/${item.thumbnail_path}`
+                  ? `/api/print-media/file/${item.thumbnail_path}`
                   : null;
+
+                // Debug logging
+                if (item.thumbnail_path) {
+                  console.log(
+                    "Thumbnail URL for",
+                    item.title,
+                    ":",
+                    thumbnailUrl
+                  );
+                }
 
                 return (
                   <div
@@ -90,16 +100,34 @@ const PrintMediaPage: React.FC = () => {
                           src={thumbnailUrl}
                           alt={item.title}
                           className="w-full h-full object-contain drop-shadow-md"
+                          onError={(e) => {
+                            console.error(
+                              "Thumbnail failed to load:",
+                              thumbnailUrl
+                            );
+                            e.currentTarget.style.display = "none";
+                          }}
+                          onLoad={() => {
+                            console.log(
+                              "Thumbnail loaded successfully:",
+                              thumbnailUrl
+                            );
+                          }}
                         />
                       ) : (
-                        <svg
-                          className="w-16 h-16 text-gray-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z" />
-                          <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-                        </svg>
+                        <div className="flex flex-col items-center">
+                          <svg
+                            className="w-16 h-16 text-gray-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z" />
+                            <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                          </svg>
+                          <span className="text-xs text-gray-500 mt-2">
+                            No thumbnail
+                          </span>
+                        </div>
                       )}
                     </div>
 
