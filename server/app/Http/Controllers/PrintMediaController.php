@@ -6,11 +6,11 @@ use App\Models\PrintMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\HttpFoundation\Response; 
+use Symfony\Component\HttpFoundation\Response;
 
 class PrintMediaController extends Controller
 {
-  
+
     public function index()
     {
         $media = PrintMedia::all()->map(function ($item) {
@@ -55,15 +55,15 @@ class PrintMediaController extends Controller
 
         try {
             $data = $request->only(['title', 'description', 'byline', 'date']);
-            
+
             $typeMapping = [
                 'tabloid' => 'Tabloid',
-                'magazine' => 'Magazine', 
+                'magazine' => 'Magazine',
                 'folio' => 'Folio',
                 'other' => 'Other'
             ];
             $data['type'] = $typeMapping[strtolower($request->type)] ?? $request->type;
-            
+
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $data['original_filename'] = $file->getClientOriginalName();
@@ -114,7 +114,7 @@ class PrintMediaController extends Controller
         $printMedia = PrintMedia::findOrFail($id);
 
         $printMedia->fill($request->only(['title', 'description', 'byline', 'date']));
-        
+
         $typeMapping = ['tabloid' => 'Tabloid', 'magazine' => 'Magazine', 'folio' => 'Folio', 'other' => 'Other'];
         $printMedia->type = $typeMapping[strtolower($request->type)] ?? $request->type;
 
@@ -136,7 +136,7 @@ class PrintMediaController extends Controller
             $thumbnailPath = $thumbnailFile->store('print_media_thumbnails', 'public');
             $printMedia->thumbnail_path = $thumbnailPath;
         }
-        
+
         $printMedia->save();
 
         return response()->json([
