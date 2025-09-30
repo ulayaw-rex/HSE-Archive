@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class UserController extends Controller
 {
@@ -30,7 +31,11 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => [
+                'required',
+                'string',
+                PasswordRule::min(8)->mixedCase()->numbers()->symbols(),
+            ],
             'role' => ['required', Rule::in(['guest', 'hillsider', 'alumni', 'admin'])],
         ]);
 
@@ -82,24 +87,29 @@ class UserController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
-            'password' => 'sometimes|required|string|min:8',
+            'password' => [
+                'sometimes',
+                'required',
+                'string',
+                PasswordRule::min(8)->mixedCase()->numbers()->symbols(),
+            ],
             'role' => ['sometimes', 'required', Rule::in(['hillsider', 'alumni', 'admin'])],
         ]);
 
         $updateData = [];
-        
+
         if (isset($validated['name'])) {
             $updateData['name'] = $validated['name'];
         }
-        
+
         if (isset($validated['email'])) {
             $updateData['email'] = $validated['email'];
         }
-        
+
         if (isset($validated['password'])) {
             $updateData['password'] = Hash::make($validated['password']);
         }
-        
+
         if (isset($validated['role'])) {
             $updateData['role'] = $validated['role'];
         }

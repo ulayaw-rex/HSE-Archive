@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
+import AxiosInstance from "../AxiosInstance";
 import "./AdminLayout.css";
 import type { SidebarItemType } from "../pages/Admin/SidebarItems"; // ✅ shared type
 
@@ -84,6 +85,13 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
   sidebarItems,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const handleLogout = async () => {
+    try {
+      await AxiosInstance.post("/logout", {}, { withCredentials: true });
+    } catch {}
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  };
 
   return (
     <div className="min-h-screen flex bg-green-50 text-gray-900">
@@ -121,6 +129,31 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
           {sidebarItems.map((item, index) => (
             <SidebarItem key={index} item={item} />
           ))}
+
+          {/* Sidebar footer actions */}
+          <div className="mt-4 pt-4 border-t border-green-600/50">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogout();
+              }}
+              className="flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-colors hover:bg-green-600/60 text-white"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <path d="M15 12H3" />
+                <path d="M12 15l-3-3 3-3" />
+                <path d="M21 4v16a2 2 0 01-2 2H9" />
+              </svg>
+              <span className="text-sm font-medium">Logout</span>
+            </a>
+          </div>
         </nav>
       </div>
 

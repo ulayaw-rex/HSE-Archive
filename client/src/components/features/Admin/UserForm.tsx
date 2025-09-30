@@ -22,6 +22,7 @@ const UserForm: React.FC<UserFormProps> = ({
     password: "",
     role: "hillsider",
   });
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isEditing = !!user;
@@ -34,6 +35,7 @@ const UserForm: React.FC<UserFormProps> = ({
         password: "",
         role: user.role,
       });
+      setConfirmPassword("");
     }
   }, [user]);
 
@@ -50,10 +52,36 @@ const UserForm: React.FC<UserFormProps> = ({
       newErrors.email = "Email is invalid";
     }
 
-    if (!isEditing && !formData.password.trim()) {
+    const isPasswordProvided = !!formData.password.trim();
+    if (!isEditing && !isPasswordProvided) {
       newErrors.password = "Password is required";
-    } else if (formData.password.trim() && formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+    } else if (isPasswordProvided) {
+      const password = formData.password;
+      const rules = [
+        {
+          test: /.{8,}/,
+          message: "Password must be at least 8 characters",
+        },
+        { test: /[A-Z]/, message: "Must include an uppercase letter" },
+        { test: /[a-z]/, message: "Must include a lowercase letter" },
+        { test: /[0-9]/, message: "Must include a number" },
+        { test: /[^A-Za-z0-9]/, message: "Must include a special character" },
+      ];
+
+      for (const rule of rules) {
+        if (!rule.test.test(password)) {
+          newErrors.password = rule.message;
+          break;
+        }
+      }
+    }
+
+    // Confirm password rules: required on create; required on edit only if password is being changed
+    const shouldRequireConfirm = !isEditing || isPasswordProvided;
+    if (shouldRequireConfirm && !confirmPassword.trim()) {
+      newErrors.confirmPassword = "Please confirm the password";
+    } else if (shouldRequireConfirm && confirmPassword !== formData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -188,6 +216,39 @@ const UserForm: React.FC<UserFormProps> = ({
           {errors.password && (
             <p className="text-red-500 text-sm mt-2 font-medium">
               {errors.password}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            Confirm Password{" "}
+            {(!isEditing || formData.password) && <span>*</span>}
+          </label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (errors.confirmPassword) {
+                setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+              }
+            }}
+            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 ${
+              errors.confirmPassword
+                ? "border-red-400 bg-red-50"
+                : "border-gray-200 focus:border-blue-400"
+            }`}
+            placeholder="Re-enter password"
+          />
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm mt-2 font-medium">
+              {errors.confirmPassword}
             </p>
           )}
         </div>

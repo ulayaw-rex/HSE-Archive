@@ -5,6 +5,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PrintMediaController;
+use App\Http\Controllers\AuthController;
 
 //Dashboard stats route temporarily disabled due to issues with apiResource method
 // Route::apiResource('news/dashboard/stats', [NewsController::class, 'dashboardStats']);
@@ -28,3 +29,10 @@ Route::get('print-media/{id}/download', [PrintMediaController::class, 'downloadP
 
 // This new route will handle serving the PDF file through the PrintMediaController
 Route::get('print-media/file/{path}', [PrintMediaController::class, 'serveFile'])->where('path', '.*');
+
+// 🔐 Auth Routes (API using session via web middleware + Sanctum)
+Route::middleware('web')->post('login', [AuthController::class, 'login']);
+Route::middleware(['web','auth:sanctum'])->group(function () {
+    Route::get('me', [AuthController::class, 'me']);
+    Route::post('logout', [AuthController::class, 'logout']);
+});

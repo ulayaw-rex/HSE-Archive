@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FaCalendarAlt, FaFacebookF, FaInstagram } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
@@ -10,6 +10,16 @@ const ArticleDetail: React.FC = () => {
   const [publication, setPublication] = useState<Publication | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Determine current user once per mount so hook order stays stable across renders
+  const currentUser = useMemo(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     if (!idOrSlug) return;
@@ -68,11 +78,38 @@ const ArticleDetail: React.FC = () => {
             <div className="flex items-center space-x-1">
               <FaCalendarAlt />
               <span>
-                {new Date(publication.created_at).toLocaleDateString()}
+                {new Date(
+                  publication.created_at ||
+                    (publication as any).updated_at ||
+                    Date.now()
+                ).toLocaleDateString()}
               </span>
             </div>
-            <div>
-              By <span className="font-bold">{publication.byline}</span>
+            <div className="flex items-center gap-3">
+              <span>
+                By{" "}
+                <span className="font-bold">
+                  {publication.byline || "The Hillside Echo"}
+                </span>
+              </span>
+              {currentUser && (
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Placeholder action; wire to your attribute editor when available
+                    window.dispatchEvent(
+                      new CustomEvent("open-attribute-editor", {
+                        detail: { publicationId: publication.publication_id },
+                      })
+                    );
+                  }}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-600"
+                  aria-label="Add attribute"
+                >
+                  Add attribute +
+                </a>
+              )}
             </div>
           </div>
 
@@ -93,7 +130,7 @@ const ArticleDetail: React.FC = () => {
           )}
 
           <article className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
-            {publication.body.split("\n").map((para, idx) => (
+            {(publication.body ?? "").split("\n").map((para, idx) => (
               <p key={idx}>{para}</p>
             ))}
           </article>

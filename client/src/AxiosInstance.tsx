@@ -1,22 +1,17 @@
 import axios from "axios";
 
-
 let API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // Create axios instance with initial URL
 const AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api`,
+  withCredentials: true,
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
 });
 
-
 AxiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-
-  console.log("Axios is sending this token:", token);
-
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-  }
+  // Using Sanctum cookie-based auth; do not attach Authorization header
 
   if (config.data instanceof FormData) {
     config.headers["Content-Type"] = "multipart/form-data";

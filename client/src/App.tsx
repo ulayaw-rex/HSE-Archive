@@ -14,6 +14,16 @@ import { adminSidebarItems } from "./pages/Admin/SidebarItems";
 // Routes
 import SiteRoutes from "./routes/SiteRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
+import { Navigate } from "react-router-dom";
+
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const saved = localStorage.getItem("user");
+  const user = saved ? JSON.parse(saved) : null;
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+}
 
 function App() {
   return (
@@ -25,7 +35,11 @@ function App() {
         {/* Admin routes */}
         <Route
           path="/admin"
-          element={<AdminLayout sidebarItems={adminSidebarItems} />}
+          element={
+            <RequireAdmin>
+              <AdminLayout sidebarItems={adminSidebarItems} />
+            </RequireAdmin>
+          }
         >
           {AdminRoutes}
         </Route>
