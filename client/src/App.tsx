@@ -16,6 +16,8 @@ import SiteRoutes from "./routes/SiteRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import { Navigate } from "react-router-dom";
 
+import NotFoundPage from "./components/common/NotFound";
+
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const saved = localStorage.getItem("user");
   const user = saved ? JSON.parse(saved) : null;
@@ -43,6 +45,8 @@ function App() {
         >
           {AdminRoutes}
         </Route>
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       {/* Toast notifications */}
