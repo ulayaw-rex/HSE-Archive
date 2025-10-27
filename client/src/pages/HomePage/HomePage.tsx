@@ -78,12 +78,13 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Featured Carousel */}
+      {/* Featured Carousel is NOW OUTSIDE the container, making it full-width */}
       {featuredArticles.length > 0 && (
         <FeaturedCarousel articles={featuredArticles} />
       )}
 
-      <div className="container mx-auto px-4">
+      {/* This container now only holds the category sections */}
+      <div className="w-[90%] mx-auto px-4">
         {/* Category Sections */}
         {categories.map((category) => (
           <section key={category} className="space-y-6">

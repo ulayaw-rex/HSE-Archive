@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany; 
 
 class Publication extends Model
 {
@@ -25,4 +26,12 @@ class Publication extends Model
         'photo_credits',
         'image_path',
     ];
+
+
+    public function comments(): HasMany
+    {
+        // Links this model's 'publication_id' to the
+        // 'publication_id' on the 'Comment' model.
+        return $this->hasMany(Comment::class, 'publication_id', 'publication_id');
+    }
 }

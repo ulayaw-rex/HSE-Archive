@@ -4,6 +4,7 @@ import { FaCalendarAlt, FaFacebookF, FaInstagram } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
+import { Comments } from "../../components/features/Publications/Comments";
 
 const ArticleDetail: React.FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
@@ -134,6 +135,9 @@ const ArticleDetail: React.FC = () => {
               <p key={idx}>{para}</p>
             ))}
           </article>
+
+          {/* Comments Section */}
+          <Comments publicationId={publication.publication_id} />
         </div>
 
         {/* Sidebar with social media icons */}

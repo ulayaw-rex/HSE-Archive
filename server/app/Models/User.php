@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany; // <-- ADD THIS LINE
 
 class User extends Authenticatable
 {
@@ -72,5 +73,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get all of the comments for the user.
+     * THIS IS THE NEW FUNCTION YOU MUST ADD.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        // This relationship is standard, so it's simple.
+        return $this->hasMany(Comment::class);
     }
 }

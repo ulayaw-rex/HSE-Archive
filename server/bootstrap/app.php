@@ -15,6 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api([
             \App\Http\Middleware\Cors::class,
         ]);
+
+        // --- ADD THIS LINE ---
+        // This registers your 'role' middleware so you can use 'role:admin'
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+        
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
