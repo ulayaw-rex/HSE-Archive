@@ -46,7 +46,7 @@ const PrintMediaPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white py-8">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 w-[90%]">
         {/* Filter Tabs */}
         <div className="mb-8 border-b border-gray-200">
           <nav className="flex space-x-4" aria-label="Tabs">

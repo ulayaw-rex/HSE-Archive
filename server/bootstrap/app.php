@@ -15,9 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api([
             \App\Http\Middleware\Cors::class,
         ]);
-
-        // --- ADD THIS LINE ---
-        // This registers your 'role' middleware so you can use 'role:admin'
+        $middleware->validateCsrfTokens(except: [
+            'api/logout', // <--- This matches your route in api.php
+            'logout'
+        ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);

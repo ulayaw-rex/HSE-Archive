@@ -123,7 +123,7 @@ const NewsPage: React.FC = () => {
         </div>
       )}
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 w-[90%]">
         {/* Category Sections */}
         {categories.map((category) => (
           <section key={category} className="space-y-6">

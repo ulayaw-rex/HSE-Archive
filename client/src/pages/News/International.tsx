@@ -37,7 +37,7 @@ const EntertainmentNewsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white py-8">
-      <div className="container mx-auto px-4 space-y-6">
+      <div className="container mx-auto px-4 space-y-6 w-[90%]">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-6">
           ENTERTAINMENT
         </h1>

@@ -4,6 +4,9 @@ import AxiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import LoginArt from "../../../assets/Login.png";
 
+// 1. IMPORT THE AUTH HOOK
+import { useAuth } from "../../../context/AuthContext";
+
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +14,10 @@ interface LoginModalProps {
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+
+  // 2. GET THE CHECKAUTH FUNCTION
+  const { checkAuth } = useAuth();
+
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
@@ -24,17 +31,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      // First, hit Sanctum's CSRF endpoint so the cookie is set
+      // First, hit Sanctum's CSRF endpoint
       await AxiosInstance.get(
         `${
           import.meta.env.VITE_API_URL || "http://localhost:8000"
         }/sanctum/csrf-cookie`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
-      // Manually attach XSRF header from cookie to be safe
+      // Manually attach XSRF header (Your existing logic)
       const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
       const xsrfToken = xsrfMatch
         ? decodeURIComponent(xsrfMatch[1])
@@ -52,10 +57,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         }
       );
 
-      // Store only user (no token) for UI; server sends httpOnly cookie for auth
-      localStorage.removeItem("token");
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Call checkAuth to update the Global State immediately
+      await checkAuth();
 
+      // Now React knows who you are, so we can close and navigate
       onClose();
 
       if (data?.redirect) {

@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl">
       {/* Main Footer Content */}
-      <div className="container mx-auto px-6 py-16">
+      <div className="container mx-auto px-6 py-16 w-[90%]">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column - Branding */}
           <div className="flex flex-col items-start space-y-6">
@@ -141,7 +141,7 @@ const Footer: React.FC = () => {
       <div className="border-t border-green-700/30 mx-6"></div>
 
       {/* Bottom Section - Copyright & Social Media */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 w-[90%]">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           {/* Copyright */}
           <div className="text-sm text-gray-300 text-center md:text-left">

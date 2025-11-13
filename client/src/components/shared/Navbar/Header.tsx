@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
-import AxiosInstance from "../../../AxiosInstance";
 
-// Define the NavigationLink type
+import { useAuth } from "../../../context/AuthContext";
+
 type NavigationLink = {
   id: string;
   label: string;
@@ -20,7 +20,6 @@ const navLinks: NavigationLink[] = [
   { id: "about", label: "About", href: "/about" },
 ];
 
-// Define the TopLink type
 type TopLink = {
   id: string;
   label: string;
@@ -34,24 +33,14 @@ const topLinks: TopLink[] = [
 ];
 
 const Header: React.FC = () => {
+  // 1. Destructure isLoading from the hook
+  const { user, logout, isLoading } = useAuth();
+  const navigate = useNavigate();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("user");
-      if (saved) {
-        setCurrentUser(JSON.parse(saved));
-      } else {
-        setCurrentUser(null);
-      }
-    } catch {
-      setCurrentUser(null);
-    }
-  }, [isLoginModalOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -87,13 +76,9 @@ const Header: React.FC = () => {
   }, [isProfileOpen]);
 
   const handleLogout = async () => {
-    try {
-      await AxiosInstance.post("/logout", {}, { withCredentials: true });
-    } catch {}
-    localStorage.removeItem("user");
-    setCurrentUser(null);
+    await logout();
     setIsProfileOpen(false);
-    window.location.href = "/";
+    navigate("/");
   };
 
   const toggleMobileMenu = (): void => {
@@ -102,13 +87,11 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky lg:static top-0 z-50 bg-green-700 text-white shadow-lg">
-        {/* Top Bar */}
-        <div className="container mx-auto px-4 py-2">
+      <header className="sticky lg:relative top-0 z-[100] bg-green-700 text-white shadow-lg">
+        <div className="container mx-auto px-4 py-2 w-[90%]">
           <div className="flex items-center justify-between relative">
-            {/* Left Side - Desktop Links & Mobile Menu */}
+            {/* Left Side */}
             <div className="flex items-center">
-              {/* Mobile Menu Button */}
               <button
                 onClick={toggleMobileMenu}
                 className="lg:hidden items-center justify-center"
@@ -134,7 +117,6 @@ const Header: React.FC = () => {
                 )}
               </button>
 
-              {/* Desktop Links */}
               <div className="hidden lg:flex items-center space-x-6">
                 {topLinks.slice(0, 5).map((link) => (
                   <a
@@ -148,9 +130,8 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* Center - Mobile Title & Desktop Date */}
+            {/* Center */}
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-              {/* Mobile Title */}
               <div
                 className="lg:hidden"
                 onClick={() => (window.location.href = "/")}
@@ -159,7 +140,6 @@ const Header: React.FC = () => {
                   The Hillside Echo
                 </span>
               </div>
-              {/* Desktop Date */}
               <div className="hidden lg:block">
                 <span className="text-sm text-white">
                   {new Date().toLocaleDateString("en-US", {
@@ -174,7 +154,16 @@ const Header: React.FC = () => {
 
             {/* Right Side - Auth */}
             <div className="flex items-center relative">
-              {currentUser ? (
+              {/* 2. SKELETON LOADER LOGIC */}
+              {isLoading ? (
+                <div className="flex items-center space-x-2 animate-pulse">
+                  {/* Name Placeholder */}
+                  <div className="h-4 w-24 bg-green-500/50 rounded"></div>
+                  {/* Icon Placeholder */}
+                  <div className="h-5 w-5 bg-green-500/50 rounded-full"></div>
+                </div>
+              ) : user ? (
+                // LOGGED IN VIEW
                 <div className="relative" ref={profileRef}>
                   <a
                     href="#"
@@ -184,21 +173,34 @@ const Header: React.FC = () => {
                     }}
                     className="flex items-center space-x-2 text-sm text-green-200 hover:text-white transition-colors duration-200"
                   >
+                    <span className="hidden md:inline">{user.name}</span>
                     <FaUserCircle size={18} />
                   </a>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white text-green-800 rounded-md shadow-lg border border-green-200 z-50">
-                      <div className="px-4 py-3 text-sm border-b border-green-100">
-                        {currentUser.name || currentUser.email}
+                    <div className="absolute right-0 mt-2 w-48 bg-white text-green-800 rounded-md shadow-lg border border-green-200 z-[101]">
+                      <div className="px-4 py-3 text-sm border-b border-green-100 font-semibold">
+                        {user.name || user.email}
                       </div>
+
+                      {user.role === "admin" && (
+                        <NavLink
+                          to="/admin"
+                          className="block px-4 py-2 text-sm hover:bg-green-50"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Admin Dashboard
+                        </NavLink>
+                      )}
+
+                      <div className="border-t border-green-100"></div>
                       <a
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
                           handleLogout();
                         }}
-                        className="block px-4 py-2 text-sm hover:bg-green-50"
+                        className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium"
                       >
                         Logout
                       </a>
@@ -206,6 +208,7 @@ const Header: React.FC = () => {
                   )}
                 </div>
               ) : (
+                // GUEST VIEW
                 <a
                   href="#"
                   onClick={(e) => {
@@ -221,11 +224,9 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-green-700">
               <div className="flex flex-col space-y-3 pt-4">
-                {/* Navigation Links */}
                 {navLinks.map((link) => (
                   <NavLink
                     key={link.id}
@@ -240,11 +241,7 @@ const Header: React.FC = () => {
                     {link.label}
                   </NavLink>
                 ))}
-
-                {/* Separator */}
                 <div className="border-t border-green-700 my-3"></div>
-
-                {/* Top Links */}
                 {topLinks.map((link) => (
                   <a
                     key={link.id}

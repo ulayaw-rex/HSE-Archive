@@ -124,7 +124,7 @@ const Navbar: React.FC = () => {
 
       {/* Navigation Bar - ADDED sticky classes */}
       <div className="hidden lg:block sticky top-0 z-50 bg-green-700 text-white shadow-lg">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-4 py-3 w-[90%]">
           <div className="flex items-center justify-between">
             {/* Desktop Navigation - Centered */}
             <nav className="flex items-center flex-1">

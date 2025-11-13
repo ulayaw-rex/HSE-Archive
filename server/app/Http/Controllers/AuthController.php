@@ -58,23 +58,38 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-
         return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
+            'isLoggedIn' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
         ]);
     }
 
     public function logout(Request $request): JsonResponse
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(['message' => 'Logged out']);
+        try {
+            // 1. Standard Logout
+            Auth::guard('web')->logout();
+    
+            // 2. Kill the session completely
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            // 3. Manually force the cookie to expire immediately
+            $cookie = cookie('laravel_session', '', -1);
+            
+            return response()
+                ->json(['message' => 'Logged out'])
+                ->withCookie($cookie);
+                
+        } catch (\Exception $e) {
+            // Even if it fails, return 200 so the frontend knows to proceed
+            return response()->json(['message' => 'Forced logout'], 200);
+        }
     }
 }
 
