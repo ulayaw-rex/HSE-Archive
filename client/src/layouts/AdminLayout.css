@@ -1,4 +1,3 @@
-/* Default state (inactive) */
 .sidebar .parent-button {
   width: 100%;
   display: flex;
@@ -16,12 +15,10 @@
   border: none !important;
 }
 
-/* Hover */
 .sidebar .parent-button:hover {
   background-color: rgba(22, 163, 74, 0.6) !important; /* bg-green-600/60 */
 }
 
-/* Active (clicked / selected) */
 .sidebar .parent-button.active {
   background-color: #16a34a !important; /* bg-green-600 */
 }

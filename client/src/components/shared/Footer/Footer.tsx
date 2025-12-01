@@ -3,14 +3,12 @@ import { NavLink } from "react-router-dom";
 import { FaFacebook, FaInstagram } from "react-icons/fa";
 import Logo from "../../../assets/LOGO.png";
 
-// Types for footer data
 type NavigationLink = {
   id: string;
   text: string;
   href: string;
 };
 
-// Footer data - matching navbar links
 const leftNavigationLinks: NavigationLink[] = [
   { id: "news", text: "NEWS", href: "/news" },
   { id: "sports", text: "SPORTS", href: "/sports" },
@@ -30,18 +28,14 @@ const rightNavigationLinks: NavigationLink[] = [
 const Footer: React.FC = () => {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle newsletter subscription
     console.log("Newsletter subscription submitted");
   };
 
   return (
     <footer className="bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl">
-      {/* Main Footer Content */}
       <div className="container mx-auto px-6 py-16 w-[90%]">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Left Column - Branding */}
           <div className="flex flex-col items-start space-y-6">
-            {/* 👇 LOGO SECTION UPDATED HERE */}
             <div
               onClick={() => (window.location.href = "/")}
               className="cursor-pointer"
@@ -53,7 +47,6 @@ const Footer: React.FC = () => {
               />
             </div>
 
-            {/* Description */}
             <p className="text-sm text-gray-200 leading-relaxed max-w-sm">
               The Hillside Echo is student publication, bringing you the latest
               news, sports, and opinions from our community. Stay connected with
@@ -61,10 +54,8 @@ const Footer: React.FC = () => {
             </p>
           </div>
 
-          {/* Middle Column - Navigation Links */}
           <div className="flex justify-center lg:justify-start">
             <div className="grid grid-cols-2 gap-x-16 gap-y-3">
-              {/* Left Navigation Column */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">
                   Main Sections
@@ -84,7 +75,6 @@ const Footer: React.FC = () => {
                 ))}
               </div>
 
-              {/* Right Navigation Column */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">
                   Resources
@@ -106,7 +96,6 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column - Newsletter Signup */}
           <div className="flex flex-col space-y-6">
             <div>
               <h4 className="text-lg font-semibold mb-2">Stay Connected</h4>
@@ -137,13 +126,10 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Separator Line */}
       <div className="border-t border-green-700/30 mx-6"></div>
 
-      {/* Bottom Section - Copyright & Social Media */}
       <div className="container mx-auto px-6 py-8 w-[90%]">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-          {/* Copyright */}
           <div className="text-sm text-gray-300 text-center md:text-left">
             <p className="font-medium">
               © 2025 The Hillside Echo All Rights Reserved
@@ -153,7 +139,6 @@ const Footer: React.FC = () => {
             </p>
           </div>
 
-          {/* Social Media Icons */}
           <div className="flex space-x-6">
             <a
               href={"https://www.facebook.com/thehillsidecho"}

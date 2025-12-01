@@ -14,9 +14,7 @@ const NewsPage: React.FC = () => {
   >({});
 
   useEffect(() => {
-    // Function to fetch all publications data
     const fetchPublicationsData = () => {
-      // Fetch latest publication as featured article
       AxiosInstance.get<Publication[]>("/publications")
         .then((res) => {
           if (res.data.length > 0) {
@@ -27,7 +25,6 @@ const NewsPage: React.FC = () => {
           console.error("Failed to fetch featured article", err);
         });
 
-      // Fetch recent articles for each category
       categories.forEach((category) => {
         AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
           .then((res) => {
@@ -45,19 +42,15 @@ const NewsPage: React.FC = () => {
       });
     };
 
-    // Initial fetch
     fetchPublicationsData();
 
-    // Listen for publicationCreated event to refresh immediately
     const handlePublicationCreated = () => {
       fetchPublicationsData();
     };
     window.addEventListener("publicationCreated", handlePublicationCreated);
 
-    // Set interval to refresh data every 30 seconds
     const intervalId = setInterval(fetchPublicationsData, 30000);
 
-    // Cleanup on unmount
     return () => {
       clearInterval(intervalId);
       window.removeEventListener(

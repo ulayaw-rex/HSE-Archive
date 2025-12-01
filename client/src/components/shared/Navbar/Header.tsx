@@ -89,7 +89,6 @@ const Header: React.FC = () => {
       <header className="sticky lg:relative top-0 z-[100] bg-green-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-2 w-[90%]">
           <div className="flex items-center justify-between relative">
-            {/* Left Side */}
             <div className="flex items-center">
               <button
                 onClick={toggleMobileMenu}
@@ -129,7 +128,6 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* Center */}
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
               <div
                 className="lg:hidden"
@@ -151,7 +149,6 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side - Auth */}
             <div className="flex items-center relative">
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
@@ -159,7 +156,6 @@ const Header: React.FC = () => {
                   <div className="h-5 w-5 bg-green-500/50 rounded-full"></div>
                 </div>
               ) : user ? (
-                // LOGGED IN VIEW
                 <div className="relative" ref={profileRef}>
                   <a
                     href="#"
@@ -175,17 +171,14 @@ const Header: React.FC = () => {
 
                   {isProfileOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-green-200 z-[101]">
-                      {/* User Info */}
                       <div className="px-4 py-3 text-sm border-b border-green-100 font-semibold !text-green-900">
                         {user.name || user.email}
                       </div>
 
-                      {/* Admin Dashboard Link */}
                       {user.role === "admin" && (
                         <NavLink
                           to="/admin"
                           onClick={() => setIsProfileOpen(false)}
-                          // FIX: Added !text-gray-700 to force dark color over header's white text
                           className="block px-4 py-2 text-sm !text-gray-700 hover:!bg-green-50 hover:!text-green-700 transition-colors"
                         >
                           Admin Dashboard
@@ -194,14 +187,12 @@ const Header: React.FC = () => {
 
                       <div className="border-t border-green-100"></div>
 
-                      {/* Logout Link */}
                       <a
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
                           handleLogout();
                         }}
-                        // FIX: Added !text-red-600 to force red color
                         className="block px-4 py-2 text-sm !text-red-600 hover:!bg-red-50 font-medium transition-colors"
                       >
                         Logout
@@ -210,7 +201,6 @@ const Header: React.FC = () => {
                   )}
                 </div>
               ) : (
-                // GUEST VIEW
                 <a
                   href="#"
                   onClick={(e) => {

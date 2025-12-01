@@ -1,6 +1,5 @@
-import React from 'react';
+import React from "react";
 
-// A newspaper icon that matches the theme of "The Hillside Echo".
 const NewspaperIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
     {...props}
@@ -23,7 +22,6 @@ const NewspaperIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-
 /**
  * A 404 Not Found component for your React application.
  * It's styled with Tailwind CSS to match the green, clean theme of the main site.
@@ -33,13 +31,16 @@ const NotFoundPage: React.FC = () => {
     <div className="bg-gray-50 flex items-center justify-center min-h-screen text-gray-800 font-sans">
       <div className="text-center p-8 bg-white rounded-lg shadow-xl max-w-md w-full mx-4 border-t-8 border-green-800">
         <header className="mb-6">
-           <NewspaperIcon className="w-24 h-24 mx-auto text-green-700"/>
+          <NewspaperIcon className="w-24 h-24 mx-auto text-green-700" />
           <h1 className="text-8xl font-extrabold text-green-800 mt-4">404</h1>
-          <h2 className="text-2xl font-semibold text-gray-800 mt-2">Page Not Found</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mt-2">
+            Page Not Found
+          </h2>
         </header>
         <main>
           <p className="text-gray-600 mb-8">
-            Sorry, the page you are looking for does not exist or has been moved.
+            Sorry, the page you are looking for does not exist or has been
+            moved.
           </p>
           <a
             href="/"
@@ -54,4 +55,3 @@ const NotFoundPage: React.FC = () => {
 };
 
 export default NotFoundPage;
-

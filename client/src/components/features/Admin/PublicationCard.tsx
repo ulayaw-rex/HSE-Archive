@@ -45,7 +45,6 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
           </div>
         </div>
         <div className="absolute top-2 right-2 flex space-x-2 z-20">
-          {/* Edit Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -70,7 +69,6 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
             </svg>
           </button>
 
-          {/* Delete Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();

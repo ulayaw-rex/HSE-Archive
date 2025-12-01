@@ -6,7 +6,7 @@ import type { Publication } from "../../types/Publication";
 
 const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get("q"); // Get "?q=keyword" from URL
+  const query = searchParams.get("q");
 
   const [results, setResults] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +70,6 @@ const SearchResults: React.FC = () => {
                 className="block bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
               >
                 <div className="flex flex-col md:flex-row gap-6">
-                  {/* Thumbnail (Optional) */}
                   {article.image && (
                     <div className="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-200">
                       <img
@@ -81,7 +80,6 @@ const SearchResults: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Text Content */}
                   <div className="flex-1">
                     <span className="text-xs font-bold text-green-600 uppercase tracking-wider">
                       {article.category}

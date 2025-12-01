@@ -10,24 +10,19 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import type { WeeklyData, CategoryData } from "./DashboardStats"; // Import types
+import type { WeeklyData, CategoryData } from "./DashboardStats";
 
-// 1. Define Props Interface
 interface DashboardChartsProps {
   weeklyData: WeeklyData[];
   categoryData: CategoryData[];
 }
 
-// 2. Accept Props
 export const DashboardCharts: React.FC<DashboardChartsProps> = ({
   weeklyData,
   categoryData,
 }) => {
-  // No loading state here! Parent handles it.
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      {/* Chart 1: Weekly Engagement */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-gray-800 mb-4">
           Weekly Engagement
@@ -81,7 +76,6 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
         </div>
       </div>
 
-      {/* Chart 2: Categories */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-gray-800 mb-4">
           Content Distribution

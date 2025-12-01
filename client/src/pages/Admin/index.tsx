@@ -6,7 +6,7 @@ import AxiosInstance from "../../AxiosInstance";
 import { DashboardCharts } from "../../components/features/Admin/DashboardCharts";
 import { MostViewedChart } from "../../components/features/Admin/MostViewedCharts";
 import { RecentActivity } from "../../components/features/Admin/RecentActivity";
-import LoadingSpinner from "../../components/common/LoadingSpinner"; // Import your nice spinner
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const response = await AxiosInstance.get("publications/dashboard/stats");
@@ -22,8 +22,6 @@ const AdminPage: React.FC = () => {
 
   const loadDashboardStats = async () => {
     try {
-      // Note: We don't set loading(true) here on refresh intervals,
-      // only on the very first load. This prevents the UI from flickering every 30s.
       if (!dashboardStats) setLoading(true);
 
       setError(null);
@@ -52,7 +50,6 @@ const AdminPage: React.FC = () => {
           </h1>
         </div>
 
-        {/* --- 1. SINGLE LOADING STATE --- */}
         {loading ? (
           <div className="flex h-96 items-center justify-center">
             <div className="text-center">
@@ -68,23 +65,19 @@ const AdminPage: React.FC = () => {
           </div>
         ) : dashboardStats ? (
           <>
-            {/* 1. STATS CARDS */}
             <div className="mb-8">
               <DashboardStatsCards stats={dashboardStats} />
             </div>
 
             <div className="space-y-6">
-              {/* 2. BIG CHARTS (Pass data via props) */}
               <DashboardCharts
                 weeklyData={dashboardStats.weeklyEngagement}
                 categoryData={dashboardStats.articlesByCategory}
               />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* 3. DONUT CHART (Pass data via props) */}
                 <MostViewedChart data={dashboardStats.mostViewed} />
 
-                {/* 4. ACTIVITY FEED (Pass data via props) */}
                 <RecentActivity
                   uploads={dashboardStats.activityUploads}
                   comments={dashboardStats.activityComments}

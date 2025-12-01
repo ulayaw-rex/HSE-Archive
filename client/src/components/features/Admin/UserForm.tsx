@@ -76,7 +76,6 @@ const UserForm: React.FC<UserFormProps> = ({
       }
     }
 
-    // Confirm password rules: required on create; required on edit only if password is being changed
     const shouldRequireConfirm = !isEditing || isPasswordProvided;
     if (shouldRequireConfirm && !confirmPassword.trim()) {
       newErrors.confirmPassword = "Please confirm the password";
@@ -119,7 +118,6 @@ const UserForm: React.FC<UserFormProps> = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }

@@ -17,7 +17,6 @@ const PublicationsPage: React.FC = () => {
   const [publicationToDelete, setPublicationToDelete] =
     useState<Publication | null>(null);
   const [loading, setLoading] = useState(true);
-  // 1. Add a new state to track the deletion process
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -36,7 +35,6 @@ const PublicationsPage: React.FC = () => {
   };
 
   const handleCreate = async (data: CreatePublicationData) => {
-    // ... (handleCreate function remains the same)
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -66,7 +64,6 @@ const PublicationsPage: React.FC = () => {
   };
 
   const handleUpdate = async (data: CreatePublicationData) => {
-    // ... (handleUpdate function remains the same)
     if (!publicationToEdit) return;
     try {
       const formData = new FormData();
@@ -110,7 +107,6 @@ const PublicationsPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  // 2. Update the handleDelete function to manage the loading state
   const handleDelete = async () => {
     if (!publicationToDelete) return;
 

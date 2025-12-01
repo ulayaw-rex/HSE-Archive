@@ -23,7 +23,6 @@ const UserManagement: React.FC = () => {
       console.error("Error fetching users:", err);
       console.error("Error details:", err.response?.data);
       console.error("Error status:", err.response?.status);
-      // Don't show error to user, just log it
     } finally {
       setLoading(false);
     }

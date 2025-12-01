@@ -16,18 +16,14 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
 
   return (
     <>
-      {/* Blurred backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center"
         onClick={onClose}
       >
-        {/* Modal content (clicks here won’t close modal) */}
         <div
           className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-full overflow-y-auto relative z-50"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Remove the close button entirely */}
-
           <div className="p-6">
             <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-gray-300 text-gray-700 uppercase">
               {publication.category}

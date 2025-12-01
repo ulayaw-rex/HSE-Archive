@@ -192,7 +192,6 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 htmlFor="upload-file"
                 className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
               >
-                {/* SVG for upload file */}
                 <span>{file ? file.name : "Upload file"}</span>
                 <input
                   id="upload-file"
@@ -207,7 +206,6 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 htmlFor="upload-thumbnail"
                 className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
               >
-                {/* SVG for upload thumbnail */}
                 <span>{thumbnail ? thumbnail.name : "Upload thumbnail"}</span>
                 <input
                   id="upload-thumbnail"

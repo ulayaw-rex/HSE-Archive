@@ -18,8 +18,6 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
 }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // Use proxy from vite.config.ts
-
   const thumbnailUrl = printMedia.thumbnail_path
     ? `/api/print-media/file/${printMedia.thumbnail_path}`
     : null;
@@ -58,7 +56,6 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
           style={{ minHeight: "250px" }}
           onClick={handleCardClick}
         >
-          {/* Background Image */}
           {thumbnailUrl && (
             <img
               src={thumbnailUrl}
@@ -67,15 +64,11 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
             />
           )}
 
-          {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
 
-          {/* Content Overlay */}
           <div className="relative p-4 flex flex-col h-full text-white">
-            {/* This empty div pushes the content to the bottom */}
             <div className="flex-grow"></div>
 
-            {/* All text content is now grouped at the bottom */}
             <div>
               <span className="inline-block bg-black text-white text-xs font-semibold uppercase rounded-full px-3 py-1 mb-2">
                 {printMedia.type}
@@ -90,7 +83,6 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
           <button
             onClick={handleEditClick}

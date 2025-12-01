@@ -71,8 +71,6 @@ const Navbar: React.FC = () => {
     }
   };
 
-  // --- IMPROVED DROPDOWN LOGIC ---
-  // We handle Enter/Leave on the PARENT container to prevent flickering
   const handleMouseEnter = (linkId: string) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -96,7 +94,6 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Main Header */}
       <div className="hidden lg:block bg-green-800 border-b border-green-200 shadow-md">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-center relative">
@@ -114,18 +111,15 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation Bar */}
       <div className="hidden lg:block sticky top-0 z-50 bg-green-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3 w-[90%]">
           <div className="flex items-center justify-between">
-            {/* Desktop Navigation */}
             <nav className="flex items-center flex-1">
               <div className="flex items-center justify-center space-x-13 w-full">
                 {navLinks.map((link) => (
                   <div
                     key={link.id}
                     className="relative group h-full"
-                    // FIX 1: Events are now on the wrapper div
                     onMouseEnter={() =>
                       link.hasDropdown && handleMouseEnter(link.id)
                     }
@@ -134,16 +128,13 @@ const Navbar: React.FC = () => {
                     <NavLink
                       to={link.href}
                       className={({ isActive }) => {
-                        // FIX 2: Check if this dropdown is open to keep the "Active" style
                         const isDropdownOpen = hoveredDropdown === link.id;
 
                         return `
                           text-white hover:text-green-200 transition-all duration-200 
                           font-semibold text-base uppercase tracking-wider 
                           px-4 py-2 rounded-md flex items-center gap-1 whitespace-nowrap
-                          ${
-                            /* Hover Effect: Active OR Dropdown Open -> Dark Green Background */ ""
-                          }
+                          ${""}
                           ${
                             isActive || isDropdownOpen
                               ? "bg-green-800 text-green-100 shadow-inner"
@@ -162,10 +153,8 @@ const Navbar: React.FC = () => {
                       )}
                     </NavLink>
 
-                    {/* --- DROPDOWN MENU --- */}
                     {link.hasDropdown && hoveredDropdown === link.id && (
                       <div className="absolute top-full left-0 pt-2 w-56 z-50">
-                        {/* The white box */}
                         <div className="w-full bg-white border border-green-600 rounded-lg shadow-xl overflow-hidden animate-fadeIn">
                           <div className="py-1">
                             {link.dropdownItems?.map((item) => (
@@ -193,7 +182,6 @@ const Navbar: React.FC = () => {
               </div>
             </nav>
 
-            {/* Search Bar */}
             <div className="flex items-center ml-4">
               <form onSubmit={handleSearch} className="relative group">
                 <div className="relative flex items-center">

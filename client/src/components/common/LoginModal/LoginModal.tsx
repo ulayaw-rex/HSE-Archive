@@ -4,7 +4,6 @@ import AxiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import LoginArt from "../../../assets/Login.png";
 
-// 1. IMPORT THE AUTH HOOK
 import { useAuth } from "../../../context/AuthContext";
 
 interface LoginModalProps {
@@ -15,7 +14,6 @@ interface LoginModalProps {
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
-  // 2. GET THE CHECKAUTH FUNCTION
   const { checkAuth } = useAuth();
 
   const [credentials, setCredentials] = useState({
@@ -31,7 +29,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      // First, hit Sanctum's CSRF endpoint
       await AxiosInstance.get(
         `${
           import.meta.env.VITE_API_URL || "http://localhost:8000"
@@ -39,7 +36,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         { withCredentials: true }
       );
 
-      // Manually attach XSRF header (Your existing logic)
       const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
       const xsrfToken = xsrfMatch
         ? decodeURIComponent(xsrfMatch[1])
@@ -57,10 +53,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         }
       );
 
-      // Call checkAuth to update the Global State immediately
       await checkAuth();
 
-      // Now React knows who you are, so we can close and navigate
       onClose();
 
       if (data?.redirect) {

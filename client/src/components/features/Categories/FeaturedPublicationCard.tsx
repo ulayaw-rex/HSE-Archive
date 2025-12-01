@@ -14,7 +14,6 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
       to={`/news/${publication.publication_id}`}
       className="featured-publication-card block relative h-[500px] w-full overflow-hidden rounded-lg"
     >
-      {/* Image with gradient overlay */}
       <div className="absolute inset-0">
         <img
           src={publication.image || "/placeholder-image.jpg"}
@@ -24,7 +23,6 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/50 to-transparent" />
       </div>
 
-      {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-6">
         <h2 className="text-3xl font-bold text-white mb-3">
           {publication.title}

@@ -16,7 +16,6 @@ const categories = [
 ];
 
 const HomePage: React.FC = () => {
-  // Simulated user role: 'guest' or 'admin'
   const [userRole] = useState<"guest" | "admin">("guest");
 
   const [featuredArticles, setFeaturedArticles] = useState<Publication[]>([]);
@@ -25,7 +24,6 @@ const HomePage: React.FC = () => {
   >({});
 
   useEffect(() => {
-    // Function to fetch all publications data
     const fetchPublicationsData = () => {
       // Fetch latest 3 publications for featured carousel
       AxiosInstance.get<Publication[]>("/publications")
@@ -54,10 +52,8 @@ const HomePage: React.FC = () => {
       });
     };
 
-    // Initial fetch
     fetchPublicationsData();
 
-    // Listen for publicationCreated event to refresh immediately
     const handlePublicationCreated = () => {
       fetchPublicationsData();
     };
@@ -66,7 +62,6 @@ const HomePage: React.FC = () => {
     // Set interval to refresh data every 30 seconds
     const intervalId = setInterval(fetchPublicationsData, 30000);
 
-    // Cleanup on unmount
     return () => {
       clearInterval(intervalId);
       window.removeEventListener(
@@ -78,14 +73,11 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Featured Carousel is NOW OUTSIDE the container, making it full-width */}
       {featuredArticles.length > 0 && (
         <FeaturedCarousel articles={featuredArticles} />
       )}
 
-      {/* This container now only holds the category sections */}
       <div className="w-[90%] mx-auto px-4">
-        {/* Category Sections */}
         {categories.map((category) => (
           <section key={category} className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 pb-2 border-b-2 border-green-600 capitalize">

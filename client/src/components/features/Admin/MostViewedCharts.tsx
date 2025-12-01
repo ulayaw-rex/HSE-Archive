@@ -11,12 +11,10 @@ import type { MostViewedData } from "./DashboardStats";
 
 const COLORS = ["#14532d", "#166534", "#15803d", "#22c55e", "#dcfce7"];
 
-// 1. Define Props
 interface MostViewedChartProps {
   data: MostViewedData[];
 }
 
-// 2. Accept Props
 export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
   const getDateRange = () => {
     const end = new Date();

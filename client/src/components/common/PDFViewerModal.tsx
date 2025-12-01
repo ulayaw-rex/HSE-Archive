@@ -3,7 +3,6 @@ import { Dialog } from "@headlessui/react";
 import type { PrintMedia } from "../../types/PrintMedia";
 import { Document, Page, pdfjs } from "react-pdf";
 
-// Set up PDF.js worker with matching version
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
   import.meta.url
@@ -34,10 +33,8 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
 
   if (!printMedia) return null;
 
-  // Use the proxy from vite.config.ts instead of direct API URL
   const fullPdfUrl = `/api/print-media/file/${printMedia.file_path}`;
 
-  // Debug logging (can be removed in production)
   console.log("PDF Modal - File path:", printMedia.file_path);
   console.log("PDF Modal - Full URL:", fullPdfUrl);
 

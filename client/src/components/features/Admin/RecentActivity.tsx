@@ -7,12 +7,11 @@ import {
   FaClock,
 } from "react-icons/fa";
 
-// --- Types ---
 export interface ActivityItem {
   id: string;
   type: "article" | "printmedia" | "comment" | "user";
   message: string;
-  subtext?: string; // For comment body or user name
+  subtext?: string;
   time: string;
 }
 
@@ -31,7 +30,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>("uploads");
 
-  // Helper: Get the correct list based on the active tab
   const getCurrentList = () => {
     switch (activeTab) {
       case "uploads":
@@ -45,7 +43,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
     }
   };
 
-  // Helper: Get Icon and Color based on activity type
   const getIconConfig = (type: string) => {
     switch (type) {
       case "article":
@@ -65,11 +62,9 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full flex flex-col min-h-[400px]">
-      {/* --- HEADER & TABS --- */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h3 className="text-lg font-bold text-gray-800">Recent Activity</h3>
 
-        {/* Tab Buttons */}
         <div className="flex bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab("uploads")}
@@ -104,7 +99,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         </div>
       </div>
 
-      {/* --- CONTENT LIST --- */}
       <div
         className="flex-1 overflow-y-auto pr-2 custom-scrollbar"
         style={{ maxHeight: "350px" }}
@@ -121,14 +115,12 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 
               return (
                 <li key={item.id} className="relative flex gap-4 group">
-                  {/* Icon Bubble */}
                   <div
                     className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${color} ring-4 ring-white`}
                   >
                     {icon}
                   </div>
 
-                  {/* Text Content */}
                   <div className="flex-1 min-w-0 pt-1">
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {item.message}
@@ -140,7 +132,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                     )}
                   </div>
 
-                  {/* Time */}
                   <div className="text-xs text-gray-400 whitespace-nowrap pt-1.5">
                     {item.time}
                   </div>

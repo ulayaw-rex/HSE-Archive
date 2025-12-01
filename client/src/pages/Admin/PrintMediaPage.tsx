@@ -18,7 +18,6 @@ const PrintMediaPage: React.FC = () => {
   const [selectedPrintMedia, setSelectedPrintMedia] =
     useState<PrintMedia | null>(null);
   const [loading, setLoading] = useState(true);
-  // 1. Add a new state to track the deletion process
   const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchPrintMedia = useCallback(async () => {
@@ -94,7 +93,6 @@ const PrintMediaPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  // 2. Update the confirmDelete function to manage the loading state
   const confirmDelete = useCallback(async () => {
     if (!printMediaToDelete) return;
 

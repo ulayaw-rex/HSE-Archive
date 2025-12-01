@@ -60,7 +60,6 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     setLoading(true);
     try {
       await onSubmit({ ...formData, image });
-      // Reset form to initial state after successful submission
       setFormData({
         title: "",
         byline: "",

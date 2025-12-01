@@ -27,7 +27,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, items }) => {
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">{title}</h2>
 
-        {/* Featured Card */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
           {featured.imageUrl && (
             <a href={featured.href || "#"}>
@@ -53,7 +52,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, items }) => {
           </div>
         </div>
 
-        {/* Two-column grid with up to 3 cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {others.map((item) => (
             <div
@@ -79,7 +77,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, items }) => {
                   <p className="text-sm text-gray-500 mt-1">{item.date}</p>
                 )}
                 {item.excerpt && (
-                  <p className="text-gray-700 mt-2 line-clamp-3">{item.excerpt}</p>
+                  <p className="text-gray-700 mt-2 line-clamp-3">
+                    {item.excerpt}
+                  </p>
                 )}
               </div>
             </div>
@@ -91,6 +91,3 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, items }) => {
 };
 
 export default CategorySection;
-
-
-

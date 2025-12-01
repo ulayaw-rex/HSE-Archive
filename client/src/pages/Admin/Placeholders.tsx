@@ -1,4 +1,3 @@
-// pages/Admin/Placeholders.tsx
 export const ContentArchivesPage = () => (
   <div className="p-6">
     <h1 className="text-2xl font-bold mb-4">Archives</h1>

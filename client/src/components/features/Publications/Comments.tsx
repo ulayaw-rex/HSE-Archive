@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Removed useEffect
+import React, { useState } from "react";
 import axios from "../../../AxiosInstance";
 import { useAuth } from "../../../context/AuthContext";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
@@ -17,7 +17,6 @@ interface CommentAuthor {
   name: string;
 }
 
-// Export this interface so the Parent can use it
 export interface Comment {
   id: number;
   body: string;
@@ -25,7 +24,6 @@ export interface Comment {
   created_at: string;
 }
 
-// UPDATE PROPS: Accept comments and setComments from parent
 interface CommentsProps {
   publicationId: number;
   comments: Comment[];
@@ -40,23 +38,15 @@ export function Comments({
   const { user } = useAuth();
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  // Removed local 'comments' state (now using props)
 
-  // Editing State
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
 
-  // Delete Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [newComment, setNewComment] = useState("");
-
-  // REMOVED: useEffect for fetching (Parent does this now)
-  // REMOVED: loading state (Parent handles the main loading)
-
-  // --- HANDLERS ---
 
   const handleGuestClick = () => {
     toast.error(
@@ -78,7 +68,6 @@ export function Comments({
         `/publications/${publicationId}/comments`,
         { body: newComment }
       );
-      // Update parent state
       setComments([response.data, ...comments]);
       setNewComment("");
       toast.success("Comment posted!");
@@ -87,7 +76,6 @@ export function Comments({
     }
   };
 
-  // Edit Logic
   const startEditing = (comment: Comment) => {
     setEditingId(comment.id);
     setEditText(comment.body);
@@ -102,7 +90,6 @@ export function Comments({
     if (editText.trim() === "") return;
 
     try {
-      // Optimistic Update
       const updatedList = comments.map((c) =>
         c.id === id ? { ...c, body: editText } : c
       );
@@ -116,7 +103,6 @@ export function Comments({
     }
   };
 
-  // Delete Logic
   const initiateDelete = (id: number) => {
     setCommentToDelete(id);
     setIsDeleteModalOpen(true);
@@ -148,7 +134,6 @@ export function Comments({
         {user ? `Comments (${comments.length})` : "Comments"}
       </h3>
 
-      {/* Form Area */}
       <div className="mb-8 bg-gray-50 p-4 rounded-lg">
         {user ? (
           <form onSubmit={handleSubmit}>
@@ -200,7 +185,6 @@ export function Comments({
         )}
       </div>
 
-      {/* List Area */}
       {user ? (
         <div className="space-y-6">
           {comments.length === 0 ? (
