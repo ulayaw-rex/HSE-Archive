@@ -33,7 +33,6 @@ const topLinks: TopLink[] = [
 ];
 
 const Header: React.FC = () => {
-  // 1. Destructure isLoading from the hook
   const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -154,12 +153,9 @@ const Header: React.FC = () => {
 
             {/* Right Side - Auth */}
             <div className="flex items-center relative">
-              {/* 2. SKELETON LOADER LOGIC */}
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
-                  {/* Name Placeholder */}
                   <div className="h-4 w-24 bg-green-500/50 rounded"></div>
-                  {/* Icon Placeholder */}
                   <div className="h-5 w-5 bg-green-500/50 rounded-full"></div>
                 </div>
               ) : user ? (
@@ -178,29 +174,35 @@ const Header: React.FC = () => {
                   </a>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white text-green-800 rounded-md shadow-lg border border-green-200 z-[101]">
-                      <div className="px-4 py-3 text-sm border-b border-green-100 font-semibold">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-green-200 z-[101]">
+                      {/* User Info */}
+                      <div className="px-4 py-3 text-sm border-b border-green-100 font-semibold !text-green-900">
                         {user.name || user.email}
                       </div>
 
+                      {/* Admin Dashboard Link */}
                       {user.role === "admin" && (
                         <NavLink
                           to="/admin"
-                          className="block px-4 py-2 text-sm hover:bg-green-50"
                           onClick={() => setIsProfileOpen(false)}
+                          // FIX: Added !text-gray-700 to force dark color over header's white text
+                          className="block px-4 py-2 text-sm !text-gray-700 hover:!bg-green-50 hover:!text-green-700 transition-colors"
                         >
                           Admin Dashboard
                         </NavLink>
                       )}
 
                       <div className="border-t border-green-100"></div>
+
+                      {/* Logout Link */}
                       <a
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
                           handleLogout();
                         }}
-                        className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium"
+                        // FIX: Added !text-red-600 to force red color
+                        className="block px-4 py-2 text-sm !text-red-600 hover:!bg-red-50 font-medium transition-colors"
                       >
                         Logout
                       </a>

@@ -22,6 +22,7 @@ class Publication extends Model
         'title',
         'byline',
         'body',
+        'views',
         'category',
         'photo_credits',
         'image_path',
@@ -30,8 +31,6 @@ class Publication extends Model
 
     public function comments(): HasMany
     {
-        // Links this model's 'publication_id' to the
-        // 'publication_id' on the 'Comment' model.
         return $this->hasMany(Comment::class, 'publication_id', 'publication_id');
     }
 }

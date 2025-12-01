@@ -7,44 +7,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany; // <-- ADD THIS LINE
+use Illuminate\Database\Eloquent\Relations\HasMany; 
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    // Role constants
     const ROLE_HILLSIDER = 'hillsider';
     const ROLE_ALUMNI = 'alumni';
     const ROLE_ADMIN = 'admin';
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'users';
 
-    /**
-     * The primary key for the model.
-     *
-     * @var string
-     */
     protected $primaryKey = 'id';
 
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
     public $incrementing = true;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -52,21 +30,11 @@ class User extends Authenticatable
         'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -75,15 +43,8 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get all of the comments for the user.
-     * THIS IS THE NEW FUNCTION YOU MUST ADD.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function comments(): HasMany
     {
-        // This relationship is standard, so it's simple.
         return $this->hasMany(Comment::class);
     }
 }

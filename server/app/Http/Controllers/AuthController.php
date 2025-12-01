@@ -28,7 +28,6 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        // Ensure role is valid and set a redirect URL based on role
         $validRoles = [User::ROLE_HILLSIDER, User::ROLE_ALUMNI, User::ROLE_ADMIN];
         if (!in_array($user->role, $validRoles, true)) {
             throw ValidationException::withMessages([
@@ -72,14 +71,11 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            // 1. Standard Logout
             Auth::guard('web')->logout();
     
-            // 2. Kill the session completely
             $request->session()->invalidate();
             $request->session()->regenerateToken();
             
-            // 3. Manually force the cookie to expire immediately
             $cookie = cookie('laravel_session', '', -1);
             
             return response()
@@ -87,7 +83,6 @@ class AuthController extends Controller
                 ->withCookie($cookie);
                 
         } catch (\Exception $e) {
-            // Even if it fails, return 200 so the frontend knows to proceed
             return response()->json(['message' => 'Forced logout'], 200);
         }
     }

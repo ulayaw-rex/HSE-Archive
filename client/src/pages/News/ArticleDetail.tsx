@@ -4,15 +4,25 @@ import { FaCalendarAlt, FaFacebookF, FaInstagram } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
-import { Comments } from "../../components/features/Publications/Comments";
+import {
+  Comments,
+  type Comment,
+} from "../../components/features/Publications/Comments"; // Import Comment type
 
 const ArticleDetail: React.FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
+
+  // State for Article
   const [publication, setPublication] = useState<Publication | null>(null);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [idOrSlug]);
+  // State for Comments (Lifted Up)
+  const [comments, setComments] = useState<Comment[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Determine current user once per mount so hook order stays stable across renders
   const currentUser = useMemo(() => {
     try {
       const saved = localStorage.getItem("user");
@@ -25,28 +35,45 @@ const ArticleDetail: React.FC = () => {
   useEffect(() => {
     if (!idOrSlug) return;
 
-    const fetchPublication = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await AxiosInstance.get<Publication>(
-          `/publications/${idOrSlug}`
-        );
-        setPublication(response.data);
+
+        // --- PARALLEL FETCHING START ---
+        // We use Promise.all to fetch both at once
+        const [pubResponse, commentsResponse] = await Promise.all([
+          // 1. Fetch Publication
+          AxiosInstance.get<Publication>(`/publications/${idOrSlug}`),
+
+          // 2. Fetch Comments (We handle error gracefully here if needed)
+          AxiosInstance.get<Comment[]>(
+            `/publications/${idOrSlug}/comments`
+          ).catch(() => ({ data: [] })),
+        ]);
+
+        setPublication(pubResponse.data);
+
+        // If the comments request was mocked or returned data, set it
+        if (Array.isArray(commentsResponse.data)) {
+          setComments(commentsResponse.data);
+        }
+        // --- PARALLEL FETCHING END ---
       } catch (err) {
-        console.error("Failed to fetch publication:", err);
+        console.error("Failed to fetch data:", err);
         setError("Failed to load article.");
       } finally {
+        // Only stops loading when BOTH are done
         setLoading(false);
       }
     };
 
-    fetchPublication();
+    fetchData();
   }, [idOrSlug]);
 
   if (loading) {
     return (
-      <div className="p-8 text-center">
+      <div className="p-8 text-center h-screen flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -98,7 +125,6 @@ const ArticleDetail: React.FC = () => {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    // Placeholder action; wire to your attribute editor when available
                     window.dispatchEvent(
                       new CustomEvent("open-attribute-editor", {
                         detail: { publicationId: publication.publication_id },
@@ -136,8 +162,12 @@ const ArticleDetail: React.FC = () => {
             ))}
           </article>
 
-          {/* Comments Section */}
-          <Comments publicationId={publication.publication_id} />
+          {/* Pass data down to Comments */}
+          <Comments
+            publicationId={publication.publication_id}
+            comments={comments}
+            setComments={setComments}
+          />
         </div>
 
         {/* Sidebar with social media icons */}

@@ -20,6 +20,7 @@ import EditorialBoardPage from "../pages/About/EditorialBoard";
 import FAQsPage from "../pages/About/FAQs";
 import ContactPage from "../pages/About/Contact";
 import ArticleDetail from "../pages/News/ArticleDetail";
+import SearchResults from "../pages/HomePage/SearchResults";
 
 export default (
   <>
@@ -43,5 +44,6 @@ export default (
     <Route path="/about/editorial-board" element={<EditorialBoardPage />} />
     <Route path="/about/faqs" element={<FAQsPage />} />
     <Route path="/about/contact" element={<ContactPage />} />
+    <Route path="/search" element={<SearchResults />} />
   </>
 );

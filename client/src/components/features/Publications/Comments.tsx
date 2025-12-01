@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react"; // Removed useEffect
 import axios from "../../../AxiosInstance";
 import { useAuth } from "../../../context/AuthContext";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
-import LoadingSpinner from "../../common/LoadingSpinner";
 import { toast } from "react-toastify";
 import {
   FaUserCircle,
@@ -11,9 +10,6 @@ import {
   FaCheck,
   FaTimes,
 } from "react-icons/fa";
-
-// 1. IMPORT YOUR EXISTING MODAL
-// (Adjust the path to where your file is located)
 import ConfirmationModal from "../../common/ConfirmationModal";
 
 interface CommentAuthor {
@@ -21,52 +17,44 @@ interface CommentAuthor {
   name: string;
 }
 
-interface Comment {
+// Export this interface so the Parent can use it
+export interface Comment {
   id: number;
   body: string;
   user: CommentAuthor;
   created_at: string;
 }
 
+// UPDATE PROPS: Accept comments and setComments from parent
 interface CommentsProps {
   publicationId: number;
+  comments: Comment[];
+  setComments: React.Dispatch<React.SetStateAction<Comment[]>>;
 }
 
-export function Comments({ publicationId }: CommentsProps) {
+export function Comments({
+  publicationId,
+  comments,
+  setComments,
+}: CommentsProps) {
   const { user } = useAuth();
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  // Removed local 'comments' state (now using props)
 
   // Editing State
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
 
-  // --- 2. DELETE MODAL STATE ---
+  // Delete Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [newComment, setNewComment] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  // --- FETCH COMMENTS ---
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `/publications/${publicationId}/comments`
-        );
-        setComments(response.data);
-      } catch (err) {
-        setComments([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchComments();
-  }, [publicationId, user]);
+  // REMOVED: useEffect for fetching (Parent does this now)
+  // REMOVED: loading state (Parent handles the main loading)
 
   // --- HANDLERS ---
 
@@ -90,6 +78,7 @@ export function Comments({ publicationId }: CommentsProps) {
         `/publications/${publicationId}/comments`,
         { body: newComment }
       );
+      // Update parent state
       setComments([response.data, ...comments]);
       setNewComment("");
       toast.success("Comment posted!");
@@ -113,6 +102,7 @@ export function Comments({ publicationId }: CommentsProps) {
     if (editText.trim() === "") return;
 
     try {
+      // Optimistic Update
       const updatedList = comments.map((c) =>
         c.id === id ? { ...c, body: editText } : c
       );
@@ -126,28 +116,23 @@ export function Comments({ publicationId }: CommentsProps) {
     }
   };
 
-  // --- 3. DELETE LOGIC (SPLIT IN TWO) ---
-
-  // Part A: User clicks trash icon -> Open Modal
+  // Delete Logic
   const initiateDelete = (id: number) => {
     setCommentToDelete(id);
     setIsDeleteModalOpen(true);
   };
 
-  // Part B: User confirms in Modal -> Call API
   const confirmDelete = async () => {
     if (commentToDelete === null) return;
 
     setIsDeleting(true);
     try {
-      // Optimistic UI update
       const filteredList = comments.filter((c) => c.id !== commentToDelete);
       setComments(filteredList);
 
       await axios.delete(`/comments/${commentToDelete}`);
       toast.success("Comment deleted");
 
-      // Close modal
       setIsDeleteModalOpen(false);
       setCommentToDelete(null);
     } catch (error) {
@@ -157,20 +142,13 @@ export function Comments({ publicationId }: CommentsProps) {
     }
   };
 
-  if (loading)
-    return (
-      <div className="mt-8">
-        <LoadingSpinner />
-      </div>
-    );
-
   return (
     <section className="comments-section mt-8 border-t border-gray-200 pt-6">
       <h3 className="text-xl font-bold text-green-800 mb-6">
         {user ? `Comments (${comments.length})` : "Comments"}
       </h3>
 
-      {/* --- FORM --- */}
+      {/* Form Area */}
       <div className="mb-8 bg-gray-50 p-4 rounded-lg">
         {user ? (
           <form onSubmit={handleSubmit}>
@@ -222,7 +200,7 @@ export function Comments({ publicationId }: CommentsProps) {
         )}
       </div>
 
-      {/* --- LIST --- */}
+      {/* List Area */}
       {user ? (
         <div className="space-y-6">
           {comments.length === 0 ? (
@@ -259,7 +237,6 @@ export function Comments({ publicationId }: CommentsProps) {
                                 <FaEdit size={14} />
                               </button>
                               <button
-                                // UPDATE: Call initiateDelete instead of deleteComment
                                 onClick={() => initiateDelete(comment.id)}
                                 className="text-gray-400 hover:text-red-600 transition-colors"
                                 title="Delete"
@@ -319,7 +296,6 @@ export function Comments({ publicationId }: CommentsProps) {
         onClose={() => setIsLoginModalOpen(false)}
       />
 
-      {/* 4. ADD YOUR CUSTOM CONFIRMATION MODAL HERE */}
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

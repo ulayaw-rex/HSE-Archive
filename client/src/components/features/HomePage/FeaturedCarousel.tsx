@@ -1,5 +1,6 @@
 import React from "react";
 import Slider from "react-slick";
+import { Link } from "react-router-dom";
 import type { Publication } from "../../../types/Publication";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -21,22 +22,22 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
   };
 
   return (
-    // Use overflow-hidden to contain the slider, add vertical margins
-    // --- EDITED: Removed "mt-8" to close the gap above ---
     <div className="mb-12 relative overflow-hidden">
       <Slider {...settings}>
         {articles.map((article) => (
           <div key={article.publication_id}>
-            <div className="relative h-[70vh] w-full">
+            <Link
+              to={`/news/${article.publication_id}`}
+              className="block relative h-[70vh] w-full cursor-pointer group overflow-hidden"
+            >
               <img
                 src={article.image || "/placeholder-image.jpg"}
                 alt={article.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/50 to-transparent">
-                {/* This w-[90%] container holds both the badge and the text for alignment */}
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
                 <div className="w-[90%] mx-auto px-4 h-full relative">
-                  {/* Featured Badge is now inside the 90% container */}
                   <div className="absolute top-4 left-4 z-10 bg-green-600 text-white px-6 py-2 rounded-full shadow-lg flex items-center space-x-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +50,6 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                     <span className="font-bold text-lg">Featured</span>
                   </div>
 
-                  {/* Text content section, aligned to the bottom */}
                   <div className="h-full flex items-end pb-16">
                     <div className="max-w-3xl">
                       <div className="mb-4">
@@ -57,7 +57,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                           {article.category}
                         </span>
                       </div>
-                      <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                      <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
                         {article.title}
                       </h2>
                       <p className="text-gray-200 text-lg mb-4 line-clamp-2">
@@ -74,7 +74,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </Slider>

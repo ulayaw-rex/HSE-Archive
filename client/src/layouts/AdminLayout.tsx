@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
 import "./AdminLayout.css";
-import type { SidebarItemType } from "../pages/Admin/SidebarItems"; // ✅ shared type
+import type { SidebarItemType } from "../pages/Admin/SidebarItems";
 
-// Sidebar item component
 const SidebarItem: React.FC<{ item: SidebarItemType }> = ({ item }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
@@ -13,7 +12,6 @@ const SidebarItem: React.FC<{ item: SidebarItemType }> = ({ item }) => {
   if (hasChildren) {
     return (
       <div>
-        {/* Parent menu button */}
         <div className="sidebar">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -34,7 +32,6 @@ const SidebarItem: React.FC<{ item: SidebarItemType }> = ({ item }) => {
           </button>
         </div>
 
-        {/* Dropdown children */}
         {isOpen && (
           <div className="ml-4 mt-1 space-y-1 border-l border-green-600/40 pl-2">
             {item.children!.map((child, index) => (
@@ -61,7 +58,6 @@ const SidebarItem: React.FC<{ item: SidebarItemType }> = ({ item }) => {
     );
   }
 
-  // Single item (no children)
   return (
     <NavLink
       to={item.to || "#"}
@@ -80,7 +76,6 @@ const SidebarItem: React.FC<{ item: SidebarItemType }> = ({ item }) => {
   );
 };
 
-// Admin layout wrapper
 const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
   sidebarItems,
 }) => {
@@ -94,15 +89,13 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
   };
 
   return (
-    <div className="min-h-screen flex bg-green-50 text-gray-900">
-      {/* Sidebar */}
+    <div className="h-screen flex bg-green-50 text-gray-900 overflow-hidden">
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-green-700 text-white border-r border-green-700 shadow-sm transition-transform duration-200 ease-out md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-green-700 text-white border-r border-green-700 shadow-sm transition-transform duration-200 ease-out flex flex-col md:relative md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Header */}
-        <div className="px-4 py-4 border-b border-green-600 flex items-center justify-between">
+        <div className="px-4 py-4 border-b border-green-600 flex items-center justify-between flex-shrink-0">
           <div>
             <div className="text-lg font-semibold">HSE Admin</div>
             <div className="text-xs opacity-80">Content Management</div>
@@ -124,42 +117,39 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
           </button>
         </div>
 
-        {/* Menu items */}
-        <nav className="p-2 overflow-y-auto h-[calc(100vh-80px)]">
+        <nav className="p-2 flex-1 overflow-y-auto">
           {sidebarItems.map((item, index) => (
             <SidebarItem key={index} item={item} />
           ))}
-
-          {/* Sidebar footer actions */}
-          <div className="mt-4 pt-4 border-t border-green-600/50">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleLogout();
-              }}
-              className="flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-colors hover:bg-green-600/60 text-white"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M15 12H3" />
-                <path d="M12 15l-3-3 3-3" />
-                <path d="M21 4v16a2 2 0 01-2 2H9" />
-              </svg>
-              <span className="text-sm font-medium">Logout</span>
-            </a>
-          </div>
         </nav>
+
+        <div className="p-2 border-t border-green-600/50 flex-shrink-0">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLogout();
+            }}
+            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-green-600/60 text-white"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M15 12H3" />
+              <path d="M12 15l-3-3 3-3" />
+              <path d="M21 4v16a2 2 0 01-2 2H9" />
+            </svg>
+            <span className="text-sm font-medium">Logout</span>
+          </a>
+        </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 md:ml-0">
-        <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
+      <div className="flex-1 flex flex-col min-w-0 md:ml-0 overflow-hidden">
+        <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur flex-shrink-0">
           <div className="px-4 md:px-6 h-14 flex items-center justify-between">
             <button
               className="md:hidden p-2 rounded hover:bg-green-50"
@@ -180,7 +170,7 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="mx-auto max-w-6xl">
             <Outlet />
           </div>

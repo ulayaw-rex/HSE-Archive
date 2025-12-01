@@ -11,9 +11,6 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of users.
-     */
     public function index(): JsonResponse
     {
         $users = User::select('id', 'name', 'email', 'role', 'created_at')
@@ -23,9 +20,7 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    /**
-     * Store a newly created user.
-     */
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -58,9 +53,7 @@ class UserController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified user.
-     */
+
     public function show(User $user): JsonResponse
     {
         return response()->json([
@@ -72,9 +65,7 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified user.
-     */
+
     public function update(Request $request, User $user): JsonResponse
     {
         $validated = $request->validate([
@@ -128,9 +119,7 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified user.
-     */
+
     public function destroy(User $user): JsonResponse
     {
         $user->delete();

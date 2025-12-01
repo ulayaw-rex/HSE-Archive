@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
 import "./navbar.css";
 import Logo from "../../../assets/LOGO.png";
@@ -37,13 +37,9 @@ const navLinks: NavigationLink[] = [
     ],
   },
   { id: "sports", label: "Sports", href: "/sports" },
-  { id: "opinion", label: "opinion", href: "/opinion" },
+  { id: "opinion", label: "Opinion", href: "/opinion" },
   { id: "literary", label: "Literary", href: "/literary" },
-  {
-    id: "print-media",
-    label: "Print Media",
-    href: "/print-media",
-  },
+  { id: "print-media", label: "Print Media", href: "/print-media" },
   {
     id: "about",
     label: "About",
@@ -62,37 +58,34 @@ const navLinks: NavigationLink[] = [
 ];
 
 const Navbar: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
   const handleSearch = (e: React.FormEvent): void => {
     e.preventDefault();
-    // Handle search functionality here
-    console.log("Searching for:", searchQuery);
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
-  const handleDropdownEnter = (linkId: string) => {
+  // --- IMPROVED DROPDOWN LOGIC ---
+  // We handle Enter/Leave on the PARENT container to prevent flickering
+  const handleMouseEnter = (linkId: string) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     setHoveredDropdown(linkId);
   };
 
-  const handleDropdownMenuEnter = (linkId: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setHoveredDropdown(linkId);
-  };
-
-  const handleDropdownMenuLeave = () => {
+  const handleMouseLeave = () => {
     timeoutRef.current = window.setTimeout(() => {
       setHoveredDropdown(null);
-    }, 100); // Shorter delay when leaving dropdown menu
+    }, 150); // Small delay to make it feel smoother
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -103,11 +96,10 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Main Header - REMOVED sticky classes */}
+      {/* Main Header */}
       <div className="hidden lg:block bg-green-800 border-b border-green-200 shadow-md">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-center relative">
-            {/* Centered Logo */}
             <div
               onClick={() => (window.location.href = "/")}
               className="cursor-pointer"
@@ -122,70 +114,76 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation Bar - ADDED sticky classes */}
+      {/* Navigation Bar */}
       <div className="hidden lg:block sticky top-0 z-50 bg-green-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3 w-[90%]">
           <div className="flex items-center justify-between">
-            {/* Desktop Navigation - Centered */}
+            {/* Desktop Navigation */}
             <nav className="flex items-center flex-1">
               <div className="flex items-center justify-center space-x-13 w-full">
                 {navLinks.map((link) => (
                   <div
                     key={link.id}
-                    className="relative group"
+                    className="relative group h-full"
+                    // FIX 1: Events are now on the wrapper div
                     onMouseEnter={() =>
-                      link.hasDropdown && handleDropdownEnter(link.id)
+                      link.hasDropdown && handleMouseEnter(link.id)
                     }
+                    onMouseLeave={handleMouseLeave}
                   >
                     <NavLink
                       to={link.href}
-                      className={({ isActive }) =>
-                        `text-white hover:text-green-200 transition-all duration-200 font-semibold text-base uppercase tracking-wider hover:transform hover:scale-105 px-2 py-2 rounded-md hover:bg-green-700 flex items-center gap-1 whitespace-nowrap ${
-                          isActive ? "bg-green-600 text-green-100" : ""
-                        }`
-                      }
+                      className={({ isActive }) => {
+                        // FIX 2: Check if this dropdown is open to keep the "Active" style
+                        const isDropdownOpen = hoveredDropdown === link.id;
+
+                        return `
+                          text-white hover:text-green-200 transition-all duration-200 
+                          font-semibold text-base uppercase tracking-wider 
+                          px-4 py-2 rounded-md flex items-center gap-1 whitespace-nowrap
+                          ${
+                            /* Hover Effect: Active OR Dropdown Open -> Dark Green Background */ ""
+                          }
+                          ${
+                            isActive || isDropdownOpen
+                              ? "bg-green-800 text-green-100 shadow-inner"
+                              : "hover:bg-green-600"
+                          }
+                        `;
+                      }}
                     >
                       {link.label}
                       {link.hasDropdown && (
-                        <FaChevronDown className="text-xs transition-transform duration-200 group-hover:rotate-180" />
+                        <FaChevronDown
+                          className={`text-xs transition-transform duration-300 ${
+                            hoveredDropdown === link.id ? "rotate-180" : ""
+                          }`}
+                        />
                       )}
                     </NavLink>
 
-                    {/* Professional Dropdown Menu */}
+                    {/* --- DROPDOWN MENU --- */}
                     {link.hasDropdown && hoveredDropdown === link.id && (
-                      <div
-                        className="absolute top-full left-1/2 transform -translate-x-1/2 pt-1 w-56"
-                        onMouseEnter={() => handleDropdownMenuEnter(link.id)}
-                        onMouseLeave={() => handleDropdownMenuLeave()}
-                        style={{ pointerEvents: "auto" }}
-                      >
-                        <div
-                          className="w-full text-black bg-white border border-green-600 rounded-lg shadow-xl z-[60]"
-                          style={{ minWidth: "200px" }}
-                        >
-                          <div className="py-2">
-                            {link.dropdownItems &&
-                            link.dropdownItems.length > 0 ? (
-                              link.dropdownItems.map((item) => (
-                                <NavLink
-                                  key={item.id}
-                                  to={item.href}
-                                  className={({ isActive }) =>
-                                    `block px-4 py-3 text-sm text-gray-700 hover:bg-green-700 hover:text-green-600 transition-colors duration-200 border-b border-gray-100 last:border-b-0 cursor-pointer ${
-                                      isActive
-                                        ? "bg-green-100 text-green-800 font-semibold"
-                                        : ""
-                                    }`
-                                  }
-                                >
-                                  {item.label}
-                                </NavLink>
-                              ))
-                            ) : (
-                              <div className="px-4 py-3 text-sm text-gray-500">
-                                No items available
-                              </div>
-                            )}
+                      <div className="absolute top-full left-0 pt-2 w-56 z-50">
+                        {/* The white box */}
+                        <div className="w-full bg-white border border-green-600 rounded-lg shadow-xl overflow-hidden animate-fadeIn">
+                          <div className="py-1">
+                            {link.dropdownItems?.map((item) => (
+                              <NavLink
+                                key={item.id}
+                                to={item.href}
+                                className={({ isActive }) =>
+                                  `block px-4 py-3 text-sm transition-colors duration-200 border-b border-gray-100 last:border-b-0 cursor-pointer
+                                  ${
+                                    isActive
+                                      ? "!bg-green-100 !text-green-900 font-bold"
+                                      : "!text-gray-700 hover:!bg-green-50 hover:!text-green-800"
+                                  }`
+                                }
+                              >
+                                {item.label}
+                              </NavLink>
+                            ))}
                           </div>
                         </div>
                       </div>
@@ -195,19 +193,42 @@ const Navbar: React.FC = () => {
               </div>
             </nav>
 
-            {/* Search Bar - Right Side */}
+            {/* Search Bar */}
             <div className="flex items-center ml-4">
               <form onSubmit={handleSearch} className="relative group">
                 <div className="relative flex items-center">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <FaSearch className="text-lg text-green-200 group-hover:text-white transition-all duration-300" />
+                    <FaSearch
+                      className={`text-lg transition-colors duration-300 z-10 ${
+                        isSearchFocused
+                          ? "text-green-700"
+                          : "text-green-200 group-hover:text-green-700"
+                      }`}
+                    />
                   </div>
                   <input
                     type="text"
                     placeholder="Search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-8 group-hover:w-48 pl-9 pr-3 py-1.5 bg-transparent hover:bg-white hover:border-green-200 hover:border rounded-md text-white placeholder-transparent hover:placeholder-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:w-48 focus:placeholder-green-200 focus:bg-white focus:border-green-200 focus:text-green-800 transition-all duration-300 ease-in-out cursor-pointer"
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
+                    style={{ color: isSearchFocused ? "#111827" : "white" }}
+                    className="
+                      w-8 group-hover:w-48 focus:w-48
+                      pl-9 pr-3 py-1.5
+                      rounded-md border border-transparent
+                      transition-all duration-300 ease-in-out cursor-pointer
+                      focus:outline-none focus:ring-2 focus:ring-green-400
+                      bg-transparent
+                      hover:bg-white
+                      focus:bg-white
+                      hover:border-green-200
+                      focus:border-green-200
+                      placeholder-transparent
+                      focus:placeholder-gray-500
+                      hover:placeholder-gray-500
+                    "
                   />
                 </div>
               </form>
