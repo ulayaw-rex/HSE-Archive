@@ -11,11 +11,19 @@ public function up(): void
     Schema::enableForeignKeyConstraints();
     
     Schema::create('publication_views', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('publication_id')->constrained()->onDelete('cascade');
-        $table->string('ip_address')->nullable(); 
-        $table->timestamps(); 
-    });
+    $table->id(); 
+
+    $table->unsignedInteger('publication_id');
+
+    $table->foreign('publication_id')
+          ->references('publication_id')
+          ->on('publications')
+          ->onDelete('cascade');
+
+    $table->string('ip_address')->nullable();
+    $table->timestamps();
+});
+
     
     Schema::disableForeignKeyConstraints();
 

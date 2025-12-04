@@ -26,11 +26,16 @@ class Publication extends Model
         'category',
         'photo_credits',
         'image_path',
+        'user_id',
     ];
 
 
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'publication_id', 'publication_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

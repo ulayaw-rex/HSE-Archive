@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
-import "./navbar.css";
 import Logo from "../../../assets/LOGO.png";
 
 type NavigationLink = {
@@ -44,16 +43,6 @@ const navLinks: NavigationLink[] = [
     id: "about",
     label: "About",
     href: "/about",
-    hasDropdown: true,
-    dropdownItems: [
-      {
-        id: "editorial-board",
-        label: "The Editorial Board",
-        href: "/about/editorial-board",
-      },
-      { id: "faqs", label: "FAQs", href: "/about/faqs" },
-      { id: "contact", label: "Contact Us", href: "/about/contact" },
-    ],
   },
 ];
 

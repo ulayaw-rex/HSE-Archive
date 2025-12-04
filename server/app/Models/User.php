@@ -28,6 +28,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'course',
+        'position',
+        'avatar',   
     ];
 
     protected $hidden = [
@@ -46,5 +49,10 @@ class User extends Authenticatable
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+    
+    public function publications()
+    {
+        return $this->hasMany(Publication::class, 'user_id');
     }
 }

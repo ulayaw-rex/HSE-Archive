@@ -16,11 +16,9 @@ import MagazinesPage from "../pages/PrintMedia/Magazines";
 import FoliosPage from "../pages/PrintMedia/Folios";
 import OtherIssuesPage from "../pages/PrintMedia/OtherIssues";
 import AboutPage from "../pages/About";
-import EditorialBoardPage from "../pages/About/EditorialBoard";
-import FAQsPage from "../pages/About/FAQs";
-import ContactPage from "../pages/About/Contact";
 import ArticleDetail from "../pages/News/ArticleDetail";
 import SearchResults from "../pages/HomePage/SearchResults";
+import UserProfile from "../pages/Profiles/UserProfile";
 
 export default (
   <>
@@ -41,9 +39,8 @@ export default (
     <Route path="/print-media/folios" element={<FoliosPage />} />
     <Route path="/print-media/other-issues" element={<OtherIssuesPage />} />
     <Route path="/about" element={<AboutPage />} />
-    <Route path="/about/editorial-board" element={<EditorialBoardPage />} />
-    <Route path="/about/faqs" element={<FAQsPage />} />
-    <Route path="/about/contact" element={<ContactPage />} />
     <Route path="/search" element={<SearchResults />} />
+    <Route path="/profile" element={<UserProfile />} /> {/* Own Profile */}
+    <Route path="/profile/:id" element={<UserProfile />} />
   </>
 );

@@ -7,6 +7,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PrintMediaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\UserProfileController;
 
 //  Auth 
 Route::middleware('web')->post('login', [AuthController::class, 'login']);
@@ -32,6 +33,9 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     
     //  Auth
     Route::get('me', [AuthController::class, 'me']);
+
+    // User Profiles
+    Route::get('/profile/{id?}', [UserProfileController::class, 'show']);
 
     //  News
     Route::post('news/{news}/increment-views', [NewsController::class, 'incrementViews']);
