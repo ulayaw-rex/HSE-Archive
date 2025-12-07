@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
-import PublicationForm from "../../components/features/Admin/PublicationForm";
+import PublicationForm from "../../components/features/Publications/PublicationForm";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { toast } from "react-toastify";
 import type {
@@ -186,7 +186,7 @@ const PublicationsPage: React.FC = () => {
           isOpen={!!publicationToDelete}
           onClose={() => setPublicationToDelete(null)}
           onConfirm={handleDelete}
-          isLoading={isDeleting} // 3. Pass the loading state to the modal
+          isLoading={isDeleting}
           title="Delete Publication"
           message={`Are you sure you want to delete "${publicationToDelete?.title}"? This action cannot be undone.`}
           confirmLabel="Delete"

@@ -27,6 +27,8 @@ Route::get('print-media/{id}/view', [PrintMediaController::class, 'viewPdf']);
 Route::get('print-media/{id}/download', [PrintMediaController::class, 'downloadPdf']);
 Route::get('print-media/file/{path}', [PrintMediaController::class, 'serveFile'])->where('path', '.*');
 
+//  User Profiles (Viewing)
+Route::get('/profile/{id?}', [UserProfileController::class, 'show']);
 
 // AUTHENTICATED USER ROUTES 
 Route::middleware(['web', 'auth:sanctum'])->group(function () {
@@ -35,7 +37,8 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
 
     // User Profiles
-    Route::get('/profile/{id?}', [UserProfileController::class, 'show']);
+    Route::get('/users/search', [UserController::class, 'search']);
+    Route::post('/publications', [PublicationController::class, 'store']);
 
     //  News
     Route::post('news/{news}/increment-views', [NewsController::class, 'incrementViews']);

@@ -4,6 +4,8 @@ export interface User {
   email: string;
   role: "hillsider" | "alumni" | "admin";
   created_at: string;
+  course?: string;
+  position?: string;
 }
 
 export interface CreateUserData {
@@ -11,6 +13,8 @@ export interface CreateUserData {
   email: string;
   password: string;
   role: "hillsider" | "alumni" | "admin";
+  course?: string;
+  position?: string;
 }
 
 export interface UpdateUserData {
@@ -18,4 +22,6 @@ export interface UpdateUserData {
   email?: string;
   password?: string;
   role?: "hillsider" | "alumni" | "admin";
+  course?: string;
+  position?: string;
 }

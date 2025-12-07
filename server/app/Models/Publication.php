@@ -27,6 +27,7 @@ class Publication extends Model
         'photo_credits',
         'image_path',
         'user_id',
+        'status',
     ];
 
 

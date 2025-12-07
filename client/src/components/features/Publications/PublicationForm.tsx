@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
+import WriterSelect from "./WriterSelect";
+
 import type {
   Publication,
   CreatePublicationData,
 } from "../../../types/Publication";
 
+interface ExtendedCreatePublicationData extends CreatePublicationData {
+  user_id?: number;
+}
+
 interface PublicationFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreatePublicationData) => Promise<void>;
+  onSubmit: (data: ExtendedCreatePublicationData) => Promise<void>;
   publication?: Publication | null;
   mode?: "add" | "edit";
 }
@@ -19,13 +25,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   publication,
   mode = "add",
 }) => {
-  const [formData, setFormData] = useState<CreatePublicationData>({
+  const [formData, setFormData] = useState<ExtendedCreatePublicationData>({
     title: "",
     byline: "",
     body: "",
     category: "university",
     photo_credits: "",
+    user_id: undefined,
   });
+
   const [image, setImage] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,6 +46,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         body: publication.body,
         category: publication.category,
         photo_credits: publication.photo_credits || "",
+        user_id: publication.user_id,
       });
       setExistingImageUrl(publication.image || null);
     } else {
@@ -47,6 +56,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         body: "",
         category: "university",
         photo_credits: "",
+        user_id: undefined,
       });
       setImage(null);
       setExistingImageUrl(null);
@@ -57,15 +67,23 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.user_id && !formData.byline) {
+      alert("Please select a valid writer.");
+      return;
+    }
+
     setLoading(true);
     try {
       await onSubmit({ ...formData, image });
+
       setFormData({
         title: "",
         byline: "",
         body: "",
         category: "university",
         photo_credits: "",
+        user_id: undefined,
       });
       setImage(null);
       setExistingImageUrl(null);
@@ -94,16 +112,17 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
           <div>
             <h3 className="text-green-700 font-semibold mb-2">Byline</h3>
             <div className="grid grid-cols-3 gap-4 mb-4">
-              <input
-                type="text"
-                placeholder="Writer"
-                value={formData.byline}
-                onChange={(e) =>
-                  setFormData({ ...formData, byline: e.target.value })
-                }
-                className="col-span-1 p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
-                required
+              <WriterSelect
+                initialValue={formData.byline}
+                onSelect={(id, name) => {
+                  setFormData({
+                    ...formData,
+                    user_id: id || undefined,
+                    byline: name,
+                  });
+                }}
               />
+
               <select
                 value={formData.category}
                 onChange={(e) =>

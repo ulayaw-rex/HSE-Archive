@@ -8,8 +8,6 @@ import {
   FeedbackReviewPage,
   FeedbackModeratePage,
   AnalyticsViewsPage,
-  AnalyticsActivityPage,
-  AnalyticsReportsPage,
   SettingsModulesPage,
   SettingsBackupPage,
   SettingsSecurityPage,
@@ -30,9 +28,7 @@ export default (
     <Route path="feedback/review" element={<FeedbackReviewPage />} />
     <Route path="feedback/moderate" element={<FeedbackModeratePage />} />
     {/* Analytics */}
-    <Route path="analytics/views" element={<AnalyticsViewsPage />} />
-    <Route path="analytics/activity" element={<AnalyticsActivityPage />} />
-    <Route path="analytics/reports" element={<AnalyticsReportsPage />} />
+    <Route path="analytics" element={<AnalyticsViewsPage />} />
     {/* Settings */}
     <Route path="settings/modules" element={<SettingsModulesPage />} />
     <Route path="settings/backup" element={<SettingsBackupPage />} />

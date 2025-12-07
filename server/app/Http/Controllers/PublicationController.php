@@ -12,40 +12,88 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User; 
 use App\Models\PrintMedia; 
 use App\Models\Comment;
+use Illuminate\Support\Facades\Auth;
 
 class PublicationController extends Controller
 {
-    public function index()
-    {
-        $publications = Publication::orderBy('created_at', 'desc')->get()->map(function ($publication) {
-            if ($publication->image_path) {
-                $publication->image = asset('storage/' . $publication->image_path);
-            } else {
-                $publication->image = null;
-            }
+public function index(Request $request)
+{
+    // Check if the requester is an Admin
+    $user = $request->user('sanctum');
+    $isAdmin = $user && (strtolower($user->role) === 'admin' || $user->tokenCan('role:admin'));
+
+    $query = Publication::query();
+    
+    if (!$isAdmin) {
+        $query->where('status', 'approved');
+    }
+
+    $publications = $query->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($publication) {
+            $publication->image = $publication->image_path 
+                ? asset('storage/' . $publication->image_path) 
+                : null;
             return $publication;
         });
-        return response()->json($publications);
+
+    return response()->json($publications);
+}
+
+public function store(Request $request)
+{
+    $currentUser = $request->user();
+    
+    $role = strtolower($currentUser->role);
+    $status = ($currentUser->role === 'admin') ? 'approved' : 'pending';
+
+    $writer = User::find($request->user_id);
+
+    $publication = Publication::create([
+        'title' => $request->title,
+        'body' => $request->body,
+        'category' => $request->category,
+        'photo_credits' => $request->photo_credits,
+        'user_id' => $request->user_id,
+        'byline' => $writer->name, 
+        'status' => $status, 
+    ]);
+
+    if ($request->hasFile('image')) {
+        $path = $request->file('image')->store('publications_images', 'public');
+        $publication->update(['image_path' => $path]); // Update with path
     }
+
+    $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
+
+    return response()->json($publication, 201);
+}
 
 public function show(Publication $publication, Request $request)
 {
+    $user = $request->user('sanctum'); 
+
+    $isAdmin = $user && ($user->role === 'admin' || $user->tokenCan('role:admin'));
+
+    if ($publication->status !== 'approved') {
+         if (!$isAdmin && (!$user || $user->id !== $publication->user_id)) {
+             return response()->json(['message' => 'This article is pending approval.'], 403);
+         }
+    }
+
     PublicationView::create([
         'publication_id' => $publication->publication_id,
         'ip_address' => $request->ip(),
     ]);
 
     $publication->increment('views');
-
-    if ($publication->image_path) {
-        $publication->image = asset('storage/' . $publication->image_path);
-    } else {
-        $publication->image = null;
-    }
     
+    $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
+    $publication->load('user'); 
+
     return response()->json($publication);
-}
-public function dashboardStats()
+}    
+    public function dashboardStats()
     {
         $categoryCounts = Publication::selectRaw('category, count(*) as count')
             ->groupBy('category')
@@ -160,103 +208,71 @@ public function dashboardStats()
         ]);
     }    
 
-    public function search(Request $request)
+public function search(Request $request)
     {
         $query = $request->input('q');
+        if (!$query) return response()->json([]);
 
-        if (!$query) {
-            return response()->json([]);
-        }
-
-        $publications = Publication::where('title', 'LIKE', "%{$query}%")
-            ->orWhere('body', 'LIKE', "%{$query}%")
-            ->orWhere('byline', 'LIKE', "%{$query}%")
+        $publications = Publication::where('status', 'approved') // Filter by status
+            ->where(function($q) use ($query) {
+                $q->where('title', 'LIKE', "%{$query}%")
+                  ->orWhere('body', 'LIKE', "%{$query}%")
+                  ->orWhere('byline', 'LIKE', "%{$query}%");
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($publication) {
-                if ($publication->image_path) {
-                    $publication->image = asset('storage/' . $publication->image_path);
-                } else {
-                    $publication->image = null;
-                }
+                $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
                 return $publication;
             });
 
         return response()->json($publications);
     }
-
-    public function store(Request $request)
+    
+public function update(Request $request, Publication $publication)
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'byline' => 'required|string|max:255',
             'body' => 'required|string',
             'category' => 'required|string|max:100',
             'photo_credits' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048', // max 2MB
+            'image' => 'nullable|image|max:2048',
+            'user_id' => 'exists:users,id', // allow changing the writer
+            'status' => 'in:pending,approved,rejected' // allow admin to change status
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $data = $request->only(['title', 'byline', 'body', 'category', 'photo_credits']);
+        $data = $request->only(['title', 'body', 'category', 'photo_credits', 'status']);
+
+        if ($request->has('user_id')) {
+            $writer = User::find($request->user_id);
+            $data['user_id'] = $request->user_id;
+            $data['byline'] = $writer->name;
+        }
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('publications_images', 'public');
-            $data['image_path'] = $path;
-        }
-
-        $publication = Publication::create($data);
-
-        if ($publication->image_path) {
-            $publication->image = asset('storage/' . $publication->image_path);
-        } else {
-            $publication->image = null;
-        }
-
-        return response()->json($publication, 201);
-    }
-
-    public function update(Request $request, Publication $publication)
-    {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'byline' => 'required|string|max:255',
-            'body' => 'required|string',
-            'category' => 'required|string|max:100',
-            'photo_credits' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048', // max 2MB
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $data = $request->only(['title', 'byline', 'body', 'category', 'photo_credits']);
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('publications_images', 'public');
-            $data['image_path'] = $path;
+            if ($publication->image_path) {
+                Storage::disk('public')->delete($publication->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('publications_images', 'public');
         }
 
         $publication->update($data);
-
-        if ($publication->image_path) {
-            $publication->image = asset('storage/' . $publication->image_path);
-        } else {
-            $publication->image = null;
-        }
+        $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
 
         return response()->json($publication);
     }
-
-    public function destroy(Publication $publication)
+public function destroy(Publication $publication)
     {
+        if ($publication->image_path) {
+            Storage::disk('public')->delete($publication->image_path);
+        }
         $publication->delete();
         return response()->json(['message' => 'Publication deleted successfully']);
     }
-
     public function getByCategory($category)
     {
         $publications = Publication::where('category', $category)

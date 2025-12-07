@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { FaCalendarAlt, FaFacebookF, FaInstagram } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -51,9 +51,13 @@ const ArticleDetail: React.FC = () => {
         if (Array.isArray(commentsResponse.data)) {
           setComments(commentsResponse.data);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch data:", err);
-        setError("Failed to load article.");
+        if (err.response && err.response.status === 403) {
+          setError("Access Denied: This article is pending approval.");
+        } else {
+          setError("Failed to load article.");
+        }
       } finally {
         setLoading(false);
       }
@@ -71,7 +75,14 @@ const ArticleDetail: React.FC = () => {
   }
 
   if (error) {
-    return <div className="p-8 text-center text-red-600">{error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white shadow rounded-lg">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
+          <p className="text-gray-700">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   if (!publication) {
@@ -82,6 +93,19 @@ const ArticleDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      {publication.status === "pending" && (
+        <div
+          className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"
+          role="alert"
+        >
+          <p className="font-bold">Pending Approval</p>
+          <p>
+            This article is currently hidden from the public. You are viewing it
+            in preview mode.
+          </p>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col lg:flex-row lg:space-x-8">
         {/* Main content */}
         <div className="flex-1">
@@ -107,11 +131,22 @@ const ArticleDetail: React.FC = () => {
             <div className="flex items-center gap-3">
               <span>
                 By{" "}
-                <span className="font-bold">
-                  {publication.byline || "The Hillside Echo"}
-                </span>
+                {publication.user_id ? (
+                  <Link
+                    to={`/profile/${publication.user_id}`}
+                    className="font-bold hover:text-green-700 hover:underline transition-colors"
+                  >
+                    {publication.byline || "Hillsider Member"}
+                  </Link>
+                ) : (
+                  <span className="font-bold">
+                    {publication.byline || "The Hillside Echo"}
+                  </span>
+                )}
               </span>
-              {currentUser && (
+
+              {/* Only show "Add Attribute" if it's the writer looking at their own post */}
+              {currentUser && currentUser.id === publication.user_id && (
                 <a
                   href="#"
                   onClick={(e) => {
@@ -123,7 +158,6 @@ const ArticleDetail: React.FC = () => {
                     );
                   }}
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-600"
-                  aria-label="Add attribute"
                 >
                   Add attribute +
                 </a>
@@ -153,7 +187,6 @@ const ArticleDetail: React.FC = () => {
             ))}
           </article>
 
-          {/* Pass data down to Comments */}
           <Comments
             publicationId={publication.publication_id}
             comments={comments}
@@ -161,8 +194,9 @@ const ArticleDetail: React.FC = () => {
           />
         </div>
 
-        {/* Sidebar with social media icons */}
+        {/* Sidebar */}
         <aside className="hidden lg:flex flex-col space-y-4 top-20 self-start">
+          {/* Social Share Buttons */}
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
               window.location.href

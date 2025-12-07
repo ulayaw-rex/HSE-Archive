@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { User } from "../../../types/User";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 interface UserTableProps {
   users: User[];
@@ -87,6 +88,12 @@ const UserTable: React.FC<UserTableProps> = ({
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Course
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Position
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -101,7 +108,7 @@ const UserTable: React.FC<UserTableProps> = ({
                 {users.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
                       No users found
@@ -109,7 +116,10 @@ const UserTable: React.FC<UserTableProps> = ({
                   </tr>
                 ) : (
                   users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr
+                      key={user.id}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {user.name}
@@ -118,6 +128,16 @@ const UserTable: React.FC<UserTableProps> = ({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {user.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {user.course || "-"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {user.position || "-"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -133,19 +153,23 @@ const UserTable: React.FC<UserTableProps> = ({
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(user.created_at)}
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
+
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-3">
                           <button
                             onClick={() => onEdit(user)}
-                            className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md text-sm font-medium transition-colors w-full sm:w-auto text-center"
+                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-full transition-colors"
+                            title="Edit User"
                           >
-                            Edit
+                            <FaEdit size={18} />
                           </button>
+
                           <button
                             onClick={(e) => handleDeleteClick(user, e)}
-                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md text-sm font-medium transition-colors w-full sm:w-auto text-center"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
+                            title="Delete User"
                           >
-                            Delete
+                            <FaTrash size={18} />
                           </button>
                         </div>
                       </td>

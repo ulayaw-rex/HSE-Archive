@@ -40,7 +40,6 @@ const Header: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
-  // Close dropdown on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -51,7 +50,6 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isProfileOpen]);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
       if (!profileRef.current) return;
@@ -141,16 +139,14 @@ const Header: React.FC = () => {
                   className="relative flex items-center gap-3"
                   ref={profileRef}
                 >
-                  {/* 1. Name is now a direct link to Profile */}
                   <NavLink
-                    to="/profile"
+                    to={`/profile/${user.id}`}
                     className="hidden md:block text-sm font-semibold text-white hover:text-green-200 transition-colors"
                     title="Go to Profile"
                   >
                     {user.name}
                   </NavLink>
 
-                  {/* 2. Icon is the dropdown toggle */}
                   <button
                     onClick={() => setIsProfileOpen((prev) => !prev)}
                     className={`flex items-center text-green-200 hover:text-white transition-colors duration-200 focus:outline-none ${
@@ -166,14 +162,11 @@ const Header: React.FC = () => {
                     />
                   </button>
 
-                  {/* 3. The Improved Dropdown */}
                   {isProfileOpen && (
                     <div className="absolute right-0 top-full mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-[101] transform transition-all duration-200 ease-out origin-top-right">
-                      {/* Cosmetic Triangle/Arrow pointing up */}
                       <div className="absolute -top-2 right-2 w-4 h-4 bg-white transform rotate-45 border-l border-t border-gray-100"></div>
 
                       <div className="relative bg-white rounded-xl overflow-hidden py-1">
-                        {/* Header inside dropdown (Optional: shows email) */}
                         <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                           <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
                             Signed in as
@@ -194,7 +187,6 @@ const Header: React.FC = () => {
                             </NavLink>
                           )}
 
-                          {/* Added explicit Profile link for Mobile users (since name is hidden on mobile) */}
                           <NavLink
                             to="/profile"
                             className="md:hidden flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
