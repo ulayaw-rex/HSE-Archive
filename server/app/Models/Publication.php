@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany; 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany; 
 
 class Publication extends Model
 {
@@ -12,31 +13,37 @@ class Publication extends Model
 
     protected $table = 'publications';
 
-    protected $primaryKey = 'publication_id';
+    protected $primaryKey = 'publication_id'; 
 
     public $incrementing = true;
 
     protected $keyType = 'int';
 
     protected $fillable = [
+        'user_id',
         'title',
-        'byline',
+        'byline', 
         'body',
         'views',
         'category',
         'photo_credits',
         'image_path',
-        'user_id',
         'status',
     ];
-
 
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'publication_id', 'publication_id');
     }
-    public function user()
+
+    public function writers(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsToMany(
+            User::class, 
+            'publication_user', 
+            'publication_id',   
+            'user_id'           
+        );
     }
+    
 }

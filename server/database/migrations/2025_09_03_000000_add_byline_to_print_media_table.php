@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('byline')->nullable()->after('description');
             $table->string('original_file_path')->nullable();
             $table->string('original_filename')->nullable();
-            $table->string('file_path')->change(); // Make existing column nullable
+            $table->string('file_path')->change(); 
 
         });
     }

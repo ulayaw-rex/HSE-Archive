@@ -62,7 +62,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); // Disable button
+    setLoading(true);
 
     try {
       const formDataToSend = new FormData();
@@ -87,28 +87,29 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
     } catch (error) {
       console.error("Submission failed:", error);
     } finally {
-      setLoading(false); // Re-enable button
+      setLoading(false);
     }
   };
 
   return (
     <div
-      className="user-modal-overlay"
+      className="user-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
-      <div className="user-modal-container relative print-media-form-modal">
-        <h2 className="text-3xl font-extrabold mb-6 border-b border-gray-400 pb-2">
+      <div className="user-modal-container relative bg-white rounded-lg shadow-xl w-full md:w-auto md:min-w-[700px] lg:min-w-[900px] max-w-6xl p-6 md:p-10 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl md:text-3xl font-extrabold mb-8 border-b border-gray-400 pb-2 text-gray-900">
           {mode === "edit"
             ? "Edit Print Media Archive"
             : "Add Print Media Archive"}
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex space-x-4">
-            <div className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="col-span-1">
               <label
                 className="block text-green-700 font-semibold mb-2"
                 htmlFor="byline"
@@ -123,10 +124,11 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, byline: e.target.value })
                 }
-                className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
-            <div className="flex-1">
+
+            <div className="col-span-1">
               <label
                 className="block text-green-700 font-semibold mb-2"
                 htmlFor="type"
@@ -139,7 +141,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value })
                 }
-                className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
                 required
               >
                 <option value="folio">Folio</option>
@@ -149,6 +151,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
               </select>
             </div>
           </div>
+
           <div>
             <label
               className="block text-green-700 font-semibold mb-2"
@@ -164,10 +167,11 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
               required
             />
           </div>
+
           <div>
             <label
               className="block text-green-700 font-semibold mb-2"
@@ -186,13 +190,30 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
               required
             />
           </div>
-          <div className="flex justify-between items-center mt-6">
-            <div className="space-x-2 flex">
+
+          <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-6 border-t border-gray-200 gap-4">
+            <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4 w-full md:w-auto">
               <label
                 htmlFor="upload-file"
-                className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
+                className="cursor-pointer bg-gray-800 text-white px-4 py-3 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-900 transition-colors w-full md:w-auto"
               >
-                <span>{file ? file.name : "Upload file"}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="truncate max-w-[150px]">
+                  {file ? file.name : "Upload PDF"}
+                </span>
                 <input
                   id="upload-file"
                   type="file"
@@ -204,9 +225,25 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
 
               <label
                 htmlFor="upload-thumbnail"
-                className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
+                className="cursor-pointer bg-gray-800 text-white px-4 py-3 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-900 transition-colors w-full md:w-auto"
               >
-                <span>{thumbnail ? thumbnail.name : "Upload thumbnail"}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="truncate max-w-[150px]">
+                  {thumbnail ? thumbnail.name : "Upload Cover"}
+                </span>
                 <input
                   id="upload-thumbnail"
                   type="file"
@@ -216,10 +253,11 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 />
               </label>
             </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="!bg-green-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50"
+              className="!bg-green-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50 w-full md:w-auto shadow-md"
             >
               {mode === "edit" ? "Update Archive" : "Post Archive +"}
             </button>

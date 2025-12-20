@@ -9,6 +9,10 @@ import type {
 } from "../../types/Publication";
 import AxiosInstance from "../../AxiosInstance";
 
+interface ExtendedCreatePublicationData extends CreatePublicationData {
+  writer_ids: number[];
+}
+
 const PublicationsPage: React.FC = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -34,54 +38,78 @@ const PublicationsPage: React.FC = () => {
     }
   };
 
-  const handleCreate = async (data: CreatePublicationData) => {
+  const handleCreate = async (data: ExtendedCreatePublicationData) => {
     try {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if (key === "image") {
-            if (value instanceof File) {
-              formData.append("image", value);
-            }
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
+
+      formData.append("title", data.title);
+      formData.append("body", data.body);
+      formData.append("category", data.category);
+      formData.append("byline", data.byline);
+      if (data.photo_credits)
+        formData.append("photo_credits", data.photo_credits);
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      if (data.writer_ids && data.writer_ids.length > 0) {
+        data.writer_ids.forEach((id) => {
+          formData.append("writer_ids[]", id.toString());
+        });
+      }
 
       const response = await AxiosInstance.post("/publications", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+
       setPublications([response.data, ...publications]);
       setIsFormOpen(false);
       toast.success("Publication created successfully");
+
+      fetchPublications();
+
       window.dispatchEvent(new Event("publicationCreated"));
-    } catch (error) {
-      toast.error("Failed to create publication");
+    } catch (error: any) {
+      console.error("Create error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to create publication"
+      );
     }
   };
 
-  const handleUpdate = async (data: CreatePublicationData) => {
+  const handleUpdate = async (data: ExtendedCreatePublicationData) => {
     if (!publicationToEdit) return;
     try {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if (key === "image" && value instanceof File) {
-            formData.append("image", value);
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
+
+      formData.append("title", data.title);
+      formData.append("body", data.body);
+      formData.append("category", data.category);
+      formData.append("byline", data.byline);
+      if (data.photo_credits)
+        formData.append("photo_credits", data.photo_credits);
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      if (data.writer_ids && data.writer_ids.length > 0) {
+        data.writer_ids.forEach((id) => {
+          formData.append("writer_ids[]", id.toString());
+        });
+      }
+
       formData.append("_method", "PUT");
+
       const response = await AxiosInstance.post(
         `/publications/${publicationToEdit.publication_id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+
       setPublications(
         publications.map((pub) =>
           pub.publication_id === publicationToEdit.publication_id
@@ -110,7 +138,7 @@ const PublicationsPage: React.FC = () => {
   const handleDelete = async () => {
     if (!publicationToDelete) return;
 
-    setIsDeleting(true); // Disable button
+    setIsDeleting(true);
     try {
       await AxiosInstance.delete(
         `/publications/${publicationToDelete.publication_id}`
@@ -121,11 +149,11 @@ const PublicationsPage: React.FC = () => {
         )
       );
       toast.success("Publication deleted successfully");
-      setPublicationToDelete(null); // This closes the modal
+      setPublicationToDelete(null);
     } catch (error) {
       toast.error("Failed to delete publication");
     } finally {
-      setIsDeleting(false); // Re-enable button
+      setIsDeleting(false);
     }
   };
 
@@ -177,7 +205,9 @@ const PublicationsPage: React.FC = () => {
             setIsFormOpen(false);
             setPublicationToEdit(null);
           }}
-          onSubmit={publicationToEdit ? handleUpdate : handleCreate}
+          onSubmit={
+            publicationToEdit ? (handleUpdate as any) : (handleCreate as any)
+          }
           publication={publicationToEdit}
           mode={publicationToEdit ? "edit" : "add"}
         />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import WriterSelect from "./WriterSelect";
+// import type { User } from "../../../types/User";
 
 import type {
   Publication,
@@ -7,7 +8,7 @@ import type {
 } from "../../../types/Publication";
 
 interface ExtendedCreatePublicationData extends CreatePublicationData {
-  user_id?: number;
+  writer_ids: number[];
 }
 
 interface PublicationFormProps {
@@ -16,6 +17,7 @@ interface PublicationFormProps {
   onSubmit: (data: ExtendedCreatePublicationData) => Promise<void>;
   publication?: Publication | null;
   mode?: "add" | "edit";
+  currentUser?: { id: number; name: string } | null;
 }
 
 const PublicationForm: React.FC<PublicationFormProps> = ({
@@ -24,6 +26,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   onSubmit,
   publication,
   mode = "add",
+  currentUser,
 }) => {
   const [formData, setFormData] = useState<ExtendedCreatePublicationData>({
     title: "",
@@ -31,7 +34,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     body: "",
     category: "university",
     photo_credits: "",
-    user_id: undefined,
+    writer_ids: [],
   });
 
   const [image, setImage] = useState<File | null>(null);
@@ -42,48 +45,49 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     if (publication) {
       setFormData({
         title: publication.title,
-        byline: publication.byline,
+        byline: publication.byline || "",
         body: publication.body,
         category: publication.category,
         photo_credits: publication.photo_credits || "",
-        user_id: publication.user_id,
+        writer_ids: publication.writers
+          ? publication.writers.map((w) => w.id)
+          : [],
       });
       setExistingImageUrl(publication.image || null);
     } else {
       setFormData({
         title: "",
-        byline: "",
+        byline: currentUser ? currentUser.name : "",
         body: "",
         category: "university",
         photo_credits: "",
-        user_id: undefined,
+        writer_ids: currentUser ? [currentUser.id] : [],
       });
       setImage(null);
       setExistingImageUrl(null);
     }
-  }, [publication]);
+  }, [publication, currentUser, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.user_id && !formData.byline) {
-      alert("Please select a valid writer.");
+    if (formData.writer_ids.length === 0) {
+      alert("Please select at least one writer.");
       return;
     }
 
     setLoading(true);
     try {
       await onSubmit({ ...formData, image });
-
       setFormData({
         title: "",
         byline: "",
         body: "",
         category: "university",
         photo_credits: "",
-        user_id: undefined,
+        writer_ids: [],
       });
       setImage(null);
       setExistingImageUrl(null);
@@ -97,38 +101,47 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
   return (
     <div
-      className="user-modal-overlay"
+      className="user-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
+        if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="user-modal-container relative publication-form-modal">
-        <h2 className="text-3xl font-extrabold mb-6 border-b border-gray-400 pb-2">
+      <div className="user-modal-container relative bg-white rounded-lg shadow-xl w-full md:w-auto md:min-w-[800px] lg:min-w-[1000px] max-w-6xl p-6 md:p-10 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-3xl font-extrabold mb-8 border-b border-gray-300 pb-4 text-gray-900">
           {mode === "edit" ? "Edit Article" : "Add Article"}
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <h3 className="text-green-700 font-semibold mb-2">Byline</h3>
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <WriterSelect
-                initialValue={formData.byline}
-                onSelect={(id, name) => {
-                  setFormData({
-                    ...formData,
-                    user_id: id || undefined,
-                    byline: name,
-                  });
-                }}
-              />
+            <h3 className="text-green-700 font-semibold mb-3 text-lg">
+              Byline
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+              <div className="col-span-1">
+                {currentUser ? (
+                  <input
+                    disabled
+                    value={currentUser.name}
+                    className="w-full h-[50px] p-3 rounded-md border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
+                  />
+                ) : (
+                  <WriterSelect
+                    selectedIds={formData.writer_ids}
+                    onSelectionChange={(newIds) =>
+                      setFormData({ ...formData, writer_ids: newIds })
+                    }
+                    initialUsers={publication?.writers}
+                  />
+                )}
+              </div>
 
               <select
                 value={formData.category}
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="col-span-1 p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="col-span-1 w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
                 required
               >
                 <option value="university">University</option>
@@ -140,6 +153,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <option value="opinion">Opinion</option>
                 <option value="literary">Literary</option>
               </select>
+
               <input
                 type="text"
                 placeholder="Photo credits"
@@ -147,12 +161,25 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, photo_credits: e.target.value })
                 }
-                className="col-span-1 p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="col-span-1 w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
+
+            <input
+              type="text"
+              placeholder="Byline Display Text (e.g. John & Jane)"
+              value={formData.byline}
+              onChange={(e) =>
+                setFormData({ ...formData, byline: e.target.value })
+              }
+              className="w-full h-[50px] p-3 mb-2 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+            />
           </div>
+
           <div>
-            <h3 className="text-green-700 font-semibold mb-2">Article</h3>
+            <h3 className="text-green-700 font-semibold mb-3 text-lg">
+              Article
+            </h3>
             <input
               type="text"
               placeholder="Add a headline"
@@ -160,7 +187,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 mb-4"
+              className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 mb-4 text-lg font-medium"
               required
             />
             <textarea
@@ -169,14 +196,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, body: e.target.value })
               }
-              className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 h-40 resize-none"
+              className="w-full p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 h-64 resize-none leading-relaxed"
               required
             />
           </div>
-          <div className="flex justify-between items-center mt-6">
+
+          <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4 pt-6 border-t border-gray-200">
             <label
               htmlFor="upload-photo"
-              className="cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-md flex items-center space-x-2"
+              className="cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto hover:bg-gray-900 transition-colors"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -204,18 +232,19 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="bg-green-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50"
+              className="bg-green-700 text-white px-8 py-3 rounded-full font-bold hover:bg-green-800 disabled:opacity-50 w-full md:w-auto shadow-md"
             >
               {mode === "edit" ? "Update Article" : "Post Article +"}
             </button>
           </div>
+
           {mode === "edit" && existingImageUrl && !image && (
-            <div className="mt-4">
-              <p className="text-gray-700 mb-2">Current Photo:</p>
+            <div className="mt-6">
+              <p className="text-gray-700 mb-2 font-medium">Current Photo:</p>
               <img
                 src={existingImageUrl}
                 alt="Current publication"
-                className="max-w-full h-auto rounded-md border border-gray-300"
+                className="max-h-60 rounded-md border border-gray-300 shadow-sm"
               />
             </div>
           )}

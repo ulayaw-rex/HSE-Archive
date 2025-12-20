@@ -13,11 +13,12 @@ const ArticleDetail: React.FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
 
   const [publication, setPublication] = useState<Publication | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [idOrSlug]);
-  const [comments, setComments] = useState<Comment[]>([]);
 
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +41,6 @@ const ArticleDetail: React.FC = () => {
 
         const [pubResponse, commentsResponse] = await Promise.all([
           AxiosInstance.get<Publication>(`/publications/${idOrSlug}`),
-
           AxiosInstance.get<Comment[]>(
             `/publications/${idOrSlug}/comments`
           ).catch(() => ({ data: [] })),
@@ -91,6 +91,10 @@ const ArticleDetail: React.FC = () => {
     );
   }
 
+  // Helper to check if current user is one of the writers
+  const isWriter =
+    currentUser && publication.writers?.some((w) => w.id === currentUser.id);
+
   return (
     <div className="min-h-screen bg-white">
       {publication.status === "pending" && (
@@ -107,7 +111,6 @@ const ArticleDetail: React.FC = () => {
       )}
 
       <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col lg:flex-row lg:space-x-8">
-        {/* Main content */}
         <div className="flex-1">
           <div className="inline-block bg-gray-300 text-gray-700 rounded-full px-3 py-1 text-xs font-semibold mb-2 uppercase">
             {publication.category}
@@ -128,25 +131,36 @@ const ArticleDetail: React.FC = () => {
                 ).toLocaleDateString()}
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <span>
-                By{" "}
-                {publication.user_id ? (
-                  <Link
-                    to={`/profile/${publication.user_id}`}
-                    className="font-bold hover:text-green-700 hover:underline transition-colors"
-                  >
-                    {publication.byline || "Hillsider Member"}
-                  </Link>
-                ) : (
-                  <span className="font-bold">
-                    {publication.byline || "The Hillside Echo"}
-                  </span>
-                )}
-              </span>
 
-              {/* Only show "Add Attribute" if it's the writer looking at their own post */}
-              {currentUser && currentUser.id === publication.user_id && (
+            <div className="flex items-center flex-wrap gap-1">
+              <span className="mr-1">By</span>
+
+              {publication.writers && publication.writers.length > 0 ? (
+                publication.writers.map((writer, index) => (
+                  <span key={writer.id} className="flex items-center">
+                    <Link
+                      to={`/profile/${writer.id}`}
+                      className="font-bold hover:text-green-700 hover:underline transition-colors"
+                    >
+                      {writer.name}
+                    </Link>
+
+                    {index < publication.writers!.length - 2 && (
+                      <span className="mr-1">,</span>
+                    )}
+
+                    {index === publication.writers!.length - 2 && (
+                      <span className="mx-1">&</span>
+                    )}
+                  </span>
+                ))
+              ) : (
+                <span className="font-bold">
+                  {publication.byline || "The Hillside Echo"}
+                </span>
+              )}
+
+              {isWriter && (
                 <a
                   href="#"
                   onClick={(e) => {
@@ -157,7 +171,7 @@ const ArticleDetail: React.FC = () => {
                       })
                     );
                   }}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-600"
+                  className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-600"
                 >
                   Add attribute +
                 </a>
@@ -194,9 +208,7 @@ const ArticleDetail: React.FC = () => {
           />
         </div>
 
-        {/* Sidebar */}
         <aside className="hidden lg:flex flex-col space-y-4 top-20 self-start">
-          {/* Social Share Buttons */}
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
               window.location.href

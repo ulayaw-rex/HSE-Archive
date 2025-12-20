@@ -15,9 +15,9 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
 
         Schema::create('publications', function (Blueprint $table) {
-            $table->increments('publication_id');
+            $table->id('publication_id');
             $table->string('title');
-            $table->string('byline');
+            $table->string('byline')->nullable();
             $table->text('body');
             $table->string('category');
             $table->string('photo_credits')->nullable();

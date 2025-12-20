@@ -13,17 +13,14 @@ return new class extends Migration
 
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->text('body'); // The text of the comment
+            $table->text('body'); 
 
-            // This links to the 'users' table
             $table->foreignId('user_id')
                   ->constrained('users')
                   ->onDelete('cascade');
 
-            // This links to the 'publications' table
-            $table->unsignedInteger('publication_id'); // Must be integer to match 'increments()'
             
-            $table->foreign('publication_id')
+            $table->foreignId('publication_id')
                   ->references('publication_id')
                   ->on('publications')
                   ->onDelete('cascade');

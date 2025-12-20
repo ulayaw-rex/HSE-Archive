@@ -22,10 +22,6 @@ const NewspaperIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-/**
- * A 404 Not Found component for your React application.
- * It's styled with Tailwind CSS to match the green, clean theme of the main site.
- */
 const NotFoundPage: React.FC = () => {
   return (
     <div className="bg-gray-50 flex items-center justify-center min-h-screen text-gray-800 font-sans">

@@ -7,9 +7,16 @@ import { DashboardCharts } from "../../components/features/Admin/DashboardCharts
 import { MostViewedChart } from "../../components/features/Admin/MostViewedCharts";
 import { RecentActivity } from "../../components/features/Admin/RecentActivity";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import PendingReviewsWidget from "../../components/features/Admin/PendingReviewsWidget";
+import type { Publication } from "../../types/Publication";
 
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const response = await AxiosInstance.get("publications/dashboard/stats");
+  return response.data;
+};
+
+const fetchPublicationsList = async (): Promise<Publication[]> => {
+  const response = await AxiosInstance.get("/admin/all-publications");
   return response.data;
 };
 
@@ -17,27 +24,44 @@ const AdminPage: React.FC = () => {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
     null
   );
+
+  const [publications, setPublications] = useState<Publication[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadDashboardStats = async () => {
+  const loadPublications = async () => {
+    try {
+      const pubs = await fetchPublicationsList();
+      setPublications(pubs);
+    } catch (err) {
+      console.error("Failed to load publications for review widget", err);
+    }
+  };
+
+  const loadAllData = async () => {
     try {
       if (!dashboardStats) setLoading(true);
-
       setError(null);
-      const statsData = await fetchDashboardStats();
+
+      const [statsData, pubsData] = await Promise.all([
+        fetchDashboardStats(),
+        fetchPublicationsList(),
+      ]);
+
       setDashboardStats(statsData);
+      setPublications(pubsData);
     } catch (err) {
       console.error("Error:", err);
-      setError("Failed to fetch dashboard stats.");
+      setError("Failed to fetch dashboard data.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDashboardStats();
-    const interval = setInterval(loadDashboardStats, 30000);
+    loadAllData();
+    const interval = setInterval(loadAllData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -65,6 +89,13 @@ const AdminPage: React.FC = () => {
           </div>
         ) : dashboardStats ? (
           <>
+            <div className="mb-8">
+              <PendingReviewsWidget
+                publications={publications}
+                onReviewComplete={loadPublications}
+              />
+            </div>
+
             <div className="mb-8">
               <DashboardStatsCards stats={dashboardStats} />
             </div>

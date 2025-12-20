@@ -58,14 +58,18 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
         Route::apiResource('users', UserController::class);
 
         // News Management 
+        Route::get('/admin/all-publications', [PublicationController::class, 'index']);
         Route::apiResource('news', NewsController::class)->except(['index', 'show']);
         Route::get('news/dashboard/stats', [NewsController::class, 'dashboardStats']);
 
         // Publications Management 
         Route::get('publications/dashboard/stats', [PublicationController::class, 'dashboardStats']);
-        Route::apiResource('publications', PublicationController::class)->except(['index', 'show']);
+        Route::apiResource('publications', PublicationController::class)->except(['index', 'show', 'store']);
 
         // Print Media Management 
         Route::apiResource('print-media', PrintMediaController::class)->except(['index', 'show']);
+
+        // Reviewing and Approving Articles
+        Route::put('/publications/{id}/review', [PublicationController::class, 'review']);
     });
 });

@@ -13,9 +13,8 @@ public function up(): void
     Schema::create('publication_views', function (Blueprint $table) {
     $table->id(); 
 
-    $table->unsignedInteger('publication_id');
 
-    $table->foreign('publication_id')
+    $table->foreignId('publication_id')
           ->references('publication_id')
           ->on('publications')
           ->onDelete('cascade');

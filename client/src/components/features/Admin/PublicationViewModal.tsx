@@ -1,63 +1,93 @@
 import React from "react";
+import { FaCalendarAlt, FaUser } from "react-icons/fa";
 import type { Publication } from "../../../types/Publication";
 
 interface PublicationViewModalProps {
-  publication: Publication | null;
   isOpen: boolean;
   onClose: () => void;
+  publication: Publication | null;
 }
 
 const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
-  publication,
   isOpen,
   onClose,
+  publication,
 }) => {
   if (!isOpen || !publication) return null;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center"
-        onClick={onClose}
-      >
-        <div
-          className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-full overflow-y-auto relative z-50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-6">
-            <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-gray-300 text-gray-700 uppercase">
-              {publication.category}
-            </div>
-            <h1 className="text-3xl font-extrabold mb-2">
-              {publication.title}
-            </h1>
-            <div className="flex items-center text-gray-600 mb-4 space-x-4 text-sm">
-              <span>
-                {new Date(publication.created_at).toLocaleDateString()}
-              </span>
-              <span>
-                By <strong>{publication.byline}</strong>
-              </span>
-            </div>
-            {publication.image && (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden relative">
+        <div className="overflow-y-auto custom-scrollbar">
+          <div className="relative w-full h-64 md:h-80 bg-gray-100">
+            {publication.image ? (
               <img
                 src={publication.image}
                 alt={publication.title}
-                className="w-full h-64 object-cover rounded mb-4"
+                className="w-full h-full object-cover"
               />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <span className="text-6xl opacity-20">📰</span>
+              </div>
             )}
+
+            <div className="absolute bottom-6 left-6 md:left-10">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-green-600 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                {publication.category}
+              </span>
+            </div>
+
             {publication.photo_credits && (
-              <p className="text-sm text-gray-500 mb-4">
+              <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[10px] px-3 py-1 rounded-tl-lg backdrop-blur-sm">
                 Photo: {publication.photo_credits}
-              </p>
+              </div>
             )}
-            <p className="text-gray-800 whitespace-pre-line">
-              {publication.body}
-            </p>
+          </div>
+
+          <div className="px-6 py-8 md:px-10">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
+              {publication.title}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-8 pb-6 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <FaCalendarAlt className="text-green-600" />
+                <span>
+                  {new Date(publication.created_at).toLocaleDateString(
+                    undefined,
+                    { year: "numeric", month: "long", day: "numeric" }
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaUser className="text-green-600" />
+                <span className="font-bold text-gray-800">
+                  {publication.byline || "Hillsider Contributor"}
+                </span>
+              </div>
+            </div>
+
+            <article className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+              {(publication.body || "").split("\n").map((para, idx) =>
+                para.trim() ? (
+                  <p key={idx} className="mb-4">
+                    {para}
+                  </p>
+                ) : (
+                  <br key={idx} />
+                )
+              )}
+            </article>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

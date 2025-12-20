@@ -10,28 +10,46 @@ class UserProfileController extends Controller
 {
     public function show(Request $request, $id = null)
     {
-        // If ID is provided, show that user. Otherwise, show current logged-in user.
-        $userId = $id ? $id : $request->user()->id;
+        if ($id) {
+            $user = User::findOrFail($id);
+        } else {
+            $user = $request->user();
+        }
 
-        $user = User::findOrFail($userId);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
 
-        // Fetch articles written by this user
-        // Assuming you have a 'user_id' column in your 'publications' table
-        // If not, you'll need to add it (similar to how we added 'views')
-        $articles = Publication::where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($publication) {
-                if ($publication->image_path) {
-                    $publication->image = asset('storage/' . $publication->image_path);
-                } else {
-                    $publication->image = null;
-                }
-                return $publication;
-            });
+        $currentUser = $request->user('sanctum');
+        $isOwner = $currentUser && $currentUser->id === $user->id;
+
+        $query = Publication::whereHas('writers', function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })
+        ->with('writers')
+        ->orderBy('created_at', 'desc');
+
+        if (!$isOwner) {
+            $query->where('status', 'approved');
+        } 
+
+        $articles = $query->get()->map(function ($publication) {
+            $publication->image = $publication->image_path 
+                ? asset('storage/' . $publication->image_path) 
+                : null;
+            return $publication;
+        });
 
         return response()->json([
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => $user->avatar,
+                'course' => $user->course,    
+                'position' => $user->position 
+            ],
             'articles' => $articles
         ]);
     }

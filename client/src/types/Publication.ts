@@ -1,3 +1,5 @@
+import type { User } from "./User";
+
 export interface Publication {
   publication_id: number;
   title: string;
@@ -9,7 +11,7 @@ export interface Publication {
   created_at: string;
   updated_at: string;
   status?: "pending" | "approved" | "rejected";
-  user_id: number;
+  writers?: User[];
 }
 
 export interface CreatePublicationData {
@@ -19,5 +21,5 @@ export interface CreatePublicationData {
   category: string;
   image?: File | null;
   photo_credits?: string;
-  user_id?: number;
+  writer_ids: number[];
 }
