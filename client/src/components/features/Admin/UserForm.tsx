@@ -1,7 +1,106 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { User, CreateUserData, UpdateUserData } from "../../../types/User";
 import { toast } from "react-toastify";
 import "../../../App.css";
+
+interface CustomDropdownProps {
+  label: string;
+  name: string;
+  value: string;
+  options: string[];
+  onChange: (name: string, value: string) => void;
+  error?: string;
+  placeholder?: string;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({
+  label,
+  name,
+  value,
+  options,
+  onChange,
+  error,
+  placeholder = "Select an option",
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">
+        {label}
+      </label>
+
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full px-4 py-2.5 rounded-lg text-sm border shadow-sm cursor-pointer flex justify-between items-center bg-white transition-all ${
+          error
+            ? "border-red-300 text-red-900 bg-red-50"
+            : "border-gray-300 text-gray-900 hover:border-gray-400"
+        } ${isOpen ? "ring-2 ring-green-500/10 border-green-500" : ""}`}
+      >
+        <span className={value ? "text-gray-900" : "text-gray-400"}>
+          {value || placeholder}
+        </span>
+        <svg
+          className={`w-5 h-5 text-gray-400 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+
+      {error && (
+        <p className="text-red-500 text-xs mt-1 font-medium">{error}</p>
+      )}
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-fadeIn">
+          <ul className="max-h-48 overflow-y-auto custom-scrollbar">
+            {options.map((option) => (
+              <li
+                key={option}
+                onClick={() => {
+                  onChange(name, option);
+                  setIsOpen(false);
+                }}
+                className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-green-50 hover:text-green-700 transition-colors ${
+                  value === option
+                    ? "bg-green-50 text-green-800 font-semibold"
+                    : "text-gray-700"
+                }`}
+              >
+                {option}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface ExtendedFormData extends CreateUserData {
   course?: string;
@@ -21,6 +120,36 @@ const UserForm: React.FC<UserFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const courseOptions = [
+    "BS in Information Technology",
+    "BS in Nursing",
+    "BS in Accountancy",
+    "BS in Business Administration",
+    "BS in Hospitality Management",
+    "BS in Criminology",
+    "BA in Communication",
+    "BA in Psychology",
+    "Bachelor of Elementary Education",
+    "Bachelor of Secondary Education",
+  ];
+
+  const positionOptions = [
+    "Editor-in-Chief",
+    "Associate Editor for Print",
+    "Associate Editor for Online",
+    "Managing Editor for Finance and Property",
+    "Managing Editor for Communications",
+    "Online Editor",
+    "Newspaper Editor",
+    "Magazine Editor",
+    "Literary Editor",
+    "Art Director",
+    "Photojournalist",
+    "Sport Editor",
+    "Editorial Assistant",
+    "Contributor",
+  ];
+
   const [formData, setFormData] = useState<ExtendedFormData>({
     name: "",
     email: "",
@@ -32,7 +161,6 @@ const UserForm: React.FC<UserFormProps> = ({
 
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const isEditing = !!user;
 
   useEffect(() => {
@@ -57,6 +185,11 @@ const UserForm: React.FC<UserFormProps> = ({
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
+    }
+
+    if (formData.role !== "admin") {
+      if (!formData.course) newErrors.course = "Course is required";
+      if (!formData.position) newErrors.position = "Position is required";
     }
 
     const isPasswordProvided = !!formData.password.trim();
@@ -95,6 +228,11 @@ const UserForm: React.FC<UserFormProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleDropdownChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
@@ -163,31 +301,26 @@ const UserForm: React.FC<UserFormProps> = ({
             )}
           </div>
 
-          {/* Course */}
-          <div>
-            <label className={labelClass}>Course / Degree</label>
-            <input
-              type="text"
-              name="course"
-              value={formData.course}
-              onChange={handleChange}
-              className={inputClass(false)}
-              placeholder="e.g. BS Information Technology"
-            />
-          </div>
+          {/* ✅ Custom Course Dropdown */}
+          <CustomDropdown
+            label="Course / Degree"
+            name="course"
+            value={formData.course || ""}
+            options={courseOptions}
+            onChange={handleDropdownChange}
+            error={errors.course}
+            placeholder="Select Course"
+          />
 
-          {/* Position */}
-          <div>
-            <label className={labelClass}>Position / Title</label>
-            <input
-              type="text"
-              name="position"
-              value={formData.position}
-              onChange={handleChange}
-              className={inputClass(false)}
-              placeholder="e.g. Editorial Assistant"
-            />
-          </div>
+          <CustomDropdown
+            label="Position / Title"
+            name="position"
+            value={formData.position || ""}
+            options={positionOptions}
+            onChange={handleDropdownChange}
+            error={errors.position}
+            placeholder="Select Position"
+          />
 
           {/* Password */}
           <div>
@@ -234,26 +367,14 @@ const UserForm: React.FC<UserFormProps> = ({
 
           {/* Role */}
           <div className="md:col-span-2">
-            <label className={labelClass}>System Role</label>
-            <div className="relative">
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className={`${inputClass(
-                  false
-                )} appearance-none cursor-pointer bg-no-repeat bg-right pr-10`}
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: "right 0.5rem center",
-                  backgroundSize: "1.5em 1.5em",
-                }}
-              >
-                <option value="hillsider">Hillsider</option>
-                <option value="alumni">Alumni</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+            <CustomDropdown
+              label="System Role"
+              name="role"
+              value={formData.role}
+              options={["hillsider", "alumni", "admin"]}
+              onChange={handleDropdownChange}
+              error={errors.role}
+            />
           </div>
         </div>
 
@@ -262,44 +383,21 @@ const UserForm: React.FC<UserFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-800 transition-colors shadow-sm"
             disabled={loading}
+            className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-800 transition-colors shadow-sm"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-8 py-2.5 rounded-lg bg-green-600 text-white text-sm font-semibold shadow-md shadow-green-200 hover:bg-green-700 hover:shadow-lg transition-all duration-200 flex items-center gap-2"
             disabled={loading}
+            className="px-8 py-2.5 rounded-lg bg-green-600 text-white text-sm font-semibold shadow-md shadow-green-200 hover:bg-green-700 hover:shadow-lg transition-all duration-200 flex items-center gap-2"
           >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin h-4 w-4 text-white"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                <span>Processing...</span>
-              </>
-            ) : isEditing ? (
-              "Save Changes"
-            ) : (
-              "Create Account"
-            )}
+            {loading
+              ? "Processing..."
+              : isEditing
+              ? "Save Changes"
+              : "Create Account"}
           </button>
         </div>
       </form>

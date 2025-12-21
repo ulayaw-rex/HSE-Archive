@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('print_media', function (Blueprint $table) {
             $table->increments('print_media_id');
             $table->string('title');
-            $table->string('type'); // e.g., 'folio', 'magazine', 'tabloid', 'other'
+            $table->string('type'); 
             $table->date('date');
             $table->text('description');
             $table->string('image_path')->nullable();

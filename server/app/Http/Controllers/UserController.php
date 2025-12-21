@@ -14,8 +14,8 @@ class UserController extends Controller
 
     public function index(): JsonResponse
     {
-        $users = User::select('id', 'name', 'email', 'role', 'course', 'position', 'created_at')
-            ->orderBy('created_at', 'desc')
+        $users = User::select('id', 'name', 'email', 'role', 'course', 'position', 'status', 'created_at')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return response()->json($users);
@@ -37,7 +37,7 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function store(Request $request): JsonResponse
+public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -59,6 +59,7 @@ class UserController extends Controller
             'role' => $validated['role'],
             'course' => $validated['course'] ?? null,
             'position' => $validated['position'] ?? null,
+            'status' => 'approved' 
         ]);
 
         return response()->json([
@@ -70,11 +71,11 @@ class UserController extends Controller
                 'role' => $user->role,
                 'course' => $user->course,
                 'position' => $user->position,
+                'status' => $user->status, 
                 'created_at' => $user->created_at,
             ]
         ], 201);
     }
-
     public function show(Request $request, $id = null)
     {
         $viewer = $request->user('sanctum'); 
@@ -154,12 +155,27 @@ class UserController extends Controller
         ]);
     }
 
-    public function destroy(User $user): JsonResponse
+    public function approveUser($id): JsonResponse
     {
+        $user = User::findOrFail($id);
+        
+        $user->status = 'approved';
+        $user->save();
+
+        return response()->json([
+            'message' => 'User approved successfully',
+            'user' => $user
+        ], 200);
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+                
         $user->delete();
 
         return response()->json([
-            'message' => 'User deleted successfully'
-        ]);
+            'message' => 'User request declined and removed successfully'
+        ], 200);
     }
 }

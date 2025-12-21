@@ -6,6 +6,7 @@ export interface User {
   created_at: string;
   course?: string;
   position?: string;
+  status?: "pending" | "approved" | "rejected";
 }
 
 export interface CreateUserData {

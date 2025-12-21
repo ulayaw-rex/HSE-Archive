@@ -9,6 +9,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserProfileController;
 
+Route::post('/register', [AuthController::class, 'register']);
+
 //  Auth 
 Route::middleware('web')->post('login', [AuthController::class, 'login']);
 Route::middleware('web')->post('logout', [AuthController::class, 'logout']);
@@ -55,6 +57,7 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         
         // User Management 
+        Route::put('/users/{id}/approve', [UserController::class, 'approveUser']);
         Route::apiResource('users', UserController::class);
 
         // News Management 

@@ -25,11 +25,23 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-
         $user = Auth::user();
+
+        if ($user->status === 'pending') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return response()->json([
+                'message' => 'Your account is currently under review by the administrator. Please wait for approval.'
+            ], 403);
+        }
 
         $validRoles = [User::ROLE_HILLSIDER, User::ROLE_ALUMNI, User::ROLE_ADMIN];
         if (!in_array($user->role, $validRoles, true)) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            
             throw ValidationException::withMessages([
                 'email' => ['Your account role is not permitted to login.'],
             ]);
@@ -49,10 +61,40 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'status' => $user->status, 
             ],
             'redirect' => $redirect,
         ]);
     }
+
+
+public function register(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+        'course' => 'required|string',
+        'position' => 'required|string',
+        'role' => 'required|in:hillsider,alumni', 
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        
+        'role' => $request->role, 
+        'course' => $request->course,
+        'position' => $request->position,
+        
+        'status' => 'pending' 
+    ]);
+
+    return response()->json([
+        'message' => 'Registration successful! Please wait for admin approval.'
+    ], 201);
+}
 
     public function me(Request $request): JsonResponse
     {

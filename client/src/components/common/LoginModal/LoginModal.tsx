@@ -3,7 +3,6 @@ import "../../../App.css";
 import AxiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import LoginArt from "../../../assets/Login.png";
-
 import { useAuth } from "../../../context/AuthContext";
 
 interface LoginModalProps {
@@ -13,7 +12,6 @@ interface LoginModalProps {
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-
   const { checkAuth } = useAuth();
 
   const [credentials, setCredentials] = useState({
@@ -23,9 +21,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [isPendingError, setIsPendingError] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsPendingError(false);
     setLoading(true);
 
     try {
@@ -63,11 +64,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         navigate("/", { replace: true });
       }
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.errors?.email?.[0] ||
-        "Login failed. Please check your credentials.";
-      setError(message);
+      if (err.response && err.response.status === 403) {
+        setIsPendingError(true);
+        setError(err.response.data.message);
+      } else {
+        const message =
+          err?.response?.data?.message ||
+          err?.response?.data?.errors?.email?.[0] ||
+          "Login failed. Please check your credentials.";
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -126,7 +132,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   />
                 </div>
 
-                {error && <div className="login-modal__error">{error}</div>}
+                {error && (
+                  <div
+                    className={`text-sm p-3 rounded-md mb-4 text-center ${
+                      isPendingError
+                        ? "bg-yellow-50 text-yellow-800 border border-yellow-200"
+                        : "login-modal__error"
+                    }`}
+                  >
+                    {isPendingError ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="font-bold flex items-center gap-1">
+                          ⚠️ Account Under Review
+                        </span>
+                        <span className="text-xs">{error}</span>
+                      </div>
+                    ) : (
+                      error
+                    )}
+                  </div>
+                )}
 
                 <a href="#" className="login-modal__forgot pl-37">
                   Forgot password?
@@ -140,9 +165,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   {loading ? "Signing in..." : "LOG IN"}
                 </button>
 
-                <a href="#" className="login-modal__forgot pl-18">
-                  No account yet? Contact Administrator.
-                </a>
+                <div className="text-center mt-4">
+                  <span className="text-gray-600 text-sm">
+                    No account yet?{" "}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      navigate("/register");
+                    }}
+                    className="text-green-700 font-bold hover:underline text-sm ml-1"
+                  >
+                    Register Account
+                  </button>
+                </div>
               </form>
             </div>
           </div>

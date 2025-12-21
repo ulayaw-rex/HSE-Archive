@@ -9,6 +9,7 @@ import { RecentActivity } from "../../components/features/Admin/RecentActivity";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PendingReviewsWidget from "../../components/features/Admin/PendingReviewsWidget";
 import type { Publication } from "../../types/Publication";
+import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
 
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const response = await AxiosInstance.get("publications/dashboard/stats");
@@ -24,9 +25,7 @@ const AdminPage: React.FC = () => {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
     null
   );
-
   const [publications, setPublications] = useState<Publication[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,6 +88,10 @@ const AdminPage: React.FC = () => {
           </div>
         ) : dashboardStats ? (
           <>
+            <div className="mb-8">
+              <PendingUsersWidget />
+            </div>
+
             <div className="mb-8">
               <PendingReviewsWidget
                 publications={publications}

@@ -1,4 +1,3 @@
-// routes/SiteRoutes.tsx
 import { Route } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage";
 import SportsPage from "../pages/Sports";
@@ -19,6 +18,7 @@ import AboutPage from "../pages/About";
 import ArticleDetail from "../pages/News/ArticleDetail";
 import SearchResults from "../pages/HomePage/SearchResults";
 import UserProfile from "../pages/Profiles/UserProfile";
+import RegistrationPage from "../pages/Registration/RegistrationPage";
 
 export default (
   <>
@@ -40,7 +40,8 @@ export default (
     <Route path="/print-media/other-issues" element={<OtherIssuesPage />} />
     <Route path="/about" element={<AboutPage />} />
     <Route path="/search" element={<SearchResults />} />
-    <Route path="/profile" element={<UserProfile />} /> {/* Own Profile */}
+    <Route path="/profile" element={<UserProfile />} />
     <Route path="/profile/:id" element={<UserProfile />} />
+    <Route path="/register" element={<RegistrationPage />} />
   </>
 );

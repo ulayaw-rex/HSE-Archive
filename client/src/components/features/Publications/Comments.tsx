@@ -9,6 +9,7 @@ import {
   FaTrash,
   FaCheck,
   FaTimes,
+  FaLock,
 } from "react-icons/fa";
 import ConfirmationModal from "../../common/ConfirmationModal";
 
@@ -49,13 +50,6 @@ export function Comments({
   const [newComment, setNewComment] = useState("");
 
   const handleGuestClick = () => {
-    toast.error(
-      <div>
-        <strong>Login required</strong>
-        <p className="text-sm mt-1">Sign in to join the discussion.</p>
-      </div>,
-      { toastId: "guest-login-error", position: "top-right" }
-    );
     setIsLoginModalOpen(true);
   };
 
@@ -134,9 +128,9 @@ export function Comments({
         {user ? `Comments (${comments.length})` : "Comments"}
       </h3>
 
-      <div className="mb-8 bg-gray-50 p-4 rounded-lg">
+      <div className="mb-8">
         {user ? (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center mb-2 text-green-700 font-semibold">
               <FaUserCircle className="mr-2" />
               Posting as {user.name}
@@ -151,7 +145,8 @@ export function Comments({
             />
             <div className="flex justify-end mt-2">
               <button
-                type="submit"
+                type="button"
+                onClick={(e) => handleSubmit(e as any)}
                 className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800 transition-colors"
               >
                 Post Comment
@@ -159,28 +154,22 @@ export function Comments({
             </div>
           </form>
         ) : (
-          <div className="relative cursor-pointer">
-            <div className="flex items-center mb-2 text-gray-400 font-semibold">
-              <FaUserCircle className="mr-2" /> Log in to post...
+          <div
+            className="flex flex-col items-center justify-center p-8 bg-gray-50 border border-gray-200 border-dashed rounded-xl cursor-pointer hover:bg-gray-100 transition-all group"
+            onClick={handleGuestClick}
+          >
+            <div className="bg-green-100 p-3 rounded-full mb-3 group-hover:scale-110 transition-transform">
+              <FaLock className="text-green-600 text-xl" />
             </div>
-            <textarea
-              rows={3}
-              placeholder="Write your comment..."
-              className="w-full p-3 border border-gray-300 rounded bg-white cursor-pointer pointer-events-none"
-              readOnly
-            />
-            <div className="flex justify-end mt-2">
-              <button
-                className="px-4 py-2 bg-green-700 text-white opacity-50 cursor-not-allowed rounded"
-                disabled
-              >
-                Post Comment
-              </button>
-            </div>
-            <div
-              className="absolute inset-0 z-10"
-              onClick={handleGuestClick}
-            ></div>
+            <h4 className="text-gray-800 font-bold text-lg">
+              Join the discussion
+            </h4>
+            <p className="text-gray-500 text-sm mb-4">
+              Log in or sign up to leave a comment.
+            </p>
+            <button className="px-6 py-2 bg-green-700 text-white font-semibold rounded-full hover:bg-green-800 transition-colors shadow-sm">
+              Log In
+            </button>
           </div>
         )}
       </div>
@@ -268,7 +257,7 @@ export function Comments({
           )}
         </div>
       ) : (
-        <div className="text-center py-8 bg-gray-50 rounded border border-gray-100">
+        <div className="text-center py-8 bg-gray-50 rounded border border-gray-100 mt-4">
           <p className="text-gray-500 italic">
             Comments are hidden for guests.
           </p>
