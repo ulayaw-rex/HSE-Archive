@@ -40,60 +40,61 @@ class PublicationController extends Controller
         return response()->json($publications);
     }
 
-public function store(Request $request)
-{
-    $currentUser = $request->user();
-    
-    $status = ($currentUser->role === 'admin') ? 'approved' : 'pending';
-
-    $validator = Validator::make($request->all(), [
-        'title' => 'required|string',
-        'body' => 'required|string',
-        'category' => 'required|string',
-        'writer_ids' => 'required|array',       
-        'writer_ids.*' => 'exists:users,id',    
-        'image' => 'nullable|image|max:2048',
-        'byline' => 'nullable|string', 
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    $finalByline = $request->byline;
-
-    if (empty($finalByline)) {
-        $writers = User::whereIn('id', $request->writer_ids)->get();
+    public function store(Request $request)
+    {
+        $currentUser = $request->user();
         
-        $finalByline = $writers->pluck('name')->join(' & ');
+        $status = ($currentUser->role === 'admin') ? 'approved' : 'pending';
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string',
+            'body' => 'required|string',
+            'category' => 'required|string',
+            'writer_ids' => 'required|array',       
+            'writer_ids.*' => 'exists:users,id',    
+            'image' => 'nullable|image|max:2048',
+            'byline' => 'nullable|string', 
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $finalByline = $request->byline;
+
+        if (empty($finalByline)) {
+            $writers = User::whereIn('id', $request->writer_ids)->get();
+            
+            $finalByline = $writers->pluck('name')->join(' & ');
+        }
+
+            \Log::info('User attempting to post:', ['user' => $request->user()]);
+
+        $publication = Publication::create([
+            'user_id' => $currentUser->id,
+            'title' => $request->title,
+            'body' => $request->body,
+            'category' => $request->category,
+            'photo_credits' => $request->photo_credits,
+            'byline' => $finalByline, 
+            'status' => $status,
+            'views' => 0,
+        ]);
+
+        $publication->writers()->attach($request->writer_ids);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('publications_images', 'public');
+            $publication->update(['image_path' => $path]);
+        }
+
+        $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
+        
+        $publication->load('writers');
+
+        return response()->json($publication, 201);
     }
 
-        \Log::info('User attempting to post:', ['user' => $request->user()]);
-
-    $publication = Publication::create([
-        'user_id' => $currentUser->id,
-        'title' => $request->title,
-        'body' => $request->body,
-        'category' => $request->category,
-        'photo_credits' => $request->photo_credits,
-        'byline' => $finalByline, 
-        'status' => $status,
-        'views' => 0,
-    ]);
-
-    $publication->writers()->attach($request->writer_ids);
-
-    if ($request->hasFile('image')) {
-        $path = $request->file('image')->store('publications_images', 'public');
-        $publication->update(['image_path' => $path]);
-    }
-
-    $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
-    
-    $publication->load('writers');
-
-    return response()->json($publication, 201);
-}
     public function show(Publication $publication, Request $request)
     {
         $user = $request->user('sanctum');
@@ -338,19 +339,19 @@ public function store(Request $request)
     }
 
 
-public function review(Request $request, $id)
-{
-    $publication = Publication::findOrFail($id);
+    public function review(Request $request, $id)
+    {
+        $publication = Publication::findOrFail($id);
 
-    $request->validate([
-        'status' => 'required|in:approved,rejected'
-    ]);
+        $request->validate([
+            'status' => 'required|in:approved,rejected'
+        ]);
 
-    $publication->update(['status' => $request->status]);
+        $publication->update(['status' => $request->status]);
 
-    return response()->json([
-        'message' => 'Article ' . $request->status . ' successfully',
-        'data' => $publication
-    ]);
-}
+        return response()->json([
+            'message' => 'Article ' . $request->status . ' successfully',
+            'data' => $publication
+        ]);
+    }
 }

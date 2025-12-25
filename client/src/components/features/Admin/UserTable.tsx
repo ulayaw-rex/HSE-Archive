@@ -19,6 +19,8 @@ const UserTable: React.FC<UserTableProps> = ({
 }) => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -58,12 +60,16 @@ const UserTable: React.FC<UserTableProps> = ({
 
   const handleConfirmDelete = async () => {
     if (!userToDelete) return;
+
+    setIsDeleting(true);
     try {
       await onDelete(userToDelete.id);
       toast.success(`Successfully deleted user ${userToDelete.name}`);
       setUserToDelete(null);
     } catch (error) {
       toast.error("Failed to delete user. Please try again.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -154,7 +160,6 @@ const UserTable: React.FC<UserTableProps> = ({
                           {user.position || "-"}
                         </div>
                       </td>
-
                       <td className="px-6 py-4 whitespace-nowrap">
                         {user.status ? (
                           <span
@@ -169,7 +174,6 @@ const UserTable: React.FC<UserTableProps> = ({
                           <span className="text-sm text-gray-500">-</span>
                         )}
                       </td>
-
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(
@@ -188,7 +192,12 @@ const UserTable: React.FC<UserTableProps> = ({
                         <div className="flex items-center space-x-3">
                           <button
                             onClick={() => onEdit(user)}
-                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-full transition-colors"
+                            disabled={isDeleting}
+                            className={`p-2 rounded-full transition-colors ${
+                              isDeleting
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                            }`}
                             title="Edit User"
                           >
                             <FaEdit size={18} />
@@ -196,7 +205,12 @@ const UserTable: React.FC<UserTableProps> = ({
 
                           <button
                             onClick={(e) => handleDeleteClick(user, e)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
+                            disabled={isDeleting}
+                            className={`p-2 rounded-full transition-colors ${
+                              isDeleting
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-red-500 hover:text-red-700 hover:bg-red-50"
+                            }`}
                             title="Delete User"
                           >
                             <FaTrash size={18} />
@@ -214,13 +228,14 @@ const UserTable: React.FC<UserTableProps> = ({
 
       <ConfirmationModal
         isOpen={!!userToDelete}
-        onClose={() => setUserToDelete(null)}
+        onClose={() => !isDeleting && setUserToDelete(null)}
         onConfirm={handleConfirmDelete}
         title="Delete User"
         message={`Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone.`}
         confirmLabel="Delete"
         cancelLabel="Cancel"
         isDangerous={true}
+        isLoading={isDeleting}
       />
     </>
   );

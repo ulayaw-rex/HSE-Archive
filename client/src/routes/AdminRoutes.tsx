@@ -3,6 +3,7 @@ import AdminPage from "../pages/Admin";
 import PublicationsPage from "../pages/Admin/PublicationsPage";
 import UserManagement from "../pages/Admin/UserManagement";
 import PrintMediaPage from "../pages/Admin/PrintMediaPage";
+import SiteSettings from "../pages/Admin/SiteSettings";
 import {
   ContentArchivesPage,
   FeedbackReviewPage,
@@ -22,6 +23,7 @@ export default (
     <Route path="publications" element={<PublicationsPage />} />
     <Route path="content/archives" element={<ContentArchivesPage />} />
     <Route path="print-media" element={<PrintMediaPage />} />
+    <Route path="site-settings" element={<SiteSettings />} />
     {/* User Management */}
     <Route path="users" element={<UserManagement />} />
     {/* Feedback */}

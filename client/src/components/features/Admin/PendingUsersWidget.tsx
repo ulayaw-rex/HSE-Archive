@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AxiosInstance from "../../../AxiosInstance";
 import { toast } from "react-toastify";
-import { FaCheck, FaTimes, FaUserClock } from "react-icons/fa";
+import { FaCheck, FaTimes, FaUserClock, FaSpinner } from "react-icons/fa";
 import ConfirmationModal from "../../common/ConfirmationModal";
 
 interface PendingUser {
@@ -18,14 +18,17 @@ const PendingUsersWidget: React.FC = () => {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+
+  const [isRejecting, setIsRejecting] = useState(false);
+
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [userToReject, setUserToReject] = useState<number | null>(null);
 
   const fetchPendingUsers = async () => {
     try {
       const response = await AxiosInstance.get("/users");
-      const allUsers: any[] = response.data;
-      const pending = allUsers.filter((u: any) => u.status === "pending");
+      const pending = response.data.filter((u: any) => u.status === "pending");
       setPendingUsers(pending);
     } catch (error) {
       console.error("Failed to fetch users", error);
@@ -39,12 +42,15 @@ const PendingUsersWidget: React.FC = () => {
   }, []);
 
   const handleApprove = async (id: number) => {
+    setActionLoadingId(id);
     try {
       await AxiosInstance.put(`/users/${id}/approve`);
-      toast.success("User approved successfully!");
+      toast.success("User approved! Approval email sent.");
       setPendingUsers((prev) => prev.filter((user) => user.id !== id));
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve user");
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -56,17 +62,19 @@ const PendingUsersWidget: React.FC = () => {
   const confirmRejection = async () => {
     if (!userToReject) return;
 
+    setIsRejecting(true);
     try {
       await AxiosInstance.delete(`/users/${userToReject}`);
-      toast.info("User request declined.");
+      toast.info("User rejected. Notification email sent.");
       setPendingUsers((prev) =>
         prev.filter((user) => user.id !== userToReject)
       );
+      setIsRejectModalOpen(false);
+      setUserToReject(null);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to decline user");
     } finally {
-      setIsRejectModalOpen(false);
-      setUserToReject(null);
+      setIsRejecting(false);
     }
   };
 
@@ -81,13 +89,14 @@ const PendingUsersWidget: React.FC = () => {
     <>
       <ConfirmationModal
         isOpen={isRejectModalOpen}
-        onClose={() => setIsRejectModalOpen(false)}
+        onClose={() => !isRejecting && setIsRejectModalOpen(false)}
         onConfirm={confirmRejection}
         title="Reject Registration?"
-        message="Are you sure you want to decline this user? This action cannot be undone."
+        message="Are you sure you want to decline this user? They will receive an email notification explaining why."
         confirmLabel="Yes, Decline"
         cancelLabel="Cancel"
         isDangerous={true}
+        isLoading={isRejecting}
       />
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
@@ -131,7 +140,6 @@ const PendingUsersWidget: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 mb-1">{user.email}</p>
-
                     <div className="text-xs text-gray-400 flex flex-wrap gap-x-3">
                       {user.course && <span>🎓 {user.course}</span>}
                       {user.position && <span>💼 {user.position}</span>}
@@ -141,13 +149,32 @@ const PendingUsersWidget: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleApprove(user.id)}
-                      className="flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-all shadow-sm hover:shadow-md"
+                      disabled={actionLoadingId === user.id}
+                      className={`flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-all shadow-sm ${
+                        actionLoadingId === user.id
+                          ? "bg-green-700 text-white opacity-75 cursor-wait"
+                          : "bg-green-600 hover:bg-green-700 text-white hover:shadow-md"
+                      }`}
                     >
-                      <FaCheck size={12} /> Approve
+                      {actionLoadingId === user.id ? (
+                        <>
+                          <FaSpinner className="animate-spin" size={12} />{" "}
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <FaCheck size={12} /> Approve
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={() => handleDeclineClick(user.id)}
-                      className="flex items-center justify-center gap-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-all"
+                      disabled={actionLoadingId === user.id}
+                      className={`flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-all ${
+                        actionLoadingId === user.id
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-red-100 hover:bg-red-200 text-red-700"
+                      }`}
                     >
                       <FaTimes size={12} /> Decline
                     </button>

@@ -107,7 +107,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   <input
                     className="login-modal__input"
                     type="email"
-                    placeholder="Username"
+                    placeholder="Email"
                     value={credentials.email}
                     onChange={(e) =>
                       setCredentials({ ...credentials, email: e.target.value })
@@ -153,9 +153,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                <a href="#" className="login-modal__forgot pl-37">
-                  Forgot password?
-                </a>
+                <a href="#" className="login-modal__forgot pl-37"></a>
 
                 <button
                   type="submit"

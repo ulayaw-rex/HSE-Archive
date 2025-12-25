@@ -153,13 +153,13 @@ const RegistrationPage: React.FC = () => {
   });
 
   const courseOptions = [
-    "BS Information Technology",
-    "BS Nursing",
-    "BS Accountancy",
-    "BA Communication",
-    "BS Business Administration",
-    "BS Hospitality Management",
-    "BS Criminology",
+    "BS in Information Technology",
+    "BS in Nursing",
+    "BS in Accountancy",
+    "BA in Communication",
+    "BS in Business Administration",
+    "BS in Hospitality Management",
+    "BS in Criminology",
     "Bachelor of Elementary Education",
     "Bachelor of Secondary Education",
   ];

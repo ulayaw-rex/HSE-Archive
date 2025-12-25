@@ -31,7 +31,11 @@ AxiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response && error.response.status !== 422) {
+    if (
+      error.response &&
+      error.response.status !== 422 &&
+      error.response.status !== 401
+    ) {
       console.error("Unexpected response error: ", error);
     }
 

@@ -9,18 +9,14 @@ import {
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoadingSpinner from "./components/common/LoadingSpinner";
-
 import { AuthProvider, useAuth } from "./context/AuthContext";
-
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
-
 import { adminSidebarItems } from "./pages/Admin/SidebarItems";
-
 import SiteRoutes from "./routes/SiteRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
-
 import NotFoundPage from "./components/common/NotFound";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -45,6 +41,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           <Route element={<SiteLayout />}>{SiteRoutes}</Route>

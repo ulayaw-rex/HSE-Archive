@@ -8,6 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use App\Notifications\AccountApproved;
+use App\Notifications\AccountDeclined;
 
 class UserController extends Controller
 {
@@ -20,6 +22,7 @@ class UserController extends Controller
 
         return response()->json($users);
     }
+    
 
     public function search(Request $request): JsonResponse
     {
@@ -37,11 +40,11 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email:dns|max:255|unique:users',
             'password' => [
                 'required',
                 'string',
@@ -162,16 +165,37 @@ public function store(Request $request): JsonResponse
         $user->status = 'approved';
         $user->save();
 
+        try {
+            $user->notify(new AccountApproved());
+        } catch (\Exception $e) {
+        }
+
         return response()->json([
-            'message' => 'User approved successfully',
+            'message' => 'User approved and notified successfully',
             'user' => $user
         ], 200);
+    }
+
+    public function getMembers(): JsonResponse
+    {
+        $members = User::where('status', 'approved')
+            ->whereNotNull('position')
+            ->where('position', '!=', '') 
+            ->select('id', 'name', 'course', 'position', 'role', 'created_at') 
+            ->get();
+
+        return response()->json($members);
     }
 
     public function destroy($id): JsonResponse
     {
         $user = User::findOrFail($id);
-                
+
+        try {
+            $user->notify(new AccountDeclined());
+        } catch (\Exception $e) {
+        }
+        
         $user->delete();
 
         return response()->json([

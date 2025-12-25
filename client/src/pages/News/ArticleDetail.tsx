@@ -1,9 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaCalendarAlt, FaFacebookF, FaInstagram } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaUserPlus,
+  FaCheckCircle,
+  FaInfoCircle,
+} from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import { toast } from "react-toastify";
 import type { Publication } from "../../types/Publication";
+import { useAuth } from "../../context/AuthContext";
 import {
   Comments,
   type Comment,
@@ -11,48 +19,40 @@ import {
 
 const ArticleDetail: React.FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
+  const { user } = useAuth();
 
   const [publication, setPublication] = useState<Publication | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showAlreadySubmittedModal, setShowAlreadySubmittedModal] =
+    useState(false);
+  const [requestingCredit, setRequestingCredit] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [idOrSlug]);
 
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const currentUser = useMemo(() => {
-    try {
-      const saved = localStorage.getItem("user");
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  }, []);
-
   useEffect(() => {
     if (!idOrSlug) return;
-
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-
         const [pubResponse, commentsResponse] = await Promise.all([
           AxiosInstance.get<Publication>(`/publications/${idOrSlug}`),
           AxiosInstance.get<Comment[]>(
             `/publications/${idOrSlug}/comments`
           ).catch(() => ({ data: [] })),
         ]);
-
         setPublication(pubResponse.data);
-
         if (Array.isArray(commentsResponse.data)) {
           setComments(commentsResponse.data);
         }
       } catch (err: any) {
-        console.error("Failed to fetch data:", err);
         if (err.response && err.response.status === 403) {
           setError("Access Denied: This article is pending approval.");
         } else {
@@ -62,41 +62,127 @@ const ArticleDetail: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [idOrSlug]);
 
-  if (loading) {
+  const handleClaimClick = () => {
+    if (!publication || !user) return;
+    setIsClaimModalOpen(true);
+  };
+
+  const submitClaimRequest = async () => {
+    if (!publication) return;
+
+    try {
+      setRequestingCredit(true);
+      await AxiosInstance.post(
+        `/publications/${publication.publication_id}/request-credit`
+      );
+
+      setIsClaimModalOpen(false);
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        setIsClaimModalOpen(false);
+        setShowAlreadySubmittedModal(true);
+      } else if (error.response?.status === 422) {
+        toast.warning("You are already listed as a writer.");
+        setIsClaimModalOpen(false);
+      } else {
+        toast.error("Failed to send request. Please try again.");
+      }
+    } finally {
+      setRequestingCredit(false);
+    }
+  };
+
+  if (loading)
     return (
       <div className="p-8 text-center h-screen flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8 bg-white shadow rounded-lg">
-          <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
-          <p className="text-gray-700">{error}</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-red-600 font-bold">
+        {error}
       </div>
     );
-  }
-
-  if (!publication) {
+  if (!publication)
     return (
       <div className="p-8 text-center text-gray-600">Article not found.</div>
     );
-  }
 
-  // Helper to check if current user is one of the writers
-  const isWriter =
-    currentUser && publication.writers?.some((w) => w.id === currentUser.id);
+  const isWriter = user && publication.writers?.some((w) => w.id === user.id);
 
   return (
     <div className="min-h-screen bg-white">
+      <ConfirmationModal
+        isOpen={isClaimModalOpen}
+        onClose={() => !requestingCredit && setIsClaimModalOpen(false)}
+        onConfirm={submitClaimRequest}
+        title="Claim Authorship"
+        message={`Are you sure you want to submit a request to be credited as an author for "${publication.title}"?`}
+        confirmLabel="Submit Request"
+        cancelLabel="Cancel"
+        isLoading={requestingCredit}
+        isDangerous={false}
+      />
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowSuccessModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+              <FaCheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Request Sent!
+            </h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              Your request has been submitted successfully. The administrator
+              will review your claim shortly.
+            </p>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg shadow-green-200 transition-all"
+            >
+              Okay, Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showAlreadySubmittedModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowAlreadySubmittedModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
+              <FaInfoCircle className="h-10 w-10 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Request Pending
+            </h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              You have already submitted a request for this article. Please wait
+              for the administrator to approve it.
+            </p>
+            <button
+              onClick={() => setShowAlreadySubmittedModal(false)}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-200 transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {publication.status === "pending" && (
         <div
           className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"
@@ -120,7 +206,7 @@ const ArticleDetail: React.FC = () => {
             {publication.title}
           </h1>
 
-          <div className="flex items-center text-gray-600 mb-6 space-x-4 text-sm">
+          <div className="flex flex-wrap items-center text-gray-600 mb-6 gap-4 text-sm">
             <div className="flex items-center space-x-1">
               <FaCalendarAlt />
               <span>
@@ -134,7 +220,6 @@ const ArticleDetail: React.FC = () => {
 
             <div className="flex items-center flex-wrap gap-1">
               <span className="mr-1">By</span>
-
               {publication.writers && publication.writers.length > 0 ? (
                 publication.writers.map((writer, index) => (
                   <span key={writer.id} className="flex items-center">
@@ -144,11 +229,9 @@ const ArticleDetail: React.FC = () => {
                     >
                       {writer.name}
                     </Link>
-
                     {index < publication.writers!.length - 2 && (
                       <span className="mr-1">,</span>
                     )}
-
                     {index === publication.writers!.length - 2 && (
                       <span className="mx-1">&</span>
                     )}
@@ -160,21 +243,14 @@ const ArticleDetail: React.FC = () => {
                 </span>
               )}
 
-              {isWriter && (
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.dispatchEvent(
-                      new CustomEvent("open-attribute-editor", {
-                        detail: { publicationId: publication.publication_id },
-                      })
-                    );
-                  }}
-                  className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-600"
+              {user && !isWriter && (
+                <button
+                  onClick={handleClaimClick}
+                  disabled={requestingCredit}
+                  className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:border-green -300"
                 >
-                  Add attribute +
-                </a>
+                  <FaUserPlus /> Add Attribute
+                </button>
               )}
             </div>
           </div>
@@ -207,52 +283,6 @@ const ArticleDetail: React.FC = () => {
             setComments={setComments}
           />
         </div>
-
-        <aside className="hidden lg:flex flex-col space-y-4 top-20 self-start">
-          <a
-            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-              window.location.href
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Share on Facebook"
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <div
-              style={{
-                background: "#1877F2",
-                borderRadius: "50%",
-                padding: "10px",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <FaFacebookF size={24} color="#fff" />
-            </div>{" "}
-          </a>
-          <a
-            href="https://www.instagram.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Instagram"
-            className="text-pink-600 hover:text-pink-800"
-          >
-            <div
-              style={{
-                background:
-                  "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
-                borderRadius: "50%",
-                padding: "8px",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <FaInstagram size={24} color="#fff" />
-            </div>
-          </a>
-        </aside>
       </div>
     </div>
   );

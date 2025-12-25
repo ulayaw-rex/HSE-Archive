@@ -10,6 +10,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PendingReviewsWidget from "../../components/features/Admin/PendingReviewsWidget";
 import type { Publication } from "../../types/Publication";
 import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
+import CreditRequestsWidget from "../../components/features/Admin/CreditRequestsWidget";
 
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const response = await AxiosInstance.get("publications/dashboard/stats");
@@ -97,6 +98,10 @@ const AdminPage: React.FC = () => {
                 publications={publications}
                 onReviewComplete={loadPublications}
               />
+            </div>
+
+            <div className="mb-8">
+              <CreditRequestsWidget />
             </div>
 
             <div className="mb-8">

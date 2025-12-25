@@ -8,15 +8,24 @@ use App\Http\Controllers\PrintMediaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\SiteSettingController;
+use App\Http\Controllers\CreditRequestController;
 
+// Registration Route
 Route::post('/register', [AuthController::class, 'register']);
+
+// About Us - Team Members (Read-Only)
+Route::get('/members', [UserController::class, 'getMembers']);
+
+//  Site Settings (Read-Only)
+Route::get('/site-settings/team-photo', [SiteSettingController::class, 'getTeamPhoto']);
+Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamIntro']);
 
 //  Auth 
 Route::middleware('web')->post('login', [AuthController::class, 'login']);
 Route::middleware('web')->post('logout', [AuthController::class, 'logout']);
 
 //  News (Read-Only)
-Route::apiResource('news', NewsController::class)->only(['index', 'show']);
 Route::get('publications/category/{category}', [PublicationController::class, 'getByCategory']);
 
 //  Publications (Read-Only)
@@ -42,9 +51,6 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('/users/search', [UserController::class, 'search']);
     Route::post('/publications', [PublicationController::class, 'store']);
 
-    //  News
-    Route::post('news/{news}/increment-views', [NewsController::class, 'incrementViews']);
-
     //  Comments (Read & Create)
     Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
     Route::post('/publications/{publication}/comments', [CommentController::class, 'store']);
@@ -52,6 +58,8 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
     
+    // Credit Requests
+    Route::post('/publications/{id}/request-credit', [CreditRequestController::class, 'requestCredit']);
 
     // ADMIN-ONLY ROUTES
     Route::middleware('role:admin')->group(function () {
@@ -62,8 +70,6 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
 
         // News Management 
         Route::get('/admin/all-publications', [PublicationController::class, 'index']);
-        Route::apiResource('news', NewsController::class)->except(['index', 'show']);
-        Route::get('news/dashboard/stats', [NewsController::class, 'dashboardStats']);
 
         // Publications Management 
         Route::get('publications/dashboard/stats', [PublicationController::class, 'dashboardStats']);
@@ -74,5 +80,14 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
 
         // Reviewing and Approving Articles
         Route::put('/publications/{id}/review', [PublicationController::class, 'review']);
+
+        // Site Settings Management
+        Route::post('/admin/site-settings/team-photo', [SiteSettingController::class, 'uploadTeamPhoto']);
+        Route::post('/admin/site-settings/team-intro', [SiteSettingController::class, 'updateTeamIntro']);
+
+        // Credit Requests Management
+        Route::get('/admin/credit-requests', [CreditRequestController::class, 'index']);
+        Route::put('/admin/credit-requests/{id}/approve', [CreditRequestController::class, 'approve']);
+        Route::put('/admin/credit-requests/{id}/reject', [CreditRequestController::class, 'reject']);
     });
 });

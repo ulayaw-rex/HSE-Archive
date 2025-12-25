@@ -31,14 +31,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await axios.get("/me");
       setUser(response.data.user);
-    } catch (error) {
-      setUser(null);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setUser(null);
+      } else {
+        console.error("Auth check failed", error);
+        setUser(null);
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Run checkAuth once when the app starts
   useEffect(() => {
     checkAuth();
   }, []);

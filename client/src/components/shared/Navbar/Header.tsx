@@ -19,18 +19,6 @@ const navLinks: NavigationLink[] = [
   { id: "about", label: "About", href: "/about" },
 ];
 
-type TopLink = {
-  id: string;
-  label: string;
-  href: string;
-};
-
-const topLinks: TopLink[] = [
-  { id: "ads", label: "Ads", href: "#" },
-  { id: "tips", label: "Tips", href: "#" },
-  { id: "alumni", label: "Alumni", href: "#" },
-];
-
 const Header: React.FC = () => {
   const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -90,18 +78,6 @@ const Header: React.FC = () => {
                   <FaBars size={24} className="text-white drop-shadow-md" />
                 )}
               </button>
-
-              <div className="hidden lg:flex items-center space-x-6">
-                {topLinks.slice(0, 5).map((link) => (
-                  <a
-                    key={link.id}
-                    href={link.href}
-                    className="text-sm text-green-200 hover:text-white transition-colors duration-200 font-medium"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
             </div>
 
             {/* --- Center (Logo/Date) --- */}
@@ -244,19 +220,6 @@ const Header: React.FC = () => {
                     {link.label}
                   </NavLink>
                 ))}
-                <div className="border-t border-green-600/50 my-2 mx-4"></div>
-                <div className="px-4 flex flex-wrap gap-3">
-                  {topLinks.map((link) => (
-                    <a
-                      key={link.id}
-                      href={link.href}
-                      className="text-xs text-green-300 hover:text-white transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
               </div>
             </div>
           )}

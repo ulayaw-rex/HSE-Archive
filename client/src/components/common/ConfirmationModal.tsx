@@ -74,13 +74,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               type="button"
               onClick={onConfirm}
               disabled={isLoading}
-              className={`w-full sm:w-1/2 px-4 py-2.5 text-white font-semibold rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${
-                isLoading
-                  ? "opacity-70 cursor-wait"
-                  : isDangerous
+              className={`w-full sm:w-1/2 px-4 py-2.5 text-white font-semibold rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all 
+              ${
+                isDangerous
                   ? "bg-red-600 hover:bg-red-700 focus:ring-red-500 shadow-red-200"
                   : "bg-green-600 hover:bg-green-700 focus:ring-green-500 shadow-green-200"
-              }`}
+              } 
+              ${isLoading ? "opacity-70 cursor-wait" : ""}`}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
