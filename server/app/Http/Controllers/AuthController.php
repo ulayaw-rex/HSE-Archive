@@ -23,6 +23,7 @@ class AuthController extends Controller
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
+        \App\Models\AuditLog::record('Login', 'User logged into the system');
 
         $request->session()->regenerate();
         $user = Auth::user();

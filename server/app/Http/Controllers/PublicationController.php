@@ -91,6 +91,7 @@ class PublicationController extends Controller
         $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
         
         $publication->load('writers');
+        \App\Models\AuditLog::record('Created Publication', "Title: {$publication->title}");
 
         return response()->json($publication, 201);
     }
@@ -316,6 +317,7 @@ class PublicationController extends Controller
             Storage::disk('public')->delete($publication->image_path);
         }
         $publication->delete();
+        \App\Models\AuditLog::record('Deleted Publication', "Deleted article: {$publication->title}");
         return response()->json(['message' => 'Publication deleted successfully']);
     }
 

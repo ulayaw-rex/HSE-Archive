@@ -12,17 +12,19 @@ interface Member {
 
 const POSITION_HIERARCHY = [
   "Editor-in-Chief",
-  "Associate Editor",
-  "Managing Editor",
-  "News Editor",
-  "Feature Editor",
-  "Sports Editor",
+  "Associate Editor for Print",
+  "Associate Editor for Online",
+  "Managing Editor for Finance and Property",
+  "Managing Editor for Communications",
+  "Online Editor",
+  "Newspaper Editor",
+  "Magazine Editor",
   "Literary Editor",
-  "Senior Staff",
-  "Staff Writer",
-  "Junior Staff",
-  "Photographer",
-  "Layout Artist",
+  "Art Director",
+  "Photojournalist",
+  "Editorial Assistant",
+  "Sports Editor",
+  "Contributor",
 ];
 
 const About: React.FC = () => {

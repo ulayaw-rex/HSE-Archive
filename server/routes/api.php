@@ -10,6 +10,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\CreditRequestController;
+use App\Http\Controllers\AnalyticsController;
 
 // Registration Route
 Route::post('/register', [AuthController::class, 'register']);
@@ -50,6 +51,13 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     // User Profiles
     Route::get('/users/search', [UserController::class, 'search']);
     Route::post('/publications', [PublicationController::class, 'store']);
+
+    // Analytics
+    Route::get('/analytics/articles', [AnalyticsController::class, 'getArticleStats']);
+    Route::get('/analytics/staff', [AnalyticsController::class, 'getStaffStats']); 
+    Route::get('/analytics/export', [AnalyticsController::class, 'exportStats']); 
+    Route::get('/analytics/audit', [AnalyticsController::class, 'getAuditLogs']);
+    Route::get('/analytics/trends', [AnalyticsController::class, 'getTrendStats']);
 
     //  Comments (Read & Create)
     Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
