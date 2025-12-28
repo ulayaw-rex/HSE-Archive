@@ -1,9 +1,35 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const categories = ["university", "local", "national", "international"];
+
+const getCategoryTextColor = (category: string) => {
+  const lowerCat = category.toLowerCase();
+  switch (lowerCat) {
+    case "university":
+      return "text-green-700";
+    case "local":
+      return "text-blue-700";
+    case "national":
+      return "text-red-700";
+    case "entertainment":
+      return "text-purple-700";
+    case "sci-tech":
+      return "text-indigo-700";
+    case "sports":
+      return "text-orange-600";
+    case "opinion":
+      return "text-teal-700";
+    case "literary":
+      return "text-pink-700";
+    default:
+      return "text-gray-800";
+  }
+};
 
 const NewsPage: React.FC = () => {
   const [featuredArticle, setFeaturedArticle] = useState<Publication | null>(
@@ -13,43 +39,47 @@ const NewsPage: React.FC = () => {
     Record<string, Publication[]>
   >({});
 
-  useEffect(() => {
-    const fetchPublicationsData = () => {
-      AxiosInstance.get<Publication[]>("/publications")
-        .then((res) => {
-          if (res.data.length > 0) {
-            setFeaturedArticle(res.data[0]);
-          }
-        })
-        .catch((err) => {
-          console.error("Failed to fetch featured article", err);
-        });
+  const [loading, setLoading] = useState(true);
 
-      categories.forEach((category) => {
-        AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
-          .then((res) => {
-            setCategoryArticles((prev) => ({
-              ...prev,
-              [category]: res.data.slice(0, 4), // take 4 recent articles
-            }));
-          })
-          .catch((err) => {
-            console.error(
-              `Failed to fetch articles for category ${category}`,
-              err
-            );
-          });
-      });
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const mainPromise = AxiosInstance.get<Publication[]>("/publications");
+
+        const categoryPromises = categories.map((cat) =>
+          AxiosInstance.get<Publication[]>(`/publications/category/${cat}`)
+        );
+
+        const [mainRes, ...categoryResponses] = await Promise.all([
+          mainPromise,
+          ...categoryPromises,
+        ]);
+
+        if (mainRes.data.length > 0) {
+          setFeaturedArticle(mainRes.data[0]);
+        }
+
+        const newCategoryData: Record<string, Publication[]> = {};
+        categoryResponses.forEach((res, index) => {
+          const categoryName = categories[index];
+          newCategoryData[categoryName] = res.data.slice(0, 4);
+        });
+        setCategoryArticles(newCategoryData);
+      } catch (error) {
+        console.error("Failed to fetch news data", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchPublicationsData();
+    fetchAllData();
 
     const handlePublicationCreated = () => {
-      fetchPublicationsData();
+      fetchAllData();
     };
     window.addEventListener("publicationCreated", handlePublicationCreated);
 
-    const intervalId = setInterval(fetchPublicationsData, 30000);
+    const intervalId = setInterval(fetchAllData, 30000);
 
     return () => {
       clearInterval(intervalId);
@@ -60,78 +90,94 @@ const NewsPage: React.FC = () => {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Featured Article */}
+    <div className="min-h-screen bg-white pb-12">
       {featuredArticle && (
-        <div className="relative h-[500px] w-full mb-12">
-          {/* Featured Badge */}
-          <div className="absolute top-4 left-8 z-10 bg-green-600 text-white px-6 py-2 rounded-full shadow-lg flex items-center space-x-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span className="font-bold text-lg">Featured</span>
-          </div>
+        <div className="relative h-[70vh] w-full mb-12 group overflow-hidden">
+          <Link
+            to={`/news/${featuredArticle.publication_id}`}
+            className="block h-full w-full cursor-pointer"
+          >
+            <div className="absolute inset-0">
+              <img
+                src={featuredArticle.image || ""}
+                alt={featuredArticle.title || ""}
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
+            </div>
 
-          {/* Image with gradient overlay */}
-          <div className="absolute inset-0">
-            <img
-              src={featuredArticle.image || ""}
-              alt={featuredArticle.title || ""}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/50 to-transparent" />
-          </div>
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 pb-16 md:pb-20">
+              <div className="container mx-auto w-[90%]">
+                <div className="max-w-4xl">
+                  <div className="mb-4">
+                    <span
+                      className={`inline-block bg-white px-4 py-1.5 rounded-md text-xs md:text-sm font-extrabold uppercase tracking-widest shadow-lg ${getCategoryTextColor(
+                        featuredArticle.category
+                      )}`}
+                    >
+                      {featuredArticle.category}
+                    </span>
+                  </div>
 
-          {/* Content */}
-          <div className="absolute bottom-0 left-0 right-0 p-8">
-            <div className="container mx-auto">
-              <div className="max-w-3xl">
-                <div className="mb-4">
-                  <span className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium uppercase">
-                    {featuredArticle.category}
-                  </span>
-                </div>
-                <h1 className="text-4xl font-bold text-white mb-4">
-                  {featuredArticle.title}
-                </h1>
-                <p className="text-gray-200 text-lg mb-4 line-clamp-2">
-                  {featuredArticle.body}
-                </p>
-                <div className="flex items-center text-gray-300">
-                  <span className="font-medium">{featuredArticle.byline}</span>
-                  <span className="mx-2">•</span>
-                  <span>
-                    {new Date(featuredArticle.created_at).toLocaleDateString()}
-                  </span>
+                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
+                    {featuredArticle.title}
+                  </h1>
+
+                  <p className="text-gray-200 text-lg md:text-xl mb-6 line-clamp-2 drop-shadow-md max-w-2xl opacity-90">
+                    {featuredArticle.body}
+                  </p>
+
+                  <div className="flex items-center text-gray-300 font-medium text-sm md:text-base border-l-4 border-green-600 pl-4">
+                    <span className="text-white">{featuredArticle.byline}</span>
+                    <span className="mx-3 text-white/40">•</span>
+                    <span className="text-gray-400 uppercase tracking-wide text-xs">
+                      {new Date(featuredArticle.created_at).toLocaleDateString(
+                        undefined,
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       )}
-
       <div className="container mx-auto px-4 w-[90%]">
-        {/* Category Sections */}
-        {categories.map((category) => (
-          <section key={category} className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 pb-2 border-b-2 border-green-600 capitalize">
-              {category.replace("-", " ")}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {categoryArticles[category]?.map(
-                (article: Publication, index: number) => (
+        {categories.map((category) => {
+          const articles = categoryArticles[category];
+
+          if (!articles || articles.length === 0) return null;
+
+          return (
+            <section key={category} className="space-y-6 mb-12">
+              <div className="flex items-center justify-between border-b-2 border-green-600/20 pb-2">
+                <h2 className="text-2xl font-bold text-green-900 capitalize flex items-center gap-2">
+                  {category.replace("-", " ")} News
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {articles.map((article: Publication, index: number) => (
                   <GuestPublicationCard key={index} publication={article} />
-                )
-              )}
-            </div>
-          </section>
-        ))}
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

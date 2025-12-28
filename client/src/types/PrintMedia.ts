@@ -2,19 +2,18 @@ export interface PrintMedia {
   print_media_id: number;
   title: string;
   type: string;
-  date: string;
+  date_published: string | null;
   description: string;
   byline?: string;
-  image_path?: string;
-  original_file_path?: string;
+
+  file_path: string;
+  file_url: string | null;
+  thumbnail_path?: string;
+  thumbnail_url?: string | null;
+  original_filename?: string;
+
   created_at: string;
   updated_at: string;
-  file_url: string;
-  file_path: string;
-  thumbnail_url?: string;
-  image_url?: string;
-  original_filename?: string;
-  thumbnail_path?: string;
 }
 
 export interface CreatePrintMediaData {
@@ -22,6 +21,7 @@ export interface CreatePrintMediaData {
   type: string;
   description: string;
   byline: string;
+  date_published: string;
   file: File | null;
   thumbnail: File | null;
 }

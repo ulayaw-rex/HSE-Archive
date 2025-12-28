@@ -29,6 +29,7 @@ class Publication extends Model
         'photo_credits',
         'image_path',
         'status',
+        'date_published',
     ];
 
     public function comments(): HasMany

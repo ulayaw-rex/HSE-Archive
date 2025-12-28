@@ -10,16 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PrintMediaController extends Controller
 {
-
     public function index()
     {
-        $media = PrintMedia::all()->map(function ($item) {
+        $media = PrintMedia::orderBy('date_published', 'desc')->get()->map(function ($item) {
             return $this->transformMedia($item);
         });
 
         return response()->json($media);
     }
-
 
     public function show($id)
     {
@@ -27,19 +25,18 @@ class PrintMediaController extends Controller
         return response()->json($this->transformMedia($media));
     }
 
-
     public function store(Request $request)
     {
         \Log::info('Received data for store:', $request->all());
 
         $validator = Validator::make($request->all(), [
-            'title'       => 'required|string|max:255',
-            'type'        => 'required|string|in:tabloid,magazine,folio,other,Tabloid,Magazine,Folio,Other',
-            'description' => 'required|string',
-            'byline'      => 'nullable|string|max:255',
-            'date'        => 'required|date',
-            'file'        => 'required|file|mimes:pdf,doc,docx|max:20480',
-            'thumbnail'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'title'          => 'required|string|max:255',
+            'type'           => 'required|string|in:tabloid,magazine,folio,other,Tabloid,Magazine,Folio,Other',
+            'description'    => 'required|string',
+            'byline'         => 'nullable|string|max:255',
+            'date_published' => 'nullable|date', 
+            'file'           => 'required|file|mimes:pdf,doc,docx|max:50000', 
+            'thumbnail'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5048',
         ], [
             'file.required' => 'Please upload a file.',
             'type.in' => 'The selected type must be one of: Tabloids, Magazines, Folios, or Others'
@@ -54,7 +51,7 @@ class PrintMediaController extends Controller
         }
 
         try {
-            $data = $request->only(['title', 'description', 'byline', 'date']);
+            $data = $request->only(['title', 'description', 'byline']);
 
             $typeMapping = [
                 'tabloid' => 'Tabloid',
@@ -64,19 +61,19 @@ class PrintMediaController extends Controller
             ];
             $data['type'] = $typeMapping[strtolower($request->type)] ?? $request->type;
 
+            $data['date_published'] = $request->date_published ?? now();
+
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $data['original_filename'] = $file->getClientOriginalName();
                 $path = $file->store('print_media_files', 'public');
                 $data['file_path'] = $path;
-                \Log::info('File stored at: ' . $path);
             }
 
             if ($request->hasFile('thumbnail')) {
                 $thumbnailFile = $request->file('thumbnail');
                 $thumbnailPath = $thumbnailFile->store('print_media_thumbnails', 'public');
                 $data['thumbnail_path'] = $thumbnailPath;
-                \Log::info('Thumbnail stored at: ' . $thumbnailPath);
             }
 
             $media = PrintMedia::create($data);
@@ -91,29 +88,31 @@ class PrintMediaController extends Controller
         }
     }
 
-
     public function update(Request $request, $id)
     {
         \Log::info('Received data for update on ID ' . $id . ':', $request->all());
 
         $validator = Validator::make($request->all(), [
-            'title'       => 'required|string|max:255',
-            'type'        => 'required|string|in:tabloid,magazine,folio,other,Tabloid,Magazine,Folio,Other',
-            'description' => 'required|string',
-            'byline'      => 'nullable|string|max:255',
-            'date'        => 'sometimes|required|date',
-            'file'        => 'nullable|file|mimes:pdf,doc,docx|max:20480',
-            'thumbnail'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'title'          => 'required|string|max:255',
+            'type'           => 'required|string|in:tabloid,magazine,folio,other,Tabloid,Magazine,Folio,Other',
+            'description'    => 'required|string',
+            'byline'         => 'nullable|string|max:255',
+            'date_published' => 'nullable|date', 
+            'file'           => 'nullable|file|mimes:pdf,doc,docx|max:50000',
+            'thumbnail'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5048',
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Update validation failed:', $validator->errors()->toArray());
             return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
         }
 
         $printMedia = PrintMedia::findOrFail($id);
 
-        $printMedia->fill($request->only(['title', 'description', 'byline', 'date']));
+        $printMedia->fill($request->only(['title', 'description', 'byline']));
+        
+        if ($request->has('date_published')) {
+            $printMedia->date_published = $request->date_published;
+        }
 
         $typeMapping = ['tabloid' => 'Tabloid', 'magazine' => 'Magazine', 'folio' => 'Folio', 'other' => 'Other'];
         $printMedia->type = $typeMapping[strtolower($request->type)] ?? $request->type;
@@ -169,7 +168,28 @@ class PrintMediaController extends Controller
 
         return Storage::disk('public')->response($path);
     }
+    
+    // Download logic if needed
+    public function downloadPdf($id)
+    {
+        $media = PrintMedia::findOrFail($id);
+        if (!$media->file_path || !Storage::disk('public')->exists($media->file_path)) {
+             return response()->json(['message' => 'File not found'], 404);
+        }
+        return Storage::disk('public')->download($media->file_path, $media->original_filename ?? 'document.pdf');
+    }
 
+    public function viewPdf($id)
+    {
+        $media = PrintMedia::findOrFail($id);
+        if (!$media->file_path || !Storage::disk('public')->exists($media->file_path)) {
+             return response()->json(['message' => 'File not found'], 404);
+        }
+        return Storage::disk('public')->response($media->file_path, $media->original_filename ?? 'document.pdf', [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . ($media->original_filename ?? 'document.pdf') . '"'
+        ]);
+    }
 
     private function transformMedia(PrintMedia $media)
     {
@@ -177,7 +197,7 @@ class PrintMediaController extends Controller
             'print_media_id'    => $media->print_media_id,
             'title'             => $media->title,
             'type'              => $media->type,
-            'date'              => $media->date,
+            'date_published'    => $media->date_published, 
             'description'       => $media->description,
             'byline'            => $media->byline,
             'file_path'         => $media->file_path,

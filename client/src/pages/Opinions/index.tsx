@@ -30,8 +30,21 @@ const OpinionsPage: React.FC = () => {
     fetchPublications();
   }, []);
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <div className="text-red-600">{error}</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600 font-bold">
+        {error}
+      </div>
+    );
+  }
 
   const [featured, ...others] = publications;
 
@@ -39,15 +52,24 @@ const OpinionsPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 space-y-6 w-[90%]">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-6">Opinion</h1>
-        {featured && <FeaturedPublicationCard publication={featured} />}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {others.map((publication) => (
-            <CategoryPublicationCard
-              key={publication.publication_id}
-              publication={publication}
-            />
-          ))}
-        </div>
+
+        {publications.length === 0 ? (
+          <div className="text-center py-20 text-gray-500">
+            No opinion articles found.
+          </div>
+        ) : (
+          <>
+            {featured && <FeaturedPublicationCard publication={featured} />}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {others.map((publication) => (
+                <CategoryPublicationCard
+                  key={publication.publication_id}
+                  publication={publication}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

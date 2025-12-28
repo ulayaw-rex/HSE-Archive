@@ -17,6 +17,30 @@ import {
   type Comment,
 } from "../../components/features/Publications/Comments";
 
+const getCategoryColor = (category: string) => {
+  const lowerCat = category.toLowerCase();
+  switch (lowerCat) {
+    case "university":
+      return "bg-green-600";
+    case "local":
+      return "bg-blue-600";
+    case "national":
+      return "bg-red-600";
+    case "entertainment":
+      return "bg-purple-600";
+    case "sci-tech":
+      return "bg-indigo-600";
+    case "sports":
+      return "bg-orange-500";
+    case "opinion":
+      return "bg-teal-600";
+    case "literary":
+      return "bg-pink-600";
+    default:
+      return "bg-gray-600";
+  }
+};
+
 const ArticleDetail: React.FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
   const { user } = useAuth();
@@ -115,6 +139,8 @@ const ArticleDetail: React.FC = () => {
 
   const isWriter = user && publication.writers?.some((w) => w.id === user.id);
 
+  const badgeColorClass = getCategoryColor(publication.category);
+
   return (
     <div className="min-h-screen bg-white">
       <ConfirmationModal
@@ -198,7 +224,9 @@ const ArticleDetail: React.FC = () => {
 
       <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col lg:flex-row lg:space-x-8">
         <div className="flex-1">
-          <div className="inline-block bg-gray-300 text-gray-700 rounded-full px-3 py-1 text-xs font-semibold mb-2 uppercase">
+          <div
+            className={`inline-block text-white rounded-full px-3 py-1 text-xs font-bold mb-2 uppercase shadow-sm ${badgeColorClass}`}
+          >
             {publication.category}
           </div>
 
@@ -208,13 +236,18 @@ const ArticleDetail: React.FC = () => {
 
           <div className="flex flex-wrap items-center text-gray-600 mb-6 gap-4 text-sm">
             <div className="flex items-center space-x-1">
-              <FaCalendarAlt />
-              <span>
+              <FaCalendarAlt className="text-green-600" />
+              <span className="font-medium">
                 {new Date(
-                  publication.created_at ||
+                  publication.date_published ||
+                    publication.created_at ||
                     (publication as any).updated_at ||
                     Date.now()
-                ).toLocaleDateString()}
+                ).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
               </span>
             </div>
 
@@ -247,7 +280,7 @@ const ArticleDetail: React.FC = () => {
                 <button
                   onClick={handleClaimClick}
                   disabled={requestingCredit}
-                  className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:border-green -300"
+                  className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:border-green-300"
                 >
                   <FaUserPlus /> Add Attribute
                 </button>

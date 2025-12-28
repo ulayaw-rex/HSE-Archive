@@ -8,6 +8,7 @@ export interface Publication {
   category: string;
   image?: string;
   photo_credits?: string;
+  date_published: string | null;
   created_at: string;
   updated_at: string;
   status?: "pending" | "approved" | "rejected";
@@ -22,4 +23,5 @@ export interface CreatePublicationData {
   image?: File | null;
   photo_credits?: string;
   writer_ids: number[];
+  date_published?: string;
 }

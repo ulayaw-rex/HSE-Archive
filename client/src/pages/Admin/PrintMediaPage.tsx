@@ -180,7 +180,7 @@ const PrintMediaPage: React.FC = () => {
           isOpen={!!printMediaToDelete}
           onClose={() => setPrintMediaToDelete(null)}
           onConfirm={confirmDelete}
-          isLoading={isDeleting} // 3. Pass the loading state to the modal
+          isLoading={isDeleting}
           title="Delete Print Media Archive"
           message={`Are you sure you want to delete "${printMediaToDelete?.title}"? This action cannot be undone.`}
           confirmLabel="Delete"

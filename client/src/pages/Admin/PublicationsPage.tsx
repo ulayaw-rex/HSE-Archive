@@ -11,6 +11,7 @@ import AxiosInstance from "../../AxiosInstance";
 
 interface ExtendedCreatePublicationData extends CreatePublicationData {
   writer_ids: number[];
+  date_published: string;
 }
 
 const PublicationsPage: React.FC = () => {
@@ -46,6 +47,11 @@ const PublicationsPage: React.FC = () => {
       formData.append("body", data.body);
       formData.append("category", data.category);
       formData.append("byline", data.byline);
+
+      if (data.date_published) {
+        formData.append("date_published", data.date_published);
+      }
+
       if (data.photo_credits)
         formData.append("photo_credits", data.photo_credits);
 
@@ -89,6 +95,11 @@ const PublicationsPage: React.FC = () => {
       formData.append("body", data.body);
       formData.append("category", data.category);
       formData.append("byline", data.byline);
+
+      if (data.date_published) {
+        formData.append("date_published", data.date_published);
+      }
+
       if (data.photo_credits)
         formData.append("photo_credits", data.photo_credits);
 

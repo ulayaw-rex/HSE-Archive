@@ -15,6 +15,10 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
 }) => {
   if (!isOpen || !publication) return null;
 
+  const displayDate = new Date(
+    publication.date_published || publication.created_at
+  );
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn"
@@ -23,6 +27,26 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
       }}
     >
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
         <div className="overflow-y-auto custom-scrollbar">
           <div className="relative w-full h-64 md:h-80 bg-gray-100">
             {publication.image ? (
@@ -58,11 +82,12 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-8 pb-6 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <FaCalendarAlt className="text-green-600" />
-                <span>
-                  {new Date(publication.created_at).toLocaleDateString(
-                    undefined,
-                    { year: "numeric", month: "long", day: "numeric" }
-                  )}
+                <span className="font-medium">
+                  {displayDate.toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </span>
               </div>
               <div className="flex items-center gap-2">

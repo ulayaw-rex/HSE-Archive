@@ -3,6 +3,7 @@ import AxiosInstance from "../../AxiosInstance";
 import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 import "../../App.css";
 
@@ -13,6 +14,8 @@ const categories = [
   "entertainment",
   "sci-tech",
   "sports",
+  "opinion",
+  "literary",
 ];
 
 const HomePage: React.FC = () => {
@@ -23,33 +26,36 @@ const HomePage: React.FC = () => {
     Record<string, Publication[]>
   >({});
 
-  useEffect(() => {
-    const fetchPublicationsData = () => {
-      // Fetch latest 3 publications for featured carousel
-      AxiosInstance.get<Publication[]>("/publications")
-        .then((res) => {
-          setFeaturedArticles(res.data.slice(0, 3));
-        })
-        .catch((err) => {
-          console.error("Failed to fetch featured articles", err);
-        });
+  const [loading, setLoading] = useState(true);
 
-      // Fetch recent articles for each category
-      categories.forEach((category) => {
-        AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
-          .then((res) => {
-            setCategoryArticles((prev) => ({
-              ...prev,
-              [category]: res.data.slice(0, 4), // take 4 recent articles
-            }));
-          })
-          .catch((err) => {
-            console.error(
-              `Failed to fetch articles for category ${category}`,
-              err
-            );
-          });
-      });
+  useEffect(() => {
+    const fetchPublicationsData = async () => {
+      try {
+        const featuredPromise =
+          AxiosInstance.get<Publication[]>("/publications");
+
+        const categoryPromises = categories.map((category) =>
+          AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
+        );
+
+        const [featuredRes, ...categoryResponses] = await Promise.all([
+          featuredPromise,
+          ...categoryPromises,
+        ]);
+
+        setFeaturedArticles(featuredRes.data.slice(0, 3));
+
+        const newCategoryData: Record<string, Publication[]> = {};
+        categoryResponses.forEach((res, index) => {
+          const categoryName = categories[index];
+          newCategoryData[categoryName] = res.data.slice(0, 4);
+        });
+        setCategoryArticles(newCategoryData);
+      } catch (err) {
+        console.error("Failed to fetch homepage data", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPublicationsData();
@@ -59,7 +65,6 @@ const HomePage: React.FC = () => {
     };
     window.addEventListener("publicationCreated", handlePublicationCreated);
 
-    // Set interval to refresh data every 30 seconds
     const intervalId = setInterval(fetchPublicationsData, 30000);
 
     return () => {
@@ -71,35 +76,48 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-12">
       {featuredArticles.length > 0 && (
         <FeaturedCarousel articles={featuredArticles} />
       )}
 
       <div className="w-[90%] mx-auto px-4">
-        {categories.map((category) => (
-          <section key={category} className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 pb-2 border-b-2 border-green-600 capitalize">
-              {category.replace("-", " ")}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-5">
-              {categoryArticles[category]?.map(
-                (article: Publication, index: number) =>
-                  userRole === "admin" ? (
-                    <PublicationCard
-                      key={index}
-                      publication={article}
-                      onEdit={() => {}}
-                      onDelete={() => {}}
-                    />
-                  ) : (
-                    <GuestPublicationCard key={index} publication={article} />
-                  )
-              )}
-            </div>
-          </section>
-        ))}
+        {categories.map((category) =>
+          categoryArticles[category]?.length > 0 ? (
+            <section key={category} className="space-y-6 mt-12">
+              <div className="flex items-center justify-between border-b-2 border-green-600/20 pb-2">
+                <h2 className="text-2xl font-bold text-gray-800 capitalize">
+                  {category.replace("-", " ")}
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-5">
+                {categoryArticles[category]?.map(
+                  (article: Publication, index: number) =>
+                    userRole === "admin" ? (
+                      <PublicationCard
+                        key={index}
+                        publication={article}
+                        onEdit={() => {}}
+                        onDelete={() => {}}
+                      />
+                    ) : (
+                      <GuestPublicationCard key={index} publication={article} />
+                    )
+                )}
+              </div>
+            </section>
+          ) : null
+        )}
       </div>
     </div>
   );

@@ -1,17 +1,44 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaUserCircle, FaBars, FaTimes, FaChevronDown } from "react-icons/fa";
+import {
+  FaUserCircle,
+  FaBars,
+  FaTimes,
+  FaChevronDown,
+  FaChevronUp,
+  FaSearch,
+  FaUser,
+  FaSignOutAlt,
+  FaCog,
+} from "react-icons/fa";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
 import { useAuth } from "../../../context/AuthContext";
+
+type SubLink = {
+  label: string;
+  href: string;
+};
 
 type NavigationLink = {
   id: string;
   label: string;
   href: string;
+  subLinks?: SubLink[];
 };
 
 const navLinks: NavigationLink[] = [
-  { id: "news", label: "News", href: "/" },
+  {
+    id: "news",
+    label: "News",
+    href: "/",
+    subLinks: [
+      { label: "University", href: "/news/university" },
+      { label: "Local", href: "/news/local" },
+      { label: "National", href: "/news/national" },
+      { label: "Entertainment", href: "/news/entertainment" },
+      { label: "Sci-Tech", href: "/news/sci-tech" },
+    ],
+  },
   { id: "sports", label: "Sports", href: "/sports" },
   { id: "opinions", label: "Opinion", href: "/opinion" },
   { id: "literary", label: "Literary", href: "/literary" },
@@ -26,13 +53,14 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [isNewsDropdownOpen, setIsNewsDropdownOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsProfileOpen(false);
-      }
+      if (e.key === "Escape") setIsProfileOpen(false);
     };
     if (isProfileOpen) window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -53,11 +81,22 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     setIsProfileOpen(false);
+    setIsMobileMenuOpen(false);
     navigate("/");
   };
 
   const toggleMobileMenu = (): void => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    if (isMobileMenuOpen) setIsNewsDropdownOpen(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${searchQuery}`);
+      setIsMobileMenuOpen(false);
+      setSearchQuery("");
+    }
   };
 
   return (
@@ -65,11 +104,10 @@ const Header: React.FC = () => {
       <header className="sticky lg:relative top-0 z-[100] bg-green-700 text-white shadow-lg font-sans">
         <div className="container mx-auto px-4 py-2 w-[90%]">
           <div className="flex items-center justify-between relative">
-            {/* --- Left Side (Mobile Toggle & Top Links) --- */}
             <div className="flex items-center">
               <button
                 onClick={toggleMobileMenu}
-                className="lg:hidden items-center justify-center focus:outline-none"
+                className="lg:hidden items-center justify-center focus:outline-none p-1 rounded-md hover:bg-green-600 transition-colors"
                 aria-label="Toggle mobile menu"
               >
                 {isMobileMenuOpen ? (
@@ -80,7 +118,6 @@ const Header: React.FC = () => {
               </button>
             </div>
 
-            {/* --- Center (Logo/Date) --- */}
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
               <div
                 className="lg:hidden cursor-pointer"
@@ -102,7 +139,6 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            {/* --- Right Side (Auth) --- */}
             <div className="flex items-center relative pl-4">
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
@@ -110,18 +146,13 @@ const Header: React.FC = () => {
                   <div className="h-8 w-8 bg-green-500/50 rounded-full"></div>
                 </div>
               ) : user ? (
-                // LOGGED IN VIEW
                 <div
                   className="relative flex items-center gap-3"
                   ref={profileRef}
                 >
-                  <NavLink
-                    to={`/profile/${user.id}`}
-                    className="hidden md:block text-sm font-semibold text-white hover:text-green-200 transition-colors"
-                    title="Go to Profile"
-                  >
+                  <span className="hidden md:block text-sm font-semibold text-white select-none">
                     {user.name}
-                  </NavLink>
+                  </span>
 
                   <button
                     onClick={() => setIsProfileOpen((prev) => !prev)}
@@ -156,18 +187,20 @@ const Header: React.FC = () => {
                           {user.role === "admin" && (
                             <NavLink
                               to="/admin"
-                              className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                              className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
                               onClick={() => setIsProfileOpen(false)}
                             >
+                              <FaCog className="mr-3 text-gray-400 group-hover:text-green-600" />
                               Admin Dashboard
                             </NavLink>
                           )}
 
                           <NavLink
-                            to="/profile"
-                            className="md:hidden flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                            to={`/profile/${user.id}`}
+                            className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
                             onClick={() => setIsProfileOpen(false)}
                           >
+                            <FaUser className="mr-3 text-gray-400 group-hover:text-green-600" />
                             My Profile
                           </NavLink>
                         </div>
@@ -175,12 +208,10 @@ const Header: React.FC = () => {
                         <div className="border-t border-gray-100 my-1"></div>
 
                         <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleLogout();
-                          }}
-                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                          onClick={handleLogout}
+                          className="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium group"
                         >
+                          <FaSignOutAlt className="mr-3 text-red-400 group-hover:text-red-600" />
                           Logout
                         </button>
                       </div>
@@ -188,7 +219,6 @@ const Header: React.FC = () => {
                   )}
                 </div>
               ) : (
-                // GUEST VIEW
                 <button
                   onClick={() => setIsLoginModalOpen(true)}
                   className="flex items-center space-x-2 text-sm font-medium text-green-100 hover:text-white transition-colors duration-200 bg-green-800/30 hover:bg-green-800/50 px-3 py-1.5 rounded-full"
@@ -200,25 +230,145 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* --- Mobile Menu --- */}
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-green-600/50 animate-fade-in-down">
-              <div className="flex flex-col space-y-2 pt-4">
-                {navLinks.map((link) => (
-                  <NavLink
-                    key={link.id}
-                    to={link.href}
-                    className={({ isActive }) =>
-                      `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
-                        isActive
-                          ? "bg-green-800 text-white font-semibold"
-                          : "text-green-100 hover:bg-green-800/50 hover:text-white"
-                      }`
-                    }
-                    onClick={() => setIsMobileMenuOpen(false)}
+              {user ? (
+                <div className="pt-4 pb-2 px-2 border-b border-green-600/30 mb-2">
+                  <div className="flex items-center space-x-3 mb-3 px-2">
+                    <div className="bg-green-800 rounded-full p-2">
+                      <FaUserCircle size={24} className="text-green-100" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-sm font-bold text-white truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-green-200 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-1">
+                    <NavLink
+                      to={`/profile/${user.id}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center px-3 py-2 text-sm text-green-100 hover:bg-green-800 rounded-md transition-colors"
+                    >
+                      <FaUser className="mr-2 text-green-300" /> My Profile
+                    </NavLink>
+
+                    {user.role === "admin" && (
+                      <NavLink
+                        to="/admin"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center px-3 py-2 text-sm text-green-100 hover:bg-green-800 rounded-md transition-colors"
+                      >
+                        <FaCog className="mr-2 text-green-300" /> Admin
+                        Dashboard
+                      </NavLink>
+                    )}
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full text-left px-3 py-2 text-sm text-red-300 hover:bg-red-900/20 rounded-md transition-colors"
+                    >
+                      <FaSignOutAlt className="mr-2" /> Logout
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-4 pb-4 px-2 border-b border-green-600/30 mb-2">
+                  <button
+                    onClick={() => {
+                      setIsLoginModalOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-white text-green-800 font-bold py-2 rounded-lg shadow-sm hover:bg-green-50 transition-colors"
                   >
-                    {link.label}
-                  </NavLink>
+                    Log In / Sign Up
+                  </button>
+                </div>
+              )}
+
+              <div className="pt-2 pb-2 px-2">
+                <form onSubmit={handleSearch} className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search articles..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-green-800 text-white placeholder-green-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-300"
+                  >
+                    <FaSearch />
+                  </button>
+                </form>
+              </div>
+
+              <div className="flex flex-col space-y-1 pt-2">
+                {navLinks.map((link) => (
+                  <div key={link.id}>
+                    {link.subLinks ? (
+                      <div>
+                        <button
+                          onClick={() =>
+                            setIsNewsDropdownOpen(!isNewsDropdownOpen)
+                          }
+                          className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm transition-all duration-200 
+                            ${
+                              isNewsDropdownOpen
+                                ? "bg-green-800 text-white font-semibold"
+                                : "text-green-100 hover:bg-green-800/50 hover:text-white"
+                            }`}
+                        >
+                          <span>{link.label}</span>
+                          {isNewsDropdownOpen ? (
+                            <FaChevronUp size={12} />
+                          ) : (
+                            <FaChevronDown size={12} />
+                          )}
+                        </button>
+
+                        {isNewsDropdownOpen && (
+                          <div className="flex flex-col space-y-1 mt-1 bg-green-800/30 rounded-lg overflow-hidden">
+                            {link.subLinks.map((subLink) => (
+                              <NavLink
+                                key={subLink.label}
+                                to={subLink.href}
+                                className={({ isActive }) =>
+                                  `block px-8 py-2 text-sm border-l-4 transition-all duration-200 ${
+                                    isActive
+                                      ? "border-white bg-green-800/50 text-white"
+                                      : "border-transparent text-green-200 hover:text-white hover:bg-green-800/30"
+                                  }`
+                                }
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {subLink.label}
+                              </NavLink>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <NavLink
+                        to={link.href}
+                        className={({ isActive }) =>
+                          `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                            isActive
+                              ? "bg-green-800 text-white font-semibold"
+                              : "text-green-100 hover:bg-green-800/50 hover:text-white"
+                          }`
+                        }
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {link.label}
+                      </NavLink>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

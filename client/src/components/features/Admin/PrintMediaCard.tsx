@@ -10,6 +10,23 @@ interface PrintMediaCardProps {
   onView: (printMedia: PrintMedia) => void;
 }
 
+const getCategoryColor = (type: string) => {
+  const lowerType = type.toLowerCase();
+  switch (lowerType) {
+    case "magazine":
+      return "bg-blue-600";
+    case "tabloid":
+      return "bg-orange-500";
+    case "folio":
+      return "bg-purple-600";
+    case "newsletter":
+      return "bg-teal-600";
+    case "other":
+    default:
+      return "bg-gray-600";
+  }
+};
+
 const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
   printMedia,
   onEdit,
@@ -21,6 +38,12 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
   const thumbnailUrl = printMedia.thumbnail_path
     ? `/api/print-media/file/${printMedia.thumbnail_path}`
     : null;
+
+  const displayDate = new Date(
+    printMedia.date_published || printMedia.created_at
+  );
+
+  const badgeColorClass = getCategoryColor(printMedia.type);
 
   const handleEditClick = useCallback(
     (e: React.MouseEvent) => {
@@ -50,7 +73,7 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
 
   return (
     <>
-      <div className="relative">
+      <div className="relative group">
         <div
           className="rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 relative bg-gray-300"
           style={{ minHeight: "250px" }}
@@ -60,38 +83,53 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
             <img
               src={thumbnailUrl}
               alt={printMedia.title}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30"></div>
 
-          <div className="relative p-4 flex flex-col h-full text-white">
-            <div className="flex-grow"></div>
-
-            <div>
-              <span className="inline-block bg-black text-white text-xs font-semibold uppercase rounded-full px-3 py-1 mb-2">
+          <div className="absolute inset-0 p-4 flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <span
+                className={`inline-block text-white text-xs font-bold uppercase rounded-md px-2 py-1 shadow-sm tracking-wide ${badgeColorClass}`}
+              >
                 {printMedia.type}
               </span>
-              <h3 className="mt-25 text-xl font-bold mb-1 drop-shadow-md">
+            </div>
+
+            <div className="text-white">
+              <h3 className="text-xl font-bold mb-1 drop-shadow-md leading-tight text-white">
                 {printMedia.title}
               </h3>
-              <p className="text-sm text-gray-200 drop-shadow mb-2">
-                {printMedia.byline}
-              </p>{" "}
+
+              <div className="border-t border-white/40 w-full my-2"></div>
+
+              <div className="flex justify-between items-end">
+                <p className="text-sm text-gray-200 drop-shadow font-medium">
+                  {printMedia.byline || "Hillside Echo"}
+                </p>
+                <p className="text-xs text-gray-300 drop-shadow italic">
+                  {displayDate.toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="absolute top-2 right-2 flex space-x-2 z-10">
+        <div className="absolute top-3 right-3 flex space-x-2 z-20">
           <button
             onClick={handleEditClick}
             aria-label="Edit"
-            className="print-media-edit-btn print-media-btn"
+            className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-md shadow-lg transition-all border border-green-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -107,11 +145,11 @@ const PrintMediaCard: React.FC<PrintMediaCardProps> = ({
           <button
             onClick={handleDeleteClick}
             aria-label="Delete"
-            className="print-media-delete-btn print-media-btn"
+            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-md shadow-lg transition-all border border-red-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

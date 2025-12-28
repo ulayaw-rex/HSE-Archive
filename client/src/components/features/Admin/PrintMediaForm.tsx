@@ -20,25 +20,34 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
   printMedia,
   mode = "add",
 }) => {
-  const [formData, setFormData] = useState<CreatePrintMediaData>({
+  const [formData, setFormData] = useState<
+    CreatePrintMediaData & { date_published: string }
+  >({
     title: "",
     type: "folio",
     description: "",
     byline: "",
+    date_published: "",
     file: null,
     thumbnail: null,
   });
+
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (printMedia && mode === "edit") {
+      const existingDate = printMedia.date_published
+        ? new Date(printMedia.date_published).toISOString().split("T")[0]
+        : "";
+
       setFormData({
         title: printMedia.title,
         type: printMedia.type,
         description: printMedia.description,
         byline: printMedia.byline || "",
+        date_published: existingDate,
         file: null,
         thumbnail: null,
       });
@@ -50,6 +59,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
         type: "folio",
         description: "",
         byline: "",
+        date_published: new Date().toISOString().split("T")[0],
         file: null,
         thumbnail: null,
       });
@@ -71,6 +81,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
       formDataToSend.append("type", formData.type);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("byline", formData.byline);
+
+      formDataToSend.append("date_published", formData.date_published);
 
       if (file) {
         formDataToSend.append("file", file);
@@ -108,7 +120,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="col-span-1">
               <label
                 className="block text-green-700 font-semibold mb-2"
@@ -149,6 +161,25 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 <option value="tabloid">Tabloid</option>
                 <option value="other">Others</option>
               </select>
+            </div>
+
+            <div className="col-span-1">
+              <label
+                className="block text-green-700 font-semibold mb-2"
+                htmlFor="date_published"
+              >
+                Date Published
+              </label>
+              <input
+                id="date_published"
+                type="date"
+                value={formData.date_published}
+                onChange={(e) =>
+                  setFormData({ ...formData, date_published: e.target.value })
+                }
+                className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                required
+              />
             </div>
           </div>
 

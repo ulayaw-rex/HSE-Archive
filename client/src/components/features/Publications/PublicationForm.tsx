@@ -7,8 +7,10 @@ import type {
   CreatePublicationData,
 } from "../../../types/Publication";
 
+// 1. Extend the interface to include date_published locally
 interface ExtendedCreatePublicationData extends CreatePublicationData {
   writer_ids: number[];
+  date_published: string; // New field
 }
 
 interface PublicationFormProps {
@@ -28,6 +30,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   mode = "add",
   currentUser,
 }) => {
+  // 2. Initialize state with date_published
   const [formData, setFormData] = useState<ExtendedCreatePublicationData>({
     title: "",
     byline: "",
@@ -35,6 +38,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     category: "university",
     photo_credits: "",
     writer_ids: [],
+    date_published: new Date().toISOString().split("T")[0], // Default to today
   });
 
   const [image, setImage] = useState<File | null>(null);
@@ -43,6 +47,11 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
   useEffect(() => {
     if (publication) {
+      // 3. Format existing date for input (YYYY-MM-DD)
+      const existingDate = publication.created_at
+        ? new Date(publication.created_at).toISOString().split("T")[0]
+        : "";
+
       setFormData({
         title: publication.title,
         byline: publication.byline || "",
@@ -52,6 +61,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         writer_ids: publication.writers
           ? publication.writers.map((w) => w.id)
           : [],
+        date_published: existingDate,
       });
       setExistingImageUrl(publication.image || null);
     } else {
@@ -62,6 +72,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         category: "university",
         photo_credits: "",
         writer_ids: currentUser ? [currentUser.id] : [],
+        date_published: new Date().toISOString().split("T")[0],
       });
       setImage(null);
       setExistingImageUrl(null);
@@ -81,6 +92,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     setLoading(true);
     try {
       await onSubmit({ ...formData, image });
+      // Reset form
       setFormData({
         title: "",
         byline: "",
@@ -88,6 +100,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         category: "university",
         photo_credits: "",
         writer_ids: [],
+        date_published: new Date().toISOString().split("T")[0],
       });
       setImage(null);
       setExistingImageUrl(null);
@@ -114,11 +127,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <h3 className="text-green-700 font-semibold mb-3 text-lg">
-              Byline
+              Details
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
+              {/* Writer Select */}
               <div className="col-span-1">
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  WRITER(S)
+                </label>
                 {currentUser ? (
                   <input
                     disabled
@@ -136,49 +153,82 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 )}
               </div>
 
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                className="col-span-1 w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
-                required
-              >
-                <option value="university">University</option>
-                <option value="local">Local</option>
-                <option value="national">National</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="sci-tech">Sci-Tech</option>
-                <option value="sports">Sports</option>
-                <option value="opinion">Opinion</option>
-                <option value="literary">Literary</option>
-              </select>
+              {/* Category */}
+              <div className="col-span-1">
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  CATEGORY
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
+                  required
+                >
+                  <option value="university">University</option>
+                  <option value="local">Local</option>
+                  <option value="national">National</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="sci-tech">Sci-Tech</option>
+                  <option value="sports">Sports</option>
+                  <option value="opinion">Opinion</option>
+                  <option value="literary">Literary</option>
+                </select>
+              </div>
 
-              <input
-                type="text"
-                placeholder="Photo credits"
-                value={formData.photo_credits}
-                onChange={(e) =>
-                  setFormData({ ...formData, photo_credits: e.target.value })
-                }
-                className="col-span-1 w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
-              />
+              {/* 4. New Date Input */}
+              <div className="col-span-1">
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  DATE PUBLISHED
+                </label>
+                <input
+                  type="date"
+                  value={formData.date_published}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date_published: e.target.value })
+                  }
+                  className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                  required
+                />
+              </div>
+
+              {/* Photo Credits */}
+              <div className="col-span-1">
+                <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  PHOTO CREDITS
+                </label>
+                <input
+                  type="text"
+                  placeholder="Photographer Name"
+                  value={formData.photo_credits}
+                  onChange={(e) =>
+                    setFormData({ ...formData, photo_credits: e.target.value })
+                  }
+                  className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                />
+              </div>
             </div>
 
-            <input
-              type="text"
-              placeholder="Byline Display Text (e.g. John & Jane)"
-              value={formData.byline}
-              onChange={(e) =>
-                setFormData({ ...formData, byline: e.target.value })
-              }
-              className="w-full h-[50px] p-3 mb-2 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
-            />
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                BYLINE DISPLAY (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="Custom Byline (e.g. John & Jane)"
+                value={formData.byline}
+                onChange={(e) =>
+                  setFormData({ ...formData, byline: e.target.value })
+                }
+                className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+              />
+            </div>
           </div>
 
           <div>
             <h3 className="text-green-700 font-semibold mb-3 text-lg">
-              Article
+              Article Content
             </h3>
             <input
               type="text"
@@ -191,7 +241,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
               required
             />
             <textarea
-              placeholder="Add body"
+              placeholder="Add body text..."
               value={formData.body}
               onChange={(e) =>
                 setFormData({ ...formData, body: e.target.value })

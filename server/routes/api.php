@@ -18,34 +18,33 @@ Route::post('/register', [AuthController::class, 'register']);
 // About Us - Team Members (Read-Only)
 Route::get('/members', [UserController::class, 'getMembers']);
 
-//  Site Settings (Read-Only)
+// Site Settings (Read-Only)
 Route::get('/site-settings/team-photo', [SiteSettingController::class, 'getTeamPhoto']);
 Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamIntro']);
 
-//  Auth 
+// Auth 
 Route::middleware('web')->post('login', [AuthController::class, 'login']);
 Route::middleware('web')->post('logout', [AuthController::class, 'logout']);
 
-//  News (Read-Only)
-Route::get('publications/category/{category}', [PublicationController::class, 'getByCategory']);
-
-//  Publications (Read-Only)
+// Publications (Read-Only & Viewing)
 Route::get('/publications/search', [PublicationController::class, 'search']);
+Route::get('/publications/recent', [PublicationController::class, 'recent']);
+Route::get('publications/category/{category}', [PublicationController::class, 'getByCategory']);
 Route::apiResource('publications', PublicationController::class)->only(['index', 'show']);
 
-//  Print Media (Read-Only & Viewing)
+// Print Media (Read-Only & Viewing)
 Route::apiResource('print-media', PrintMediaController::class)->only(['index', 'show']);
 Route::get('print-media/{id}/view', [PrintMediaController::class, 'viewPdf']);
 Route::get('print-media/{id}/download', [PrintMediaController::class, 'downloadPdf']);
 Route::get('print-media/file/{path}', [PrintMediaController::class, 'serveFile'])->where('path', '.*');
 
-//  User Profiles (Viewing)
+// User Profiles (Viewing)
 Route::get('/profile/{id?}', [UserProfileController::class, 'show']);
 
 // AUTHENTICATED USER ROUTES 
 Route::middleware(['web', 'auth:sanctum'])->group(function () {
     
-    //  Auth
+    // Auth
     Route::get('me', [AuthController::class, 'me']);
 
     // User Profiles
@@ -59,7 +58,7 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('/analytics/audit', [AnalyticsController::class, 'getAuditLogs']);
     Route::get('/analytics/trends', [AnalyticsController::class, 'getTrendStats']);
 
-    //  Comments (Read & Create)
+    // Comments (Read & Create)
     Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
     Route::post('/publications/{publication}/comments', [CommentController::class, 'store']);
     

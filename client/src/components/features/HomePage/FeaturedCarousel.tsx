@@ -9,74 +9,120 @@ interface FeaturedCarouselProps {
   articles: Publication[];
 }
 
+// 1. Text Color Mapping
+const getCategoryTextColor = (category: string) => {
+  const lowerCat = category.toLowerCase();
+  switch (lowerCat) {
+    case "university":
+      return "text-green-700";
+    case "local":
+      return "text-blue-700";
+    case "national":
+      return "text-red-700";
+    case "entertainment":
+      return "text-purple-700";
+    case "sci-tech":
+      return "text-indigo-700";
+    case "sports":
+      return "text-orange-600";
+    case "opinion":
+      return "text-teal-700";
+    case "literary":
+      return "text-pink-700";
+    default:
+      return "text-gray-800";
+  }
+};
+
 const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
   const settings = {
     dots: true,
     infinite: true,
-    speed: 500,
+    speed: 700,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 5000,
+    autoplaySpeed: 6000,
     arrows: true,
+    fade: true,
   };
 
+  if (articles.length === 0) return null;
+
   return (
-    <div className="mb-12 relative overflow-hidden">
+    // REMOVED: "rounded-2xl" to keep corners sharp
+    <div className="mb-12 relative overflow-hidden shadow-2xl group">
       <Slider {...settings}>
-        {articles.map((article) => (
-          <div key={article.publication_id}>
-            <Link
-              to={`/news/${article.publication_id}`}
-              className="block relative h-[70vh] w-full cursor-pointer group overflow-hidden"
+        {articles.map((article) => {
+          const displayDate = new Date(
+            article.date_published || article.created_at
+          );
+          const categoryTextColor = getCategoryTextColor(article.category);
+
+          return (
+            <div
+              key={article.publication_id}
+              className="relative h-[70vh] w-full outline-none"
             >
-              <img
-                src={article.image || "/placeholder-image.jpg"}
-                alt={article.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              <Link
+                to={`/news/${article.publication_id}`}
+                className="block h-full w-full cursor-pointer"
+              >
+                {/* Background Image */}
+                <div className="absolute inset-0">
+                  <img
+                    src={article.image || "/placeholder-image.jpg"}
+                    alt={article.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
+
+                {/* Content Container - Restored to your original positioning */}
                 <div className="w-[90%] mx-auto px-4 h-full relative">
-                  <div className="absolute top-4 left-4 z-10 bg-green-600 text-white px-6 py-2 rounded-full shadow-lg flex items-center space-x-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span className="font-bold text-lg">Featured</span>
-                  </div>
-
+                  {/* Flex container to push content to bottom */}
                   <div className="h-full flex items-end pb-16">
                     <div className="max-w-3xl">
+                      {/* Category Badge */}
                       <div className="mb-4">
-                        <span className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold uppercase">
+                        <span
+                          className={`inline-block bg-white px-4 py-1.5 rounded-md text-xs font-extrabold uppercase tracking-widest shadow-lg ${categoryTextColor}`}
+                        >
                           {article.category}
                         </span>
                       </div>
-                      <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+
+                      {/* Title */}
+                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
                         {article.title}
                       </h2>
-                      <p className="text-gray-200 text-lg mb-4 line-clamp-2">
+
+                      {/* Body */}
+                      <p className="text-gray-200 text-lg md:text-xl mb-6 line-clamp-2 drop-shadow-md opacity-90">
                         {article.body}
                       </p>
-                      <div className="flex items-center text-gray-300">
-                        <span className="font-medium">{article.byline}</span>
-                        <span className="mx-2">•</span>
-                        <span>
-                          {new Date(article.created_at).toLocaleDateString()}
+
+                      {/* Metadata with the Green Accent Line */}
+                      <div className="flex items-center text-gray-300 font-medium text-sm md:text-base border-l-4 border-green-600 pl-4">
+                        <span className="text-white">{article.byline}</span>
+                        <span className="mx-3 text-white/40">•</span>
+                        <span className="text-gray-400 uppercase tracking-wide text-xs">
+                          {displayDate.toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          </div>
-        ))}
+              </Link>
+            </div>
+          );
+        })}
       </Slider>
     </div>
   );

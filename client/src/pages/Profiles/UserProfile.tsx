@@ -96,13 +96,21 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="mt-20">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner />
       </div>
     );
-  if (!profile) return <div className="mt-20 text-center">User not found.</div>;
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500 font-medium bg-gray-50">
+        User not found.
+      </div>
+    );
+  }
 
   const isOwnProfile = currentUser?.id === profile.id;
 

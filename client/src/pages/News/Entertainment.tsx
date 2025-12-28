@@ -5,7 +5,7 @@ import FeaturedPublicationCard from "../../components/features/Categories/Featur
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 
-const SciTechNewsPage: React.FC = () => {
+const UniversityNewsPage: React.FC = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,12 +16,12 @@ const SciTechNewsPage: React.FC = () => {
         setLoading(true);
         setError(null);
         const response = await AxiosInstance.get(
-          "/publications/category/sci-tech"
+          "/publications/category/university"
         );
         setPublications(response.data);
       } catch (err) {
-        console.error("Failed to fetch sci-tech publications:", err);
-        setError("Failed to load sci-tech publications.");
+        console.error("Failed to fetch university publications:", err);
+        setError("Failed to load university publications.");
       } finally {
         setLoading(false);
       }
@@ -51,11 +51,12 @@ const SciTechNewsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 space-y-6 w-[90%]">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">SCI-TECH</h1>
-
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">
+          UNIVERSITY
+        </h1>
         {publications.length === 0 ? (
           <div className="text-center py-20 text-gray-500">
-            No sci-tech news found.
+            No university news found.
           </div>
         ) : (
           <>
@@ -75,4 +76,4 @@ const SciTechNewsPage: React.FC = () => {
   );
 };
 
-export default SciTechNewsPage;
+export default UniversityNewsPage;

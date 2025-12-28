@@ -23,7 +23,8 @@ class PrintMedia extends Model
         'file_path',
         'original_filename',
         'thumbnail_path',
-        'image_path'
+        'image_path',
+        'date_published'
     ];
 
     protected $casts = [

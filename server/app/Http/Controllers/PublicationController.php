@@ -28,7 +28,7 @@ class PublicationController extends Controller
         }
 
         $publications = $query->with('writers') 
-            ->orderBy('created_at', 'desc')
+            ->orderBy('date_published', 'desc') 
             ->get()
             ->map(function ($publication) {
                 $publication->image = $publication->image_path
@@ -54,6 +54,7 @@ class PublicationController extends Controller
             'writer_ids.*' => 'exists:users,id',    
             'image' => 'nullable|image|max:2048',
             'byline' => 'nullable|string', 
+            'date_published' => 'nullable|date', 
         ]);
 
         if ($validator->fails()) {
@@ -64,11 +65,10 @@ class PublicationController extends Controller
 
         if (empty($finalByline)) {
             $writers = User::whereIn('id', $request->writer_ids)->get();
-            
             $finalByline = $writers->pluck('name')->join(' & ');
         }
 
-            \Log::info('User attempting to post:', ['user' => $request->user()]);
+        \Log::info('User attempting to post:', ['user' => $request->user()]);
 
         $publication = Publication::create([
             'user_id' => $currentUser->id,
@@ -79,6 +79,7 @@ class PublicationController extends Controller
             'byline' => $finalByline, 
             'status' => $status,
             'views' => 0,
+            'date_published' => $request->date_published ?? now(), 
         ]);
 
         $publication->writers()->attach($request->writer_ids);
@@ -259,7 +260,7 @@ class PublicationController extends Controller
                   ->orWhere('byline', 'LIKE', "%{$query}%");
             })
             ->with('writers') 
-            ->orderBy('created_at', 'desc')
+            ->orderBy('date_published', 'desc') 
             ->get()
             ->map(function ($publication) {
                 $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
@@ -279,14 +280,15 @@ class PublicationController extends Controller
             'image' => 'nullable|image|max:2048',
             'writer_ids' => 'sometimes|array',      
             'writer_ids.*' => 'exists:users,id',
-            'status' => 'in:pending,approved,rejected'
+            'status' => 'in:pending,approved,rejected',
+            'date_published' => 'nullable|date', 
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $data = $request->only(['title', 'body', 'category', 'photo_credits', 'status']);
+        $data = $request->only(['title', 'body', 'category', 'photo_credits', 'status', 'date_published']);
 
         if ($request->has('writer_ids')) {
             $publication->writers()->sync($request->writer_ids);
@@ -326,7 +328,7 @@ class PublicationController extends Controller
         $publications = Publication::where('category', $category)
             ->where('status', 'approved') 
             ->with('writers') 
-            ->orderBy('created_at', 'desc')
+            ->orderBy('date_published', 'desc') // Updated sort order
             ->get()
             ->map(function ($publication) {
                 if ($publication->image_path) {
@@ -355,5 +357,10 @@ class PublicationController extends Controller
             'message' => 'Article ' . $request->status . ' successfully',
             'data' => $publication
         ]);
+    }
+
+    public function recent()
+    {
+        return Publication::orderBy('date_published', 'desc')->take(3)->get();
     }
 }
