@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
 import Logo from "../../../assets/LOGO.png";
 
@@ -86,16 +86,13 @@ const Navbar: React.FC = () => {
       <div className="hidden lg:block bg-green-800 border-b border-green-200 shadow-md">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-center relative">
-            <div
-              onClick={() => (window.location.href = "/")}
-              className="cursor-pointer"
-            >
+            <Link to="/" className="cursor-pointer">
               <img
                 src={Logo}
                 alt="The Hillside Echo Logo"
                 className="h-[60px] w-auto m-2 transform transition-transform duration-200 hover:scale-105"
               />
-            </div>
+            </Link>
           </div>
         </div>
       </div>

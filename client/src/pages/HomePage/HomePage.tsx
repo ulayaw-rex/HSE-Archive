@@ -6,6 +6,7 @@ import GuestPublicationCard from "../../components/features/HomePage/GuestPublic
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 import "../../App.css";
+import { useDataCache } from "../../context/DataContext";
 
 const categories = [
   "university",
@@ -21,12 +22,16 @@ const categories = [
 const HomePage: React.FC = () => {
   const [userRole] = useState<"guest" | "admin">("guest");
 
-  const [featuredArticles, setFeaturedArticles] = useState<Publication[]>([]);
+  const { cache, updateCache } = useDataCache();
+
+  const [featuredArticles, setFeaturedArticles] = useState<Publication[]>(
+    cache.home?.featured || []
+  );
   const [categoryArticles, setCategoryArticles] = useState<
     Record<string, Publication[]>
-  >({});
+  >(cache.home?.categories || {});
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cache.home);
 
   useEffect(() => {
     const fetchPublicationsData = async () => {
@@ -43,14 +48,21 @@ const HomePage: React.FC = () => {
           ...categoryPromises,
         ]);
 
-        setFeaturedArticles(featuredRes.data.slice(0, 3));
-
+        const newFeatured = featuredRes.data.slice(0, 3);
         const newCategoryData: Record<string, Publication[]> = {};
+
         categoryResponses.forEach((res, index) => {
           const categoryName = categories[index];
           newCategoryData[categoryName] = res.data.slice(0, 4);
         });
+
+        setFeaturedArticles(newFeatured);
         setCategoryArticles(newCategoryData);
+
+        updateCache("home", {
+          featured: newFeatured,
+          categories: newCategoryData,
+        });
       } catch (err) {
         console.error("Failed to fetch homepage data", err);
       } finally {
@@ -58,7 +70,12 @@ const HomePage: React.FC = () => {
       }
     };
 
-    fetchPublicationsData();
+    if (!cache.home) {
+      fetchPublicationsData();
+    } else {
+      setLoading(false);
+      fetchPublicationsData();
+    }
 
     const handlePublicationCreated = () => {
       fetchPublicationsData();
@@ -74,7 +91,7 @@ const HomePage: React.FC = () => {
         handlePublicationCreated
       );
     };
-  }, []);
+  }, [cache.home, updateCache]);
 
   if (loading) {
     return (

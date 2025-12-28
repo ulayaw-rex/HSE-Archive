@@ -3,19 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Publication;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use App\Models\PublicationView;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\PrintMedia;
 use App\Models\Comment;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PublicationController extends Controller
 {
+
     public function index(Request $request)
     {
         $user = $request->user('sanctum');
@@ -27,8 +27,8 @@ class PublicationController extends Controller
             $query->where('status', 'approved');
         }
 
-        $publications = $query->with('writers') 
-            ->orderBy('date_published', 'desc') 
+        $publications = $query->with('writers')
+            ->orderBy('date_published', 'desc')
             ->get()
             ->map(function ($publication) {
                 $publication->image = $publication->image_path
@@ -38,6 +38,87 @@ class PublicationController extends Controller
             });
 
         return response()->json($publications);
+    }
+
+    public function show(Publication $publication, Request $request)
+    {
+        $user = $request->user('sanctum');
+        $isAdmin = $user && ($user->role === 'admin' || $user->tokenCan('role:admin'));
+        $isWriter = $user && $publication->writers->contains($user->id);
+
+        if ($publication->status !== 'approved') {
+             if (!$isAdmin && !$isWriter) {
+                 return response()->json(['message' => 'This article is pending approval.'], 403);
+             }
+        }
+
+        $hasViewedRecently = PublicationView::where('publication_id', $publication->publication_id)
+            ->where('ip_address', $request->ip())
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->exists();
+
+        if (!$hasViewedRecently) {
+            PublicationView::create([
+                'publication_id' => $publication->publication_id,
+                'ip_address' => $request->ip(),
+            ]);
+            $publication->increment('views');
+        }
+
+        $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
+        $publication->load('writers');
+
+        return response()->json($publication);
+    }
+
+
+    public function getByCategory($category)
+    {
+        $publications = Publication::where('category', $category)
+            ->where('status', 'approved')
+            ->with('writers')
+            ->orderBy('date_published', 'desc')
+            ->get()
+            ->map(function ($publication) {
+                $publication->image = $publication->image_path 
+                    ? asset('storage/' . $publication->image_path) 
+                    : null;
+                return $publication;
+            });
+
+        return response()->json($publications);
+    }
+
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        if (!$query) return response()->json([]);
+
+        $publications = Publication::where('status', 'approved')
+            ->where(function($q) use ($query) {
+                $q->where('title', 'LIKE', "%{$query}%")
+                  ->orWhere('body', 'LIKE', "%{$query}%")
+                  ->orWhere('byline', 'LIKE', "%{$query}%");
+            })
+            ->with('writers')
+            ->orderBy('date_published', 'desc')
+            ->get()
+            ->map(function ($publication) {
+                $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
+                return $publication;
+            });
+
+        return response()->json($publications);
+    }
+
+
+    public function recent()
+    {
+        return Publication::where('status', 'approved')
+            ->orderBy('date_published', 'desc')
+            ->take(3)
+            ->get();
     }
 
     public function store(Request $request)
@@ -50,11 +131,11 @@ class PublicationController extends Controller
             'title' => 'required|string',
             'body' => 'required|string',
             'category' => 'required|string',
-            'writer_ids' => 'required|array',       
-            'writer_ids.*' => 'exists:users,id',    
-            'image' => 'nullable|image|max:2048',
-            'byline' => 'nullable|string', 
-            'date_published' => 'nullable|date', 
+            'writer_ids' => 'required|array',
+            'writer_ids.*' => 'exists:users,id',
+            'image' => 'nullable|image|max:10240', 
+            'byline' => 'nullable|string',
+            'date_published' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -62,13 +143,10 @@ class PublicationController extends Controller
         }
 
         $finalByline = $request->byline;
-
         if (empty($finalByline)) {
             $writers = User::whereIn('id', $request->writer_ids)->get();
             $finalByline = $writers->pluck('name')->join(' & ');
         }
-
-        \Log::info('User attempting to post:', ['user' => $request->user()]);
 
         $publication = Publication::create([
             'user_id' => $currentUser->id,
@@ -76,10 +154,10 @@ class PublicationController extends Controller
             'body' => $request->body,
             'category' => $request->category,
             'photo_credits' => $request->photo_credits,
-            'byline' => $finalByline, 
+            'byline' => $finalByline,
             'status' => $status,
             'views' => 0,
-            'date_published' => $request->date_published ?? now(), 
+            'date_published' => $request->date_published ?? now(),
         ]);
 
         $publication->writers()->attach($request->writer_ids);
@@ -90,48 +168,84 @@ class PublicationController extends Controller
         }
 
         $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
-        
         $publication->load('writers');
+        
         \App\Models\AuditLog::record('Created Publication', "Title: {$publication->title}");
 
         return response()->json($publication, 201);
     }
 
-    public function show(Publication $publication, Request $request)
+
+    public function update(Request $request, Publication $publication)
     {
-        $user = $request->user('sanctum');
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'body' => 'required|string',
+            'category' => 'required|string|max:100',
+            'photo_credits' => 'nullable|string|max:255',
+            'image' => 'nullable|image|max:10240', 
+            'writer_ids' => 'sometimes|array',
+            'writer_ids.*' => 'exists:users,id',
+            'status' => 'in:pending,approved,rejected',
+            'date_published' => 'nullable|date',
+        ]);
 
-        $isAdmin = $user && ($user->role === 'admin' || $user->tokenCan('role:admin'));
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-        $isWriter = $user && $publication->writers->contains($user->id);
+        $data = $request->only(['title', 'body', 'category', 'photo_credits', 'status', 'date_published']);
 
-        if ($publication->status !== 'approved') {
-             if (!$isAdmin && !$isWriter) {
-                 return response()->json(['message' => 'This article is pending approval.'], 403);
+        if ($request->has('writer_ids')) {
+            $publication->writers()->sync($request->writer_ids);
+            
+             if ($request->has('byline')) {
+                 $data['byline'] = $request->byline;
              }
         }
 
-        $hasViewedRecently = PublicationView::where('publication_id', $publication->publication_id)
-            ->where('ip_address', $request->ip())
-            ->where('created_at', '>=', now()->subMinutes(10)) 
-            ->exists();
-
-        if (!$hasViewedRecently) {
-
-            PublicationView::create([
-                'publication_id' => $publication->publication_id,
-                'ip_address' => $request->ip(),
-            ]);
-    
-            $publication->increment('views');
+        if ($request->hasFile('image')) {
+            if ($publication->image_path) {
+                Storage::disk('public')->delete($publication->image_path);
+            }
+            $path = $request->file('image')->store('publications_images', 'public');
+            $data['image_path'] = $path;
         }
 
+        $publication->update($data);
         $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
-        
-        $publication->load('writers'); 
+        $publication->load('writers');
 
         return response()->json($publication);
-    }    
+    }
+
+    public function destroy(Publication $publication)
+    {
+        if ($publication->image_path) {
+            Storage::disk('public')->delete($publication->image_path);
+        }
+        $publication->delete();
+        
+        \App\Models\AuditLog::record('Deleted Publication', "Deleted article: {$publication->title}");
+        
+        return response()->json(['message' => 'Publication deleted successfully']);
+    }
+
+    public function review(Request $request, $id)
+    {
+        $publication = Publication::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:approved,rejected'
+        ]);
+
+        $publication->update(['status' => $request->status]);
+
+        return response()->json([
+            'message' => 'Article ' . $request->status . ' successfully',
+            'data' => $publication
+        ]);
+    }
 
     public function dashboardStats()
     {
@@ -143,7 +257,6 @@ class PublicationController extends Controller
             });
 
         $startDate = Carbon::now()->subDays(6)->startOfDay();
-        
         $views = PublicationView::select(
                 DB::raw('DATE(created_at) as date'), 
                 DB::raw('count(*) as views')
@@ -172,9 +285,7 @@ class PublicationController extends Controller
             ->limit(5)
             ->get();
 
-        
         $totalArticles = Publication::count();
-
         $popular = Publication::orderBy('views', 'desc')->first();
         
         $mostPopularArticle = null;
@@ -246,121 +357,5 @@ class PublicationController extends Controller
             'activityComments' => $recentComments,
             'activityUsers' => $recentUsers,
         ]);
-    }
-
-    public function search(Request $request)
-    {
-        $query = $request->input('q');
-        if (!$query) return response()->json([]);
-
-        $publications = Publication::where('status', 'approved')
-            ->where(function($q) use ($query) {
-                $q->where('title', 'LIKE', "%{$query}%")
-                  ->orWhere('body', 'LIKE', "%{$query}%")
-                  ->orWhere('byline', 'LIKE', "%{$query}%");
-            })
-            ->with('writers') 
-            ->orderBy('date_published', 'desc') 
-            ->get()
-            ->map(function ($publication) {
-                $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
-                return $publication;
-            });
-
-        return response()->json($publications);
-    }
-    
-    public function update(Request $request, Publication $publication)
-    {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'body' => 'required|string',
-            'category' => 'required|string|max:100',
-            'photo_credits' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048',
-            'writer_ids' => 'sometimes|array',      
-            'writer_ids.*' => 'exists:users,id',
-            'status' => 'in:pending,approved,rejected',
-            'date_published' => 'nullable|date', 
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $data = $request->only(['title', 'body', 'category', 'photo_credits', 'status', 'date_published']);
-
-        if ($request->has('writer_ids')) {
-            $publication->writers()->sync($request->writer_ids);
-            
-             if ($request->has('byline')) {
-                 $data['byline'] = $request->byline;
-             }
-        }
-
-        if ($request->hasFile('image')) {
-            if ($publication->image_path) {
-                Storage::disk('public')->delete($publication->image_path);
-            }
-            $data['image_path'] = $request->file('image')->store('publications_images', 'public');
-        }
-
-        $publication->update($data);
-        $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
-        
-        $publication->load('writers'); 
-
-        return response()->json($publication);
-    }
-
-    public function destroy(Publication $publication)
-    {
-        if ($publication->image_path) {
-            Storage::disk('public')->delete($publication->image_path);
-        }
-        $publication->delete();
-        \App\Models\AuditLog::record('Deleted Publication', "Deleted article: {$publication->title}");
-        return response()->json(['message' => 'Publication deleted successfully']);
-    }
-
-    public function getByCategory($category)
-    {
-        $publications = Publication::where('category', $category)
-            ->where('status', 'approved') 
-            ->with('writers') 
-            ->orderBy('date_published', 'desc') // Updated sort order
-            ->get()
-            ->map(function ($publication) {
-                if ($publication->image_path) {
-                    $publication->image = asset('storage/' . $publication->image_path);
-                } else {
-                    $publication->image = null;
-                }
-                return $publication;
-            });
-
-        return response()->json($publications);
-    }
-
-
-    public function review(Request $request, $id)
-    {
-        $publication = Publication::findOrFail($id);
-
-        $request->validate([
-            'status' => 'required|in:approved,rejected'
-        ]);
-
-        $publication->update(['status' => $request->status]);
-
-        return response()->json([
-            'message' => 'Article ' . $request->status . ' successfully',
-            'data' => $publication
-        ]);
-    }
-
-    public function recent()
-    {
-        return Publication::orderBy('date_published', 'desc')->take(3)->get();
     }
 }

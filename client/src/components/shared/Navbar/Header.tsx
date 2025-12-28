@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import {
   FaUserCircle,
   FaBars,
@@ -119,14 +119,12 @@ const Header: React.FC = () => {
             </div>
 
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-              <div
-                className="lg:hidden cursor-pointer"
-                onClick={() => (window.location.href = "/")}
-              >
+              <Link to="/" className="lg:hidden cursor-pointer">
                 <span className="text-lg font-bold text-white tracking-wide">
                   The Hillside Echo
                 </span>
-              </div>
+              </Link>
+
               <div className="hidden lg:block">
                 <span className="text-sm text-green-50 font-medium tracking-wide">
                   {new Date().toLocaleDateString("en-US", {
@@ -142,7 +140,7 @@ const Header: React.FC = () => {
             <div className="flex items-center relative pl-4">
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
-                  <div className="h-4 w-24 bg-green-500/50 rounded"></div>
+                  <div className="hidden md:block h-4 w-24 bg-green-500/50 rounded"></div>
                   <div className="h-8 w-8 bg-green-500/50 rounded-full"></div>
                 </div>
               ) : user ? (

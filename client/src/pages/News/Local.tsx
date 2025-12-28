@@ -4,31 +4,43 @@ import CategoryPublicationCard from "../../components/features/Categories/Catego
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
+import { useDataCache } from "../../context/DataContext";
 
 const LocalNewsPage: React.FC = () => {
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cache, updateCache } = useDataCache();
+
+  const [publications, setPublications] = useState<Publication[]>(
+    cache.local || []
+  );
+
+  const [loading, setLoading] = useState(!cache.local);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPublications = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await AxiosInstance.get(
-          "/publications/category/local"
-        );
-        setPublications(response.data);
-      } catch (err) {
-        console.error("Failed to fetch local publications:", err);
-        setError("Failed to load local publications.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!cache.local) {
+      const fetchPublications = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const response = await AxiosInstance.get(
+            "/publications/category/local"
+          );
+          setPublications(response.data);
 
-    fetchPublications();
-  }, []);
+          updateCache("local", response.data);
+        } catch (err) {
+          console.error("Failed to fetch local publications:", err);
+          setError("Failed to load local publications.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPublications();
+    } else {
+      setLoading(false);
+    }
+  }, [cache.local, updateCache]);
 
   if (loading) {
     return (

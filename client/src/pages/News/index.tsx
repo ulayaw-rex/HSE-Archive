@@ -4,6 +4,7 @@ import AxiosInstance from "../../AxiosInstance";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { useDataCache } from "../../context/DataContext";
 
 const categories = ["university", "local", "national", "international"];
 
@@ -32,14 +33,16 @@ const getCategoryTextColor = (category: string) => {
 };
 
 const NewsPage: React.FC = () => {
+  const { cache, updateCache } = useDataCache();
+
   const [featuredArticle, setFeaturedArticle] = useState<Publication | null>(
-    null
+    cache.newsHub?.featured || null
   );
   const [categoryArticles, setCategoryArticles] = useState<
     Record<string, Publication[]>
-  >({});
+  >(cache.newsHub?.categories || {});
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cache.newsHub);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -55,16 +58,21 @@ const NewsPage: React.FC = () => {
           ...categoryPromises,
         ]);
 
-        if (mainRes.data.length > 0) {
-          setFeaturedArticle(mainRes.data[0]);
-        }
+        const featured = mainRes.data.length > 0 ? mainRes.data[0] : null;
 
         const newCategoryData: Record<string, Publication[]> = {};
         categoryResponses.forEach((res, index) => {
           const categoryName = categories[index];
           newCategoryData[categoryName] = res.data.slice(0, 4);
         });
+
+        setFeaturedArticle(featured);
         setCategoryArticles(newCategoryData);
+
+        updateCache("newsHub", {
+          featured: featured,
+          categories: newCategoryData,
+        });
       } catch (error) {
         console.error("Failed to fetch news data", error);
       } finally {
@@ -72,7 +80,11 @@ const NewsPage: React.FC = () => {
       }
     };
 
-    fetchAllData();
+    if (!cache.newsHub) {
+      fetchAllData();
+    } else {
+      setLoading(false);
+    }
 
     const handlePublicationCreated = () => {
       fetchAllData();

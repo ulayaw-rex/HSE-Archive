@@ -4,31 +4,43 @@ import CategoryPublicationCard from "../../components/features/Categories/Catego
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
+import { useDataCache } from "../../context/DataContext";
 
 const NationalNewsPage: React.FC = () => {
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cache, updateCache } = useDataCache();
+
+  const [publications, setPublications] = useState<Publication[]>(
+    cache.national || []
+  );
+
+  const [loading, setLoading] = useState(!cache.national);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPublications = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await AxiosInstance.get(
-          "/publications/category/national"
-        );
-        setPublications(response.data);
-      } catch (err) {
-        console.error("Failed to fetch national publications:", err);
-        setError("Failed to load national publications.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!cache.national) {
+      const fetchPublications = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const response = await AxiosInstance.get(
+            "/publications/category/national"
+          );
+          setPublications(response.data);
 
-    fetchPublications();
-  }, []);
+          updateCache("national", response.data);
+        } catch (err) {
+          console.error("Failed to fetch national publications:", err);
+          setError("Failed to load national publications.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPublications();
+    } else {
+      setLoading(false);
+    }
+  }, [cache.national, updateCache]);
 
   if (loading) {
     return (

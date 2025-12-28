@@ -4,12 +4,12 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
 import { FaSearch, FaCalendarAlt, FaFilter } from "react-icons/fa";
 import type { PrintMedia } from "../../types/PrintMedia";
+import { useDataCache } from "../../context/DataContext";
 import "../../App.css";
 
 const ITEMS_PER_PAGE = 12;
 const TYPES = ["All", "Tabloids", "Magazines", "Folios", "Others"];
 
-// 1. Color Helper (Matches Admin PrintMediaCard)
 const getCategoryColor = (type: string) => {
   const lowerType = type.toLowerCase();
   switch (lowerType) {
@@ -27,8 +27,13 @@ const getCategoryColor = (type: string) => {
 };
 
 const PrintMediaPage: React.FC = () => {
-  const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cache, updateCache } = useDataCache();
+
+  const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>(
+    cache.printMedia || []
+  );
+
+  const [loading, setLoading] = useState(!cache.printMedia);
 
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,16 +46,22 @@ const PrintMediaPage: React.FC = () => {
     try {
       const response = await AxiosInstance.get<PrintMedia[]>("/print-media");
       setPrintMediaList(response.data);
+
+      updateCache("printMedia", response.data);
     } catch (error: unknown) {
       console.error("Failed to fetch print media");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [updateCache]);
 
   useEffect(() => {
-    void fetchPrintMedia();
-  }, [fetchPrintMedia]);
+    if (!cache.printMedia) {
+      void fetchPrintMedia();
+    } else {
+      setLoading(false);
+    }
+  }, [fetchPrintMedia, cache.printMedia]);
 
   const availableYears = useMemo(() => {
     const years = new Set(
@@ -70,7 +81,7 @@ const PrintMediaPage: React.FC = () => {
       const itemYear = new Date(itemDateStr).getFullYear().toString();
 
       const matchesType =
-        activeType === "All" || item.type === activeType.slice(0, -1); // "Tabloids" -> "Tabloid"
+        activeType === "All" || item.type === activeType.slice(0, -1);
 
       const matchesSearch =
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -210,7 +221,6 @@ const PrintMediaPage: React.FC = () => {
                     item.date_published || item.created_at
                   );
 
-                  // 2. Get dynamic color class
                   const badgeColorClass = getCategoryColor(item.type);
 
                   return (
@@ -219,7 +229,6 @@ const PrintMediaPage: React.FC = () => {
                       className="relative bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 ease-in-out group flex flex-col hover:-translate-y-1 cursor-pointer"
                       onClick={() => setSelectedMedia(item)}
                     >
-                      {/* 3. Applied dynamic color to the badge */}
                       <span
                         className={`absolute top-3 left-3 z-10 inline-block px-2 py-1 text-xs font-bold rounded shadow-sm text-white uppercase tracking-wide ${badgeColorClass}`}
                       >

@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { DataProvider } from "./context/DataContext";
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import { adminSidebarItems } from "./pages/Admin/SidebarItems";
@@ -23,10 +24,8 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="loading-screen">
-        <div className="p-80 text-center">
-          <LoadingSpinner />
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
@@ -43,24 +42,26 @@ function App() {
     <Router>
       <ScrollToTop />
       <AuthProvider>
-        <Routes>
-          <Route element={<SiteLayout />}>{SiteRoutes}</Route>
+        <DataProvider>
+          <Routes>
+            <Route element={<SiteLayout />}>{SiteRoutes}</Route>
 
-          <Route
-            path="/admin"
-            element={
-              <RequireAdmin>
-                <AdminLayout sidebarItems={adminSidebarItems} />
-              </RequireAdmin>
-            }
-          >
-            {AdminRoutes}
-          </Route>
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <AdminLayout sidebarItems={adminSidebarItems} />
+                </RequireAdmin>
+              }
+            >
+              {AdminRoutes}
+            </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
 
-        <ToastContainer position="top-right" autoClose={3000} />
+          <ToastContainer position="top-right" autoClose={3000} />
+        </DataProvider>
       </AuthProvider>
     </Router>
   );

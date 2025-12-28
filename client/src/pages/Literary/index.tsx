@@ -4,31 +4,43 @@ import CategoryPublicationCard from "../../components/features/Categories/Catego
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import type { Publication } from "../../types/Publication";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { useDataCache } from "../../context/DataContext";
 
 const LiteraryPage: React.FC = () => {
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cache, updateCache } = useDataCache();
+
+  const [publications, setPublications] = useState<Publication[]>(
+    cache.literary || []
+  );
+
+  const [loading, setLoading] = useState(!cache.literary);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPublications = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await AxiosInstance.get(
-          "/publications/category/literary"
-        );
-        setPublications(response.data);
-      } catch (err) {
-        console.error("Failed to fetch literary publications:", err);
-        setError("Failed to load literary publications.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!cache.literary) {
+      const fetchPublications = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const response = await AxiosInstance.get(
+            "/publications/category/literary"
+          );
+          setPublications(response.data);
 
-    fetchPublications();
-  }, []);
+          updateCache("literary", response.data);
+        } catch (err) {
+          console.error("Failed to fetch literary publications:", err);
+          setError("Failed to load literary publications.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPublications();
+    } else {
+      setLoading(false);
+    }
+  }, [cache.literary, updateCache]);
 
   if (loading) {
     return (
@@ -51,7 +63,7 @@ const LiteraryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 space-y-6 w-[90%]">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">Literary</h1>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">LITERARY</h1>
 
         {publications.length === 0 ? (
           <div className="text-center py-20 text-gray-500">

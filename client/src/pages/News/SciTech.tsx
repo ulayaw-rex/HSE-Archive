@@ -4,31 +4,43 @@ import CategoryPublicationCard from "../../components/features/Categories/Catego
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
+import { useDataCache } from "../../context/DataContext";
 
 const SciTechNewsPage: React.FC = () => {
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cache, updateCache } = useDataCache();
+
+  const [publications, setPublications] = useState<Publication[]>(
+    cache.scitech || []
+  );
+
+  const [loading, setLoading] = useState(!cache.scitech);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPublications = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await AxiosInstance.get(
-          "/publications/category/sci-tech"
-        );
-        setPublications(response.data);
-      } catch (err) {
-        console.error("Failed to fetch sci-tech publications:", err);
-        setError("Failed to load sci-tech publications.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!cache.scitech) {
+      const fetchPublications = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const response = await AxiosInstance.get(
+            "/publications/category/sci-tech"
+          );
+          setPublications(response.data);
 
-    fetchPublications();
-  }, []);
+          updateCache("scitech", response.data);
+        } catch (err) {
+          console.error("Failed to fetch sci-tech publications:", err);
+          setError("Failed to load sci-tech publications.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPublications();
+    } else {
+      setLoading(false);
+    }
+  }, [cache.scitech, updateCache]);
 
   if (loading) {
     return (

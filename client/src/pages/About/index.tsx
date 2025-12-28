@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { FaGraduationCap, FaUserTie } from "react-icons/fa";
+import { useDataCache } from "../../context/DataContext";
 
 interface Member {
   id: number;
@@ -28,31 +30,55 @@ const POSITION_HIERARCHY = [
 ];
 
 const About: React.FC = () => {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [teamPhotoUrl, setTeamPhotoUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [introText, setIntroText] = useState("");
+  const { cache, updateCache } = useDataCache();
+  const location = useLocation();
+
+  const [members, setMembers] = useState<Member[]>(cache.about?.members || []);
+  const [teamPhotoUrl, setTeamPhotoUrl] = useState<string | null>(
+    cache.about?.photo || null
+  );
+  const [introText, setIntroText] = useState(cache.about?.text || "");
+
+  const [loading, setLoading] = useState(!cache.about);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [membersRes, photoRes, textRes] = await Promise.all([
-          AxiosInstance.get("/members"),
-          AxiosInstance.get("/site-settings/team-photo"),
-          AxiosInstance.get("/site-settings/team-intro"),
-        ]);
+    if (!cache.about) {
+      const fetchData = async () => {
+        try {
+          const [membersRes, photoRes, textRes] = await Promise.all([
+            AxiosInstance.get("/members"),
+            AxiosInstance.get("/site-settings/team-photo"),
+            AxiosInstance.get("/site-settings/team-intro"),
+          ]);
 
-        setMembers(membersRes.data);
-        setTeamPhotoUrl(photoRes.data.url);
-        setIntroText(textRes.data.text);
-      } catch (error) {
-        console.error("Failed to load data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+          const newData = {
+            members: membersRes.data,
+            photo: photoRes.data.url,
+            text: textRes.data.text,
+          };
+
+          setMembers(newData.members);
+          setTeamPhotoUrl(newData.photo);
+          setIntroText(newData.text);
+
+          updateCache("about", newData);
+        } catch (error) {
+          console.error("Failed to load data", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [cache.about, updateCache]);
+
+  useEffect(() => {
+    if (!loading && !location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [loading, location.hash]);
 
   const groupedMembers = members.reduce((acc, member) => {
     const pos = member.position.trim();
