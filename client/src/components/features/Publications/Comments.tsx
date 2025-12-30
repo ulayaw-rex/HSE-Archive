@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "../../../AxiosInstance";
 import { useAuth } from "../../../context/AuthContext";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
-import { toast } from "react-toastify";
 import {
   FaUserCircle,
   FaEdit,
@@ -10,6 +9,8 @@ import {
   FaCheck,
   FaTimes,
   FaLock,
+  FaExclamationCircle,
+  FaHistory,
 } from "react-icons/fa";
 import ConfirmationModal from "../../common/ConfirmationModal";
 
@@ -18,11 +19,18 @@ interface CommentAuthor {
   name: string;
 }
 
+interface CommentHistory {
+  id: number;
+  body: string;
+  created_at: string;
+}
+
 export interface Comment {
   id: number;
   body: string;
   user: CommentAuthor;
   created_at: string;
+  is_edited: boolean;
 }
 
 interface CommentsProps {
@@ -39,6 +47,7 @@ export function Comments({
   const { user } = useAuth();
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
@@ -46,6 +55,10 @@ export function Comments({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyData, setHistoryData] = useState<CommentHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const [newComment, setNewComment] = useState("");
 
@@ -56,6 +69,7 @@ export function Comments({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newComment.trim() === "") return;
+    setError(null);
 
     try {
       const response = await axios.post(
@@ -64,13 +78,13 @@ export function Comments({
       );
       setComments([response.data, ...comments]);
       setNewComment("");
-      toast.success("Comment posted!");
     } catch (err) {
-      toast.error("Failed to post comment.");
+      setError("Unable to post your comment. Please try again.");
     }
   };
 
   const startEditing = (comment: Comment) => {
+    setError(null);
     setEditingId(comment.id);
     setEditText(comment.body);
   };
@@ -78,47 +92,65 @@ export function Comments({
   const cancelEditing = () => {
     setEditingId(null);
     setEditText("");
+    setError(null);
   };
 
   const saveEdit = async (id: number) => {
     if (editText.trim() === "") return;
+    setError(null);
 
     try {
       const updatedList = comments.map((c) =>
-        c.id === id ? { ...c, body: editText } : c
+        c.id === id ? { ...c, body: editText, is_edited: true } : c
       );
       setComments(updatedList);
       setEditingId(null);
 
       await axios.put(`/comments/${id}`, { body: editText });
-      toast.success("Comment updated");
     } catch (error) {
-      toast.error("Failed to update comment");
+      setError("Unable to save your changes. Please check your connection.");
     }
   };
 
   const initiateDelete = (id: number) => {
+    setError(null);
     setCommentToDelete(id);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
     if (commentToDelete === null) return;
-
     setIsDeleting(true);
+    setError(null);
+
     try {
       const filteredList = comments.filter((c) => c.id !== commentToDelete);
       setComments(filteredList);
 
       await axios.delete(`/comments/${commentToDelete}`);
-      toast.success("Comment deleted");
 
       setIsDeleteModalOpen(false);
       setCommentToDelete(null);
     } catch (error) {
-      toast.error("Failed to delete comment");
+      setIsDeleteModalOpen(false);
+      setError("We couldn't delete that comment. Please try again.");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const viewHistory = async (commentId: number) => {
+    setHistoryModalOpen(true);
+    setLoadingHistory(true);
+    setHistoryData([]);
+
+    try {
+      const response = await axios.get(`/comments/${commentId}/history`);
+      setHistoryData(response.data);
+    } catch (err) {
+      console.error("Failed to load history", err);
+    } finally {
+      setLoadingHistory(false);
     }
   };
 
@@ -127,6 +159,19 @@ export function Comments({
       <h3 className="text-xl font-bold text-green-800 mb-6">
         {user ? `Comments (${comments.length})` : "Comments"}
       </h3>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-3 shadow-sm animate-fadeIn">
+          <FaExclamationCircle className="mt-1 flex-shrink-0" />
+          <div className="flex-1 text-sm font-medium">{error}</div>
+          <button
+            onClick={() => setError(null)}
+            className="text-red-400 hover:text-red-700 transition-colors"
+          >
+            <FaTimes />
+          </button>
+        </div>
+      )}
 
       <div className="mb-8">
         {user ? (
@@ -137,7 +182,10 @@ export function Comments({
             </div>
             <textarea
               value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
+              onChange={(e) => {
+                setNewComment(e.target.value);
+                if (error) setError(null);
+              }}
               rows={3}
               placeholder="Share your thoughts..."
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
@@ -197,6 +245,16 @@ export function Comments({
                         <span className="text-xs text-gray-500">
                           {new Date(comment.created_at).toLocaleDateString()}
                         </span>
+
+                        {comment.is_edited && (
+                          <button
+                            onClick={() => viewHistory(comment.id)}
+                            className="text-xs text-gray-400 hover:text-green-700 underline decoration-dotted cursor-pointer transition-colors"
+                            title="View Edit History"
+                          >
+                            (Edited)
+                          </button>
+                        )}
 
                         {(user.id === comment.user.id ||
                           user.role === "admin") &&
@@ -261,6 +319,64 @@ export function Comments({
           <p className="text-gray-500 italic">
             Comments are hidden for guests.
           </p>
+        </div>
+      )}
+
+      {historyModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setHistoryModalOpen(false)}
+          />
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden animate-fadeIn">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <FaHistory className="text-green-700" /> Edit History
+              </h3>
+              <button
+                onClick={() => setHistoryModalOpen(false)}
+                className="text-gray-500 hover:text-red-500"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto custom-scrollbar">
+              {loadingHistory ? (
+                <div className="flex justify-center py-8 text-gray-400">
+                  Loading history...
+                </div>
+              ) : historyData.length > 0 ? (
+                <div className="space-y-4">
+                  {historyData.map((item) => (
+                    <div
+                      key={item.id}
+                      className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0 relative"
+                    >
+                      <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-gray-400"></div>
+
+                      <p className="text-xs text-gray-500 mb-1 font-mono uppercase">
+                        {new Date(item.created_at).toLocaleString()}
+                      </p>
+                      <div className="bg-gray-100 p-3 rounded text-sm text-gray-700">
+                        {item.body}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-l-2 border-green-500 pl-4 relative pt-2">
+                    <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-green-600"></div>
+                    <p className="text-xs text-green-700 font-bold uppercase mb-1">
+                      Current Version
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-gray-500 italic">
+                  No edit history available.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

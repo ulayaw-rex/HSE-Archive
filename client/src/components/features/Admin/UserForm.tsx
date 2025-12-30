@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { User, CreateUserData, UpdateUserData } from "../../../types/User";
 import { toast } from "react-toastify";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "../../../App.css";
 
 interface CustomDropdownProps {
@@ -161,6 +162,10 @@ const UserForm: React.FC<UserFormProps> = ({
 
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const isEditing = !!user;
 
   useEffect(() => {
@@ -265,7 +270,6 @@ const UserForm: React.FC<UserFormProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-          {/* Name */}
           <div>
             <label className={labelClass}>Full Name</label>
             <input
@@ -283,7 +287,6 @@ const UserForm: React.FC<UserFormProps> = ({
             )}
           </div>
 
-          {/* Email */}
           <div>
             <label className={labelClass}>Email Address</label>
             <input
@@ -301,7 +304,6 @@ const UserForm: React.FC<UserFormProps> = ({
             )}
           </div>
 
-          {/* ✅ Custom Course Dropdown */}
           <CustomDropdown
             label="Course / Degree"
             name="course"
@@ -322,7 +324,6 @@ const UserForm: React.FC<UserFormProps> = ({
             placeholder="Select Position"
           />
 
-          {/* Password */}
           <div>
             <label className={labelClass}>
               Password{" "}
@@ -332,14 +333,23 @@ const UserForm: React.FC<UserFormProps> = ({
                 </span>
               )}
             </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={inputClass(!!errors.password)}
-              placeholder="Enter Password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`${inputClass(!!errors.password)} pr-10`}
+                placeholder="Enter Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-xs mt-1 font-medium">
                 {errors.password}
@@ -347,17 +357,25 @@ const UserForm: React.FC<UserFormProps> = ({
             )}
           </div>
 
-          {/* Confirm Password */}
           <div>
             <label className={labelClass}>Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputClass(!!errors.confirmPassword)}
-              placeholder="Re-enter Password"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`${inputClass(!!errors.confirmPassword)} pr-10`}
+                placeholder="Re-enter Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p className="text-red-500 text-xs mt-1 font-medium">
                 {errors.confirmPassword}
@@ -365,7 +383,6 @@ const UserForm: React.FC<UserFormProps> = ({
             )}
           </div>
 
-          {/* Role */}
           <div className="md:col-span-2">
             <CustomDropdown
               label="System Role"
@@ -378,7 +395,6 @@ const UserForm: React.FC<UserFormProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end items-center gap-3 pt-6 border-t border-gray-100 mt-2">
           <button
             type="button"

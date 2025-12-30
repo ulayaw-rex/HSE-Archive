@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Publication;
+use App\Models\PrintMedia; 
 use Illuminate\Http\Request;
 
 class UserProfileController extends Controller
@@ -40,6 +41,10 @@ class UserProfileController extends Controller
             return $publication;
         });
 
+        $printMedia = PrintMedia::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
@@ -50,7 +55,8 @@ class UserProfileController extends Controller
                 'course' => $user->course,    
                 'position' => $user->position 
             ],
-            'articles' => $articles
+            'articles' => $articles,
+            'print_media' => $printMedia 
         ]);
     }
 }

@@ -67,10 +67,21 @@ const CATEGORY_COLOR_MAP: Record<string, string> = {
   Sports: "#16a34a",
   Literary: "#9333ea",
   University: "#2563eb",
+
+  Entertainment: "#db2777",
+  "Sci-Tech": "#4f46e5",
+  Opinion: "#ea580c",
+  Local: "#0891b2",
+  National: "#be123c",
 };
 
 const getTrendColor = (category: string, index: number) => {
   if (CATEGORY_COLOR_MAP[category]) return CATEGORY_COLOR_MAP[category];
+
+  const lowerCat =
+    category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+  if (CATEGORY_COLOR_MAP[lowerCat]) return CATEGORY_COLOR_MAP[lowerCat];
+
   return DISTINCT_COLORS[index % DISTINCT_COLORS.length];
 };
 
@@ -307,7 +318,7 @@ const Analytics: React.FC = () => {
                   onClick={() => handleGranularityChange("monthly")}
                   className={`px-3 py-1 rounded transition-all ${
                     granularity === "monthly"
-                      ? "bg-green-800 text-white shadow-sm"
+                      ? "bg-green-100 text-green-800 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >

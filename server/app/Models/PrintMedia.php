@@ -15,6 +15,7 @@ class PrintMedia extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
+        'user_id',
         'title',
         'type',
         'description',
@@ -32,5 +33,10 @@ class PrintMedia extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
 

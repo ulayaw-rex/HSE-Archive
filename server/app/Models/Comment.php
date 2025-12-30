@@ -17,12 +17,18 @@ class Comment extends Model
     public $incrementing = true;
 
     protected $keyType = 'int';
+    
 
     protected $fillable = [
         'body',
         'user_id',
         'publication_id',
+        'is_edited',
     ];
+
+    protected $casts = [
+    'is_edited' => 'boolean', 
+];
 
     public function publication(): BelongsTo
     {
@@ -33,4 +39,9 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function histories()
+{
+    return $this->hasMany(CommentHistory::class)->orderBy('created_at', 'desc');
+}
 }

@@ -4,6 +4,7 @@ import AxiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import LoginArt from "../../../assets/Login.png";
 import { useAuth } from "../../../context/AuthContext";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -18,9 +19,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     email: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [isPendingError, setIsPendingError] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,10 +119,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   />
                 </div>
 
-                <div className="login-modal__group">
+                <div className="login-modal__group relative">
                   <input
-                    className="login-modal__input login-modal__input--password"
-                    type="password"
+                    className="login-modal__input login-modal__input--password pr-10"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     value={credentials.password}
                     onChange={(e) =>
@@ -130,6 +133,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     }
                     required
                   />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash size={18} />
+                    ) : (
+                      <FaEye size={18} />
+                    )}
+                  </button>
                 </div>
 
                 {error && (

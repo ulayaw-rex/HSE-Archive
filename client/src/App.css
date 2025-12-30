@@ -30,11 +30,18 @@ html {
 }
 
 /* Focus styles for accessibility */
-button:focus,
-a:focus,
-input:focus {
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
   outline: 2px solid #16a34a;
   outline-offset: 2px;
+}
+
+/* Remove outline on mouse click */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Custom scrollbar */

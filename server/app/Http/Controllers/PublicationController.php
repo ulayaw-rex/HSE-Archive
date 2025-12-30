@@ -7,6 +7,7 @@ use App\Models\PublicationView;
 use App\Models\User;
 use App\Models\PrintMedia;
 use App\Models\Comment;
+use App\Models\CreditRequest; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -357,5 +358,34 @@ class PublicationController extends Controller
             'activityComments' => $recentComments,
             'activityUsers' => $recentUsers,
         ]);
+    }
+
+    public function requestCredit(Request $request, $id)
+    {
+        $publication = Publication::findOrFail($id);
+        $user = $request->user();
+
+        if ($publication->writers->contains($user->id)) {
+            return response()->json(['message' => 'You are already credited as a writer.'], 422);
+        }
+
+        $existingRequest = CreditRequest::where('user_id', $user->id)
+            ->where('requestable_id', $id)
+            ->where('requestable_type', Publication::class)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return response()->json(['message' => 'Request already pending.'], 409);
+        }
+
+        CreditRequest::create([
+            'user_id' => $user->id,
+            'requestable_id' => $id,
+            'requestable_type' => Publication::class,
+            'status' => 'pending',
+        ]);
+
+        return response()->json(['message' => 'Credit request submitted successfully.']);
     }
 }

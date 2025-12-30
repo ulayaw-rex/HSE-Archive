@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'), // <-- Change 'password' to a secure password
                 'role' => User::ROLE_ADMIN, // <-- Use the constant from your User model
                 'email_verified_at' => now(), // <-- Optionally verify the email right away
+                'status' => 'approved',
             ]
         );
 

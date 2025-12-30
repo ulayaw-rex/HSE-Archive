@@ -2,10 +2,25 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
-import { FaSearch, FaCalendarAlt, FaFilter } from "react-icons/fa";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import {
+  FaSearch,
+  FaCalendarAlt,
+  FaFilter,
+  FaUserPlus,
+  FaDownload,
+  FaCheckCircle,
+  FaInfoCircle,
+  FaUserClock,
+  FaUserCircle,
+} from "react-icons/fa";
 import type { PrintMedia } from "../../types/PrintMedia";
 import { useDataCache } from "../../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 import "../../App.css";
+
+import { useNavigate } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 12;
 const TYPES = ["All", "Tabloids", "Magazines", "Folios", "Others"];
@@ -27,41 +42,110 @@ const getCategoryColor = (type: string) => {
 };
 
 const PrintMediaPage: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { cache, updateCache } = useDataCache();
 
   const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>(
     cache.printMedia || []
   );
-
   const [loading, setLoading] = useState(!cache.printMedia);
 
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
-
   const [currentPage, setCurrentPage] = useState(1);
+
   const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(null);
+  const [claimTarget, setClaimTarget] = useState<PrintMedia | null>(null);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [requestingCredit, setRequestingCredit] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showAlreadySubmittedModal, setShowAlreadySubmittedModal] =
+    useState(false);
+
+  const [pendingRequestIds, setPendingRequestIds] = useState<number[]>([]);
 
   const fetchPrintMedia = useCallback(async () => {
     try {
+      if (!cache.printMedia) setLoading(true);
       const response = await AxiosInstance.get<PrintMedia[]>("/print-media");
       setPrintMediaList(response.data);
-
       updateCache("printMedia", response.data);
     } catch (error: unknown) {
       console.error("Failed to fetch print media");
     } finally {
       setLoading(false);
     }
-  }, [updateCache]);
+  }, [updateCache, cache.printMedia]);
 
   useEffect(() => {
-    if (!cache.printMedia) {
-      void fetchPrintMedia();
-    } else {
-      setLoading(false);
+    void fetchPrintMedia();
+  }, [fetchPrintMedia]);
+
+  const handleClaimClick = (e: React.MouseEvent, item: PrintMedia) => {
+    e.stopPropagation();
+    setClaimTarget(item);
+    setIsClaimModalOpen(true);
+  };
+
+  const submitClaimRequest = async () => {
+    if (!claimTarget) return;
+
+    try {
+      setRequestingCredit(true);
+      await AxiosInstance.post(
+        `/print-media/${claimTarget.print_media_id}/request-credit`
+      );
+      setPendingRequestIds((prev) => [...prev, claimTarget.print_media_id]);
+      setIsClaimModalOpen(false);
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        setPendingRequestIds((prev) => [...prev, claimTarget.print_media_id]);
+        setIsClaimModalOpen(false);
+        setShowAlreadySubmittedModal(true);
+      } else if (error.response?.status === 422) {
+        toast.warning("You are already listed as an owner.");
+        setIsClaimModalOpen(false);
+      } else {
+        toast.error("Failed to send request. Please try again.");
+      }
+    } finally {
+      setRequestingCredit(false);
     }
-  }, [fetchPrintMedia, cache.printMedia]);
+  };
+
+  const isPdf = (filePath?: string) => {
+    return filePath?.toLowerCase().endsWith(".pdf");
+  };
+
+  const handleDownload = async (e: React.MouseEvent, item: PrintMedia) => {
+    e.stopPropagation();
+    try {
+      const downloadUrl = `/api/print-media/${item.print_media_id}/download`;
+      window.open(downloadUrl, "_blank");
+    } catch (error) {
+      toast.error("Download failed.");
+    }
+  };
+
+  const handleUserClick = (e: React.MouseEvent, userId: number) => {
+    e.stopPropagation();
+    navigate(`/profile/${userId}`);
+  };
+
+  const handleCardClick = (e: React.MouseEvent, item: PrintMedia) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    if ((e.target as HTMLElement).closest(".user-link")) return;
+
+    if (isPdf(item.file_path)) {
+      setSelectedMedia(item);
+    } else {
+      handleDownload(e, item);
+      toast.info("Downloading file (Preview not available for this format).");
+    }
+  };
 
   const availableYears = useMemo(() => {
     const years = new Set(
@@ -79,17 +163,13 @@ const PrintMediaPage: React.FC = () => {
       const itemDateStr =
         item.date_published || item.created_at || new Date().toISOString();
       const itemYear = new Date(itemDateStr).getFullYear().toString();
-
       const matchesType =
         activeType === "All" || item.type === activeType.slice(0, -1);
-
       const matchesSearch =
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.description &&
           item.description.toLowerCase().includes(searchQuery.toLowerCase()));
-
       const matchesYear = selectedYear === "All" || itemYear === selectedYear;
-
       return matchesType && matchesSearch && matchesYear;
     });
   }, [printMediaList, activeType, searchQuery, selectedYear]);
@@ -106,13 +186,74 @@ const PrintMediaPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white py-8">
+      <ConfirmationModal
+        isOpen={isClaimModalOpen}
+        onClose={() => !requestingCredit && setIsClaimModalOpen(false)}
+        onConfirm={submitClaimRequest}
+        title="Claim Ownership"
+        message={`Are you sure you want to claim ownership of "${claimTarget?.title}"?`}
+        confirmLabel="Submit Request"
+        cancelLabel="Cancel"
+        isLoading={requestingCredit}
+        isDangerous={false}
+      />
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowSuccessModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+              <FaCheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Request Sent!
+            </h3>
+            <p className="text-gray-500 mb-8">
+              The administrator will review your claim shortly.
+            </p>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all"
+            >
+              Okay, Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showAlreadySubmittedModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowAlreadySubmittedModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
+              <FaInfoCircle className="h-10 w-10 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Request Pending
+            </h3>
+            <p className="text-gray-500 mb-8">
+              You have already submitted a request for this item.
+            </p>
+            <button
+              onClick={() => setShowAlreadySubmittedModal(false)}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 w-[90%]">
         <div className="mb-8 border-b border-gray-200 pb-4 space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <nav
-              className="flex space-x-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide"
-              aria-label="Tabs"
-            >
+            <nav className="flex space-x-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
               {TYPES.map((type) => (
                 <button
                   key={type}
@@ -136,7 +277,7 @@ const PrintMediaPage: React.FC = () => {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
-                  className="w-full sm:w-32 pl-10 pr-8 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm appearance-none bg-white cursor-pointer hover:bg-gray-50"
+                  className="w-full sm:w-32 pl-10 pr-8 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 text-sm appearance-none bg-white cursor-pointer hover:bg-gray-50"
                 >
                   {availableYears.map((year) => (
                     <option key={year} value={year}>
@@ -155,13 +296,12 @@ const PrintMediaPage: React.FC = () => {
                   placeholder="Search archives..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
             </div>
           </div>
-
           {(activeType !== "All" || selectedYear !== "All" || searchQuery) && (
             <p className="text-xs text-gray-500 italic flex items-center gap-1">
               <span className="font-semibold">Filtered by:</span>
@@ -216,25 +356,30 @@ const PrintMediaPage: React.FC = () => {
                   const thumbnailUrl = item.thumbnail_path
                     ? `/api/print-media/file/${item.thumbnail_path}`
                     : null;
-
                   const displayDate = new Date(
                     item.date_published || item.created_at
                   );
-
                   const badgeColorClass = getCategoryColor(item.type);
+                  const isOwner =
+                    user &&
+                    ((item as any).user_id === user.id ||
+                      user.role === "admin");
+                  const isPending =
+                    (item as any).has_pending_request ||
+                    pendingRequestIds.includes(item.print_media_id);
+                  const fileIsPdf = isPdf(item.file_path);
 
                   return (
                     <div
                       key={item.print_media_id}
                       className="relative bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 ease-in-out group flex flex-col hover:-translate-y-1 cursor-pointer"
-                      onClick={() => setSelectedMedia(item)}
+                      onClick={(e) => handleCardClick(e, item)}
                     >
                       <span
                         className={`absolute top-3 left-3 z-10 inline-block px-2 py-1 text-xs font-bold rounded shadow-sm text-white uppercase tracking-wide ${badgeColorClass}`}
                       >
                         {item.type}
                       </span>
-
                       <span className="absolute top-3 right-3 z-10 inline-block px-2 py-1 text-xs font-bold rounded bg-white/90 text-gray-700 backdrop-blur-sm shadow-sm border border-gray-100">
                         {displayDate.getFullYear()}
                       </span>
@@ -259,15 +404,67 @@ const PrintMediaPage: React.FC = () => {
                             </span>
                           </div>
                         )}
+
+                        <div className="absolute bottom-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+                          {isOwner && (
+                            <button
+                              onClick={(e) => handleDownload(e, item)}
+                              className="bg-white text-gray-700 p-2 rounded-full shadow-lg hover:bg-green-600 hover:text-white transition-colors"
+                              title="Download PDF"
+                            >
+                              <FaDownload size={14} />
+                            </button>
+                          )}
+                          {user && !isOwner && isPending && (
+                            <button
+                              disabled
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-gray-100 text-gray-400 p-2 rounded-full shadow-sm cursor-not-allowed border border-gray-200"
+                              title="Request Pending Approval"
+                            >
+                              <FaUserClock size={14} />
+                            </button>
+                          )}
+                          {user && !isOwner && !isPending && (
+                            <button
+                              onClick={(e) => handleClaimClick(e, item)}
+                              className="bg-white text-gray-700 p-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-colors"
+                              title="Claim Ownership"
+                            >
+                              <FaUserPlus size={14} />
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       <div className="p-4 flex flex-col flex-grow bg-white">
                         <h3 className="text-lg font-bold mb-2 truncate text-gray-800 group-hover:text-green-700 transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-3 line-clamp-2 h-10 leading-relaxed">
+
+                        {(item as any).owner_name && (
+                          <div className="flex items-center gap-2 mb-4 w-fit">
+                            <div
+                              className="flex items-center gap-1.5 cursor-pointer group/author"
+                              onClick={(e) =>
+                                handleUserClick(e, (item as any).user_id)
+                              }
+                            >
+                              <FaUserCircle
+                                className="text-gray-400 group-hover/author:text-green-600 transition-colors"
+                                size={14}
+                              />
+                              <span className="text-xs font-semibold text-gray-600 group-hover/author:text-green-700 transition-colors">
+                                {(item as any).owner_name}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <p className="text-sm text-gray-500 mb-4 line-clamp-2 h-10 leading-relaxed">
                           {item.description || "No description available."}
                         </p>
+
                         <div className="mt-auto flex justify-between items-center text-xs border-t border-gray-100 pt-3">
                           <span className="text-gray-400 font-medium">
                             {displayDate.toLocaleDateString(undefined, {
@@ -276,8 +473,12 @@ const PrintMediaPage: React.FC = () => {
                               year: "numeric",
                             })}
                           </span>
-                          <span className="text-green-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
-                            READ NOW →
+                          <span
+                            className={`font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300 ${
+                              fileIsPdf ? "text-green-600" : "text-blue-600"
+                            }`}
+                          >
+                            {fileIsPdf ? "READ NOW →" : "DOWNLOAD ↓"}
                           </span>
                         </div>
                       </div>

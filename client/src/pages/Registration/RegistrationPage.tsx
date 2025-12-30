@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { toast } from "react-toastify";
 import logo from "../../assets/Login.png";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -51,18 +52,26 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) => {
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  suffix?: React.ReactNode;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ error, ...props }) => (
+const InputField: React.FC<InputFieldProps> = ({ error, suffix, ...props }) => (
   <div className="mb-4 text-left">
-    <input
-      {...props}
-      className={`w-full text-sm rounded-lg block p-4 placeholder-gray-400 outline-none transition-all shadow-sm border-2 ${
-        error
-          ? "bg-red-50 border-red-500 text-red-900 focus:ring-red-200 placeholder-red-300"
-          : "bg-gray-100 border-transparent text-gray-800 focus:ring-2 focus:ring-green-800"
-      }`}
-    />
+    <div className="relative">
+      <input
+        {...props}
+        className={`w-full text-sm rounded-lg block p-4 placeholder-gray-400 outline-none transition-all shadow-sm border-2 ${
+          error
+            ? "bg-red-50 border-red-500 text-red-900 focus:ring-red-200 placeholder-red-300"
+            : "bg-gray-100 border-transparent text-gray-800 focus:ring-2 focus:ring-green-800"
+        } ${suffix ? "pr-12" : ""}`}
+      />
+      {suffix && (
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 flex items-center">
+          {suffix}
+        </div>
+      )}
+    </div>
     {error && (
       <p className="mt-1 text-xs text-red-600 font-medium ml-1">{error}</p>
     )}
@@ -139,6 +148,9 @@ const RegistrationPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -344,25 +356,53 @@ const RegistrationPage: React.FC = () => {
                 onChange={handleChange}
                 error={errors.name}
               />
+
               <InputField
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password*"
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="focus:outline-none hover:text-green-800 transition-colors"
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash size={18} />
+                    ) : (
+                      <FaEye size={18} />
+                    )}
+                  </button>
+                }
               />
               <p className="text-[10px] text-gray-400 mb-4 px-1 leading-tight">
                 Must contain 8 characters with symbol, number, uppercase, and
                 lowercase letters.
               </p>
+
               <InputField
                 name="password_confirmation"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Enter password again*"
                 value={formData.password_confirmation}
                 onChange={handleChange}
                 error={errors.password_confirmation}
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="focus:outline-none hover:text-green-800 transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <FaEyeSlash size={18} />
+                    ) : (
+                      <FaEye size={18} />
+                    )}
+                  </button>
+                }
               />
 
               <div className="mt-8">
