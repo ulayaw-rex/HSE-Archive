@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import DashboardStatsCards, {
   type DashboardStats,
 } from "../../components/features/Admin/DashboardStats";
@@ -11,6 +11,8 @@ import PendingReviewsWidget from "../../components/features/Admin/PendingReviews
 import type { Publication } from "../../types/Publication";
 import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
 import CreditRequestsWidget from "../../components/features/Admin/CreditRequestsWidget";
+// IMPORT THE HOOK
+import { usePolling } from "../../hooks/usePolling";
 
 interface PendingUser {
   id: number;
@@ -60,7 +62,8 @@ const AdminPage: React.FC = () => {
   const loadAllData = async () => {
     try {
       if (!dashboardStats) setLoading(true);
-      setError(null);
+
+      if (!dashboardStats) setError(null);
 
       const [statsRes, pubsRes, usersRes, creditsRes] = await Promise.all([
         AxiosInstance.get("publications/dashboard/stats"),
@@ -80,17 +83,15 @@ const AdminPage: React.FC = () => {
       setCreditRequests(creditsRes.data);
     } catch (err) {
       console.error("Error:", err);
-      setError("Failed to fetch dashboard data.");
+      if (!dashboardStats) {
+        setError("Failed to fetch dashboard data.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadAllData();
-    const interval = setInterval(loadAllData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  usePolling(loadAllData, 10000);
 
   return (
     <div className="admin-container bg-gray-50 min-h-screen">
@@ -102,7 +103,7 @@ const AdminPage: React.FC = () => {
           </p>
         </div>
 
-        {loading ? (
+        {loading && !dashboardStats ? (
           <div className="flex h-96 items-center justify-center">
             <div className="text-center">
               <LoadingSpinner />

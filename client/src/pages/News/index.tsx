@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { useDataCache } from "../../context/DataContext";
+import { usePolling } from "../../hooks/usePolling";
 
 const categories = ["university", "local", "national", "international"];
 
@@ -44,63 +45,56 @@ const NewsPage: React.FC = () => {
 
   const [loading, setLoading] = useState(!cache.newsHub);
 
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const mainPromise = AxiosInstance.get<Publication[]>("/publications");
+  const fetchAllData = useCallback(async () => {
+    try {
+      const mainPromise = AxiosInstance.get<Publication[]>("/publications");
 
-        const categoryPromises = categories.map((cat) =>
-          AxiosInstance.get<Publication[]>(`/publications/category/${cat}`)
-        );
+      const categoryPromises = categories.map((cat) =>
+        AxiosInstance.get<Publication[]>(`/publications/category/${cat}`)
+      );
 
-        const [mainRes, ...categoryResponses] = await Promise.all([
-          mainPromise,
-          ...categoryPromises,
-        ]);
+      const [mainRes, ...categoryResponses] = await Promise.all([
+        mainPromise,
+        ...categoryPromises,
+      ]);
 
-        const featured = mainRes.data.length > 0 ? mainRes.data[0] : null;
+      const featured = mainRes.data.length > 0 ? mainRes.data[0] : null;
 
-        const newCategoryData: Record<string, Publication[]> = {};
-        categoryResponses.forEach((res, index) => {
-          const categoryName = categories[index];
-          newCategoryData[categoryName] = res.data.slice(0, 4);
-        });
+      const newCategoryData: Record<string, Publication[]> = {};
+      categoryResponses.forEach((res, index) => {
+        const categoryName = categories[index];
+        newCategoryData[categoryName] = res.data.slice(0, 4);
+      });
 
-        setFeaturedArticle(featured);
-        setCategoryArticles(newCategoryData);
+      setFeaturedArticle(featured);
+      setCategoryArticles(newCategoryData);
 
-        updateCache("newsHub", {
-          featured: featured,
-          categories: newCategoryData,
-        });
-      } catch (error) {
-        console.error("Failed to fetch news data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!cache.newsHub) {
-      fetchAllData();
-    } else {
+      updateCache("newsHub", {
+        featured: featured,
+        categories: newCategoryData,
+      });
+    } catch (error) {
+      console.error("Failed to fetch news data", error);
+    } finally {
       setLoading(false);
     }
+  }, [updateCache]);
 
+  usePolling(fetchAllData, 60000);
+
+  useEffect(() => {
     const handlePublicationCreated = () => {
       fetchAllData();
     };
     window.addEventListener("publicationCreated", handlePublicationCreated);
 
-    const intervalId = setInterval(fetchAllData, 30000);
-
     return () => {
-      clearInterval(intervalId);
       window.removeEventListener(
         "publicationCreated",
         handlePublicationCreated
       );
     };
-  }, []);
+  }, [fetchAllData]);
 
   if (loading) {
     return (

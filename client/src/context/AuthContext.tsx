@@ -17,7 +17,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  checkAuth: () => Promise<void>;
+  checkAuth: () => Promise<User | null>;
   logout: () => Promise<void>;
 }
 
@@ -27,10 +27,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAuth = async () => {
+  const checkAuth = async (): Promise<User | null> => {
     try {
       const response = await axios.get("/me");
-      setUser(response.data.user);
+      const userData = response.data.user;
+      setUser(userData);
+      return userData;
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         setUser(null);
@@ -38,10 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Auth check failed", error);
         setUser(null);
       }
+      return null;
     } finally {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -53,7 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Logout request failed, but forcing local logout.");
     } finally {
       setUser(null);
-
       window.location.href = "/";
     }
   };

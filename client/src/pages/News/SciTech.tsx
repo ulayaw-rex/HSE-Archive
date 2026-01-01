@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import CategoryPublicationCard from "../../components/features/Categories/CategoryPublicationCard";
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 import { useDataCache } from "../../context/DataContext";
+import { usePolling } from "../../hooks/usePolling";
 
 const SciTechNewsPage: React.FC = () => {
   const { cache, updateCache } = useDataCache();
@@ -16,31 +17,26 @@ const SciTechNewsPage: React.FC = () => {
   const [loading, setLoading] = useState(!cache.scitech);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!cache.scitech) {
-      const fetchPublications = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          const response = await AxiosInstance.get(
-            "/publications/category/sci-tech"
-          );
-          setPublications(response.data);
+  const fetchPublications = useCallback(async () => {
+    try {
+      const response = await AxiosInstance.get(
+        "/publications/category/sci-tech"
+      );
 
-          updateCache("scitech", response.data);
-        } catch (err) {
-          console.error("Failed to fetch sci-tech publications:", err);
-          setError("Failed to load sci-tech publications.");
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchPublications();
-    } else {
+      setPublications(response.data);
+      updateCache("scitech", response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch sci-tech publications:", err);
+      if (publications.length === 0) {
+        setError("Failed to load sci-tech publications.");
+      }
+    } finally {
       setLoading(false);
     }
-  }, [cache.scitech, updateCache]);
+  }, [updateCache, publications.length]);
+
+  usePolling(fetchPublications, 60000);
 
   if (loading) {
     return (

@@ -3,12 +3,55 @@
 namespace App\Http\Controllers;
 
 use App\Models\SiteSetting;
+use App\Models\AuditLog; 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth; 
 
 class SiteSettingController extends Controller
 {
+
+    public function getSystemStatus(): JsonResponse
+    {
+        $setting = SiteSetting::firstOrCreate(
+            ['key' => 'system_lockdown'],
+            ['value' => 'false']
+        );
+
+        return response()->json([
+            'locked' => $setting->value === 'true'
+        ]);
+    }
+
+    public function toggleSystemStatus(Request $request): JsonResponse
+    {
+        $setting = SiteSetting::firstOrCreate(
+            ['key' => 'system_lockdown'],
+            ['value' => 'false']
+        );
+
+        $newValue = ($setting->value === 'true') ? 'false' : 'true';
+        
+        $setting->value = $newValue;
+        $setting->save();
+
+        AuditLog::create([
+            'user_id'    => Auth::id(), 
+            'action'     => $newValue === 'true' ? 'System Lockdown Enabled' : 'System Lockdown Disabled',
+            'details'    => $newValue === 'true' 
+                            ? 'Administrator enabled maintenance mode. Public access is blocked.' 
+                            : 'Administrator restored system access.',
+            'ip_address' => $request->ip(),
+        ]);
+
+        return response()->json([
+            'locked'  => $newValue === 'true',
+            'message' => 'System status updated successfully.'
+        ]);
+    }
+
+
     public function getTeamPhoto(): JsonResponse
     {
         $setting = SiteSetting::where('key', 'team_photo_path')->first();
@@ -25,7 +68,7 @@ class SiteSettingController extends Controller
     public function uploadTeamPhoto(Request $request): JsonResponse
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:51200', 
         ]);
 
         $oldSetting = SiteSetting::where('key', 'team_photo_path')->first();

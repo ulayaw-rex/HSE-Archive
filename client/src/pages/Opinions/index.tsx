@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import CategoryPublicationCard from "../../components/features/Categories/CategoryPublicationCard";
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import type { Publication } from "../../types/Publication";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { useDataCache } from "../../context/DataContext";
+import { usePolling } from "../../hooks/usePolling";
 
 const OpinionsPage: React.FC = () => {
   const { cache, updateCache } = useDataCache();
@@ -16,31 +17,26 @@ const OpinionsPage: React.FC = () => {
   const [loading, setLoading] = useState(!cache.opinion);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!cache.opinion) {
-      const fetchPublications = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          const response = await AxiosInstance.get(
-            "/publications/category/opinion"
-          );
-          setPublications(response.data);
+  const fetchPublications = useCallback(async () => {
+    try {
+      const response = await AxiosInstance.get(
+        "/publications/category/opinion"
+      );
 
-          updateCache("opinion", response.data);
-        } catch (err) {
-          console.error("Failed to fetch opinion publications:", err);
-          setError("Failed to load opinion publications.");
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchPublications();
-    } else {
+      setPublications(response.data);
+      updateCache("opinion", response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch opinion publications:", err);
+      if (publications.length === 0) {
+        setError("Failed to load opinion publications.");
+      }
+    } finally {
       setLoading(false);
     }
-  }, [cache.opinion, updateCache]);
+  }, [updateCache, publications.length]);
+
+  usePolling(fetchPublications, 60000);
 
   if (loading) {
     return (

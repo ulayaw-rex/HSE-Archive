@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import AxiosInstance from "../../AxiosInstance";
+import { usePolling } from "../../hooks/usePolling";
 import {
   PieChart,
   Pie,
@@ -29,14 +30,6 @@ interface StaffStat {
   position: string;
   article_count: number;
   last_active: string;
-}
-
-interface AuditLog {
-  user: string;
-  action: string;
-  details: string;
-  ip: string;
-  date: string;
 }
 
 const GREEN_COLORS = [
@@ -92,68 +85,18 @@ const Analytics: React.FC = () => {
 
   const [articleStats, setArticleStats] = useState<ArticleStat[]>([]);
   const [staffStats, setStaffStats] = useState<StaffStat[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
   const [trendData, setTrendData] = useState<any[]>([]);
   const [trendCategories, setTrendCategories] = useState<string[]>([]);
   const [granularity, setGranularity] = useState<"daily" | "monthly">("daily");
 
   const [loading, setLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const [startDate, setStartDate] = useState(
     new Date().toISOString().slice(0, 7) + "-01"
   );
   const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
-
-  useEffect(() => {
-    fetchMainData();
-  }, [startDate, endDate, activeTab]);
-
-  useEffect(() => {
-    if (activeTab === "articles") {
-      fetchTrendsOnly();
-    }
-  }, [granularity]);
-
-  const handleGranularityChange = (mode: "daily" | "monthly") => {
-    setGranularity(mode);
-
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-
-    if (mode === "monthly") {
-      setStartDate(`${year}-01-01`);
-      setEndDate(`${year}-12-31`);
-    } else {
-      setStartDate(`${year}-${month}-01`);
-      const lastDay = new Date(year, today.getMonth() + 1, 0).getDate();
-      setEndDate(`${year}-${month}-${lastDay}`);
-    }
-  };
-
-  const fetchMainData = async () => {
-    setLoading(true);
-    try {
-      if (activeTab === "articles") {
-        await Promise.all([fetchTrendsOnly(), fetchArticleStatsOnly()]);
-      } else if (activeTab === "staff") {
-        const res = await AxiosInstance.get("/analytics/staff", {
-          params: { start_date: startDate, end_date: endDate },
-        });
-        setStaffStats(res.data);
-      } else if (activeTab === "audit") {
-        const res = await AxiosInstance.get("/analytics/audit", {
-          params: { start_date: startDate, end_date: endDate },
-        });
-        setAuditLogs(res.data);
-      }
-    } catch (error) {
-      console.error("Error fetching main data", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchTrendsOnly = async () => {
     try {
@@ -175,6 +118,50 @@ const Analytics: React.FC = () => {
       setArticleStats(res.data);
     } catch (error) {
       console.error("Error fetching articles", error);
+    }
+  };
+
+  const fetchMainData = useCallback(async () => {
+    if (!hasLoadedOnce) setLoading(true);
+
+    try {
+      if (activeTab === "articles") {
+        await Promise.all([fetchTrendsOnly(), fetchArticleStatsOnly()]);
+      } else if (activeTab === "staff") {
+        const res = await AxiosInstance.get("/analytics/staff", {
+          params: { start_date: startDate, end_date: endDate },
+        });
+        setStaffStats(res.data);
+      }
+      setHasLoadedOnce(true);
+    } catch (error) {
+      console.error("Error fetching main data", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab, startDate, endDate, granularity, hasLoadedOnce]);
+
+  usePolling(fetchMainData, 30000);
+
+  useEffect(() => {
+    setHasLoadedOnce(false);
+    fetchMainData();
+  }, [startDate, endDate, activeTab, granularity]);
+
+  const handleGranularityChange = (mode: "daily" | "monthly") => {
+    setGranularity(mode);
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+
+    if (mode === "monthly") {
+      setStartDate(`${year}-01-01`);
+      setEndDate(`${year}-12-31`);
+    } else {
+      setStartDate(`${year}-${month}-01`);
+      const lastDay = new Date(year, today.getMonth() + 1, 0).getDate();
+      setEndDate(`${year}-${month}-${lastDay}`);
     }
   };
 
@@ -251,7 +238,7 @@ const Analytics: React.FC = () => {
       <div className="bg-white p-4 rounded-lg shadow-sm mb-6 border border-gray-100">
         <div className="flex flex-col md:flex-row gap-6 justify-between items-end">
           <div className="flex bg-gray-100 p-1 rounded-lg">
-            {["articles", "staff", "audit"].map((tab) => (
+            {["articles", "staff"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
@@ -263,9 +250,7 @@ const Analytics: React.FC = () => {
               >
                 {tab === "articles"
                   ? "Article Performance"
-                  : tab === "staff"
-                  ? "Staff Productivity"
-                  : "Audit Log"}
+                  : "Staff Productivity"}
               </button>
             ))}
           </div>
@@ -499,7 +484,7 @@ const Analytics: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+              {loading && !hasLoadedOnce ? (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-gray-500">
                     Loading data...
@@ -561,7 +546,7 @@ const Analytics: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+              {loading && !hasLoadedOnce ? (
                 <tr>
                   <td colSpan={4} className="text-center py-8 text-gray-500">
                     Loading data...
@@ -605,65 +590,6 @@ const Analytics: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(stat.last_active).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {activeTab === "audit" && (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Details
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    Loading logs...
-                  </td>
-                </tr>
-              ) : auditLogs.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    No activity logs found.
-                  </td>
-                </tr>
-              ) : (
-                auditLogs.map((log, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(log.date).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      {log.user}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                      {log.action}
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate"
-                      title={log.details}
-                    >
-                      {log.details || "-"}
                     </td>
                   </tr>
                 ))

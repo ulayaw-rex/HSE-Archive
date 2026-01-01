@@ -20,7 +20,6 @@ const SearchResults: React.FC = () => {
   const query = searchParams.get("q");
 
   const [results, setResults] = useState<Publication[]>([]);
-  // 1. New State for Suggestions
   const [suggestedArticles, setSuggestedArticles] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,12 +30,10 @@ const SearchResults: React.FC = () => {
     window.scrollTo(0, 0);
   }, [query]);
 
-  // 2. Fetch Search Results AND Suggestions
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch Search Results
         if (query) {
           const searchRes = await AxiosInstance.get(
             `/publications/search?q=${query}`
@@ -44,8 +41,6 @@ const SearchResults: React.FC = () => {
           setResults(searchRes.data);
         }
 
-        // Fetch Suggestions (Recent articles) independently
-        // This ensures we have them ready if search comes back empty
         const recentRes = await AxiosInstance.get("/publications/recent");
         setSuggestedArticles(recentRes.data);
       } catch (error) {
@@ -91,10 +86,8 @@ const SearchResults: React.FC = () => {
           </p>
         </div>
 
-        {/* Filter Controls (Only show if we actually have results) */}
         {!loading && results.length > 0 && (
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* ... (Keep your existing filter/sort buttons here) ... */}
             <div className="flex items-center gap-2 w-full md:w-auto">
               <FaFilter className="text-gray-400" />
               <div className="flex gap-2 overflow-x-auto">
@@ -121,7 +114,6 @@ const SearchResults: React.FC = () => {
             <LoadingSpinner />
           </div>
         ) : filteredAndSortedResults.length === 0 ? (
-          // === 3. MODIFIED NO RESULTS VIEW ===
           <div>
             <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-gray-100 mb-12">
               <div className="text-6xl mb-4">🔍</div>
@@ -142,7 +134,6 @@ const SearchResults: React.FC = () => {
               )}
             </div>
 
-            {/* Suggestions Section */}
             {suggestedArticles.length > 0 && (
               <div>
                 <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -186,7 +177,6 @@ const SearchResults: React.FC = () => {
             )}
           </div>
         ) : (
-          // === 4. NORMAL RESULTS VIEW ===
           <div className="grid gap-6">
             {filteredAndSortedResults.map((article) => (
               <Link

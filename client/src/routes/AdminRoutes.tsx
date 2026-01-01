@@ -9,12 +9,11 @@ import {
   ContentArchivesPage,
   FeedbackReviewPage,
   FeedbackModeratePage,
-  SettingsModulesPage,
-  SettingsBackupPage,
-  SettingsSecurityPage,
   HelpManualsPage,
   HelpTrainingPage,
 } from "./../pages/Admin/Placeholders";
+import Security from "../pages/Admin/Security";
+import Modules from "../pages/Admin/Modules";
 
 export default (
   <>
@@ -32,9 +31,8 @@ export default (
     {/* Analytics */}
     <Route path="analytics" element={<Analytics />} />
     {/* Settings */}
-    <Route path="settings/modules" element={<SettingsModulesPage />} />
-    <Route path="settings/backup" element={<SettingsBackupPage />} />
-    <Route path="settings/security" element={<SettingsSecurityPage />} />
+    <Route path="settings/modules" element={<Modules />} />
+    <Route path="settings/security" element={<Security />} />
     {/* Help */}
     <Route path="help/manuals" element={<HelpManualsPage />} />
     <Route path="help/training" element={<HelpTrainingPage />} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
@@ -7,6 +7,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 import "../../App.css";
 import { useDataCache } from "../../context/DataContext";
+import { usePolling } from "../../hooks/usePolling";
 
 const categories = [
   "university",
@@ -21,7 +22,6 @@ const categories = [
 
 const HomePage: React.FC = () => {
   const [userRole] = useState<"guest" | "admin">("guest");
-
   const { cache, updateCache } = useDataCache();
 
   const [featuredArticles, setFeaturedArticles] = useState<Publication[]>(
@@ -33,65 +33,56 @@ const HomePage: React.FC = () => {
 
   const [loading, setLoading] = useState(!cache.home);
 
-  useEffect(() => {
-    const fetchPublicationsData = async () => {
-      try {
-        const featuredPromise =
-          AxiosInstance.get<Publication[]>("/publications");
+  const fetchPublicationsData = useCallback(async () => {
+    try {
+      const featuredPromise = AxiosInstance.get<Publication[]>("/publications");
 
-        const categoryPromises = categories.map((category) =>
-          AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
-        );
+      const categoryPromises = categories.map((category) =>
+        AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
+      );
 
-        const [featuredRes, ...categoryResponses] = await Promise.all([
-          featuredPromise,
-          ...categoryPromises,
-        ]);
+      const [featuredRes, ...categoryResponses] = await Promise.all([
+        featuredPromise,
+        ...categoryPromises,
+      ]);
 
-        const newFeatured = featuredRes.data.slice(0, 3);
-        const newCategoryData: Record<string, Publication[]> = {};
+      const newFeatured = featuredRes.data.slice(0, 3);
+      const newCategoryData: Record<string, Publication[]> = {};
 
-        categoryResponses.forEach((res, index) => {
-          const categoryName = categories[index];
-          newCategoryData[categoryName] = res.data.slice(0, 4);
-        });
+      categoryResponses.forEach((res, index) => {
+        const categoryName = categories[index];
+        newCategoryData[categoryName] = res.data.slice(0, 4);
+      });
 
-        setFeaturedArticles(newFeatured);
-        setCategoryArticles(newCategoryData);
+      setFeaturedArticles(newFeatured);
+      setCategoryArticles(newCategoryData);
 
-        updateCache("home", {
-          featured: newFeatured,
-          categories: newCategoryData,
-        });
-      } catch (err) {
-        console.error("Failed to fetch homepage data", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!cache.home) {
-      fetchPublicationsData();
-    } else {
+      updateCache("home", {
+        featured: newFeatured,
+        categories: newCategoryData,
+      });
+    } catch (err) {
+      console.error("Failed to fetch homepage data", err);
+    } finally {
       setLoading(false);
-      fetchPublicationsData();
     }
+  }, [updateCache]);
 
+  usePolling(fetchPublicationsData, 60000);
+
+  useEffect(() => {
     const handlePublicationCreated = () => {
       fetchPublicationsData();
     };
+
     window.addEventListener("publicationCreated", handlePublicationCreated);
-
-    const intervalId = setInterval(fetchPublicationsData, 30000);
-
     return () => {
-      clearInterval(intervalId);
       window.removeEventListener(
         "publicationCreated",
         handlePublicationCreated
       );
     };
-  }, [cache.home, updateCache]);
+  }, [fetchPublicationsData]);
 
   if (loading) {
     return (

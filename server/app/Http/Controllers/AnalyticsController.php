@@ -5,13 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Publication;
 use App\Models\User;
-use App\Models\AuditLog; 
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use Carbon\CarbonPeriod;
 
 class AnalyticsController extends Controller
 {
-
     public function getArticleStats(Request $request)
     {
         $startDate = $request->input('start_date', now()->startOfMonth());
@@ -59,109 +58,6 @@ class AnalyticsController extends Controller
         return response()->json($stats);
     }
 
-    public function getAuditLogs(Request $request)
-    {
-        $startDate = $request->input('start_date', now()->startOfMonth());
-        $endDate = $request->input('end_date', now()->endOfMonth());
-
-        $logs = AuditLog::with('user')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'user' => $log->user ? $log->user->name : 'System/Unknown',
-                    'action' => $log->action,
-                    'details' => $log->details,
-                    'ip' => $log->ip_address,
-                    'date' => $log->created_at->format('Y-m-d H:i:s'),
-                ];
-            });
-
-        return response()->json($logs);
-    }
-
-    public function exportStats(Request $request)
-    {
-        $format = $request->input('format', 'pdf');
-        $type = $request->input('type', 'articles'); 
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-
-        if ($type === 'staff') {
-            return $this->exportStaff($startDate, $endDate, $format);
-        } elseif ($type === 'audit') {
-            return $this->exportAudit($startDate, $endDate, $format);
-        } else {
-            return $this->exportArticles($startDate, $endDate, $format);
-        }
-    }
-
-
-    private function exportArticles($startDate, $endDate, $format) {
-        $data = Publication::with('writers')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get();
-
-        if ($format === 'pdf') {
-            $pdf = Pdf::loadView('exports.articles_pdf', ['data' => $data]);
-            return $pdf->download('article-report.pdf');
-        } 
-
-        $csvContent = "Title,Category,Authors,Views,Date\n";
-        foreach ($data as $pub) {
-            $authors = $pub->writers->pluck('name')->implode(', ') ?: 'Unknown';
-            $title = '"' . str_replace('"', '""', $pub->title) . '"';
-            $csvContent .= "{$title},{$pub->category},\"{$authors}\",{$pub->views},{$pub->created_at}\n";
-        }
-        return response($csvContent)->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="articles.csv"');
-    }
-
-    private function exportStaff($startDate, $endDate, $format) {
-        $data = User::withCount(['publications' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }])
-            ->whereHas('publications', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            })
-            ->orderBy('publications_count', 'desc')
-            ->get();
-
-        if ($format === 'pdf') {
-            $pdf = Pdf::loadView('exports.staff_pdf', ['data' => $data]);
-            return $pdf->download('staff-performance.pdf');
-        }
-
-        $csvContent = "Name,Position,Articles Published,Last Active\n";
-        foreach ($data as $user) {
-            $csvContent .= "{$user->name},{$user->position},{$user->publications_count},{$user->updated_at}\n";
-        }
-        return response($csvContent)->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="staff-performance.csv"');
-    }
-
-    private function exportAudit($startDate, $endDate, $format) {
-        $data = AuditLog::with('user')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        if ($format === 'pdf') {
-            $pdf = Pdf::loadView('exports.audit_pdf', ['data' => $data]);
-            return $pdf->download('audit-log.pdf');
-        }
-
-        $csvContent = "User,Action,Details,IP Address,Timestamp\n";
-        foreach ($data as $log) {
-            $user = $log->user ? $log->user->name : 'Unknown';
-            $details = '"' . str_replace('"', '""', $log->details) . '"';
-            $csvContent .= "{$user},{$log->action},{$details},{$log->ip_address},{$log->created_at}\n";
-        }
-        return response($csvContent)->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="audit-log.csv"');
-    }
-
     public function getTrendStats(Request $request)
     {
         $startDate = $request->input('start_date', now()->startOfMonth());
@@ -171,7 +67,7 @@ class AnalyticsController extends Controller
         $interval = $granularity === 'monthly' ? '1 month' : '1 day';
         $format = $granularity === 'monthly' ? 'Y-m' : 'Y-m-d';
         
-        $period = \Carbon\CarbonPeriod::create($startDate, $interval, $endDate);
+        $period = CarbonPeriod::create($startDate, $interval, $endDate);
         
         $data = [];
         foreach ($period as $date) {
@@ -220,5 +116,62 @@ class AnalyticsController extends Controller
             'data' => $formattedData,
             'categories' => $categories 
         ]);
+    }
+
+    public function exportStats(Request $request)
+    {
+        $format = $request->input('format', 'pdf');
+        $type = $request->input('type', 'articles'); 
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        if ($type === 'staff') {
+            return $this->exportStaff($startDate, $endDate, $format);
+        } else {
+            return $this->exportArticles($startDate, $endDate, $format);
+        }
+    }
+
+    private function exportArticles($startDate, $endDate, $format) {
+        $data = Publication::with('writers')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('exports.articles_pdf', ['data' => $data]);
+            return $pdf->download('article-report.pdf');
+        } 
+
+        $csvContent = "Title,Category,Authors,Views,Date\n";
+        foreach ($data as $pub) {
+            $authors = $pub->writers->pluck('name')->implode(', ') ?: 'Unknown';
+            $title = '"' . str_replace('"', '""', $pub->title) . '"';
+            $csvContent .= "{$title},{$pub->category},\"{$authors}\",{$pub->views},{$pub->created_at}\n";
+        }
+        return response($csvContent)->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="articles.csv"');
+    }
+
+    private function exportStaff($startDate, $endDate, $format) {
+        $data = User::withCount(['publications' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }])
+            ->whereHas('publications', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->orderBy('publications_count', 'desc')
+            ->get();
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('exports.staff_pdf', ['data' => $data]);
+            return $pdf->download('staff-performance.pdf');
+        }
+
+        $csvContent = "Name,Position,Articles Published,Last Active\n";
+        foreach ($data as $user) {
+            $csvContent .= "{$user->name},{$user->position},{$user->publications_count},{$user->updated_at}\n";
+        }
+        return response($csvContent)->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="staff-performance.csv"');
     }
 }

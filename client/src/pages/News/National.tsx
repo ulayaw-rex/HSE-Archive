@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import CategoryPublicationCard from "../../components/features/Categories/CategoryPublicationCard";
 import FeaturedPublicationCard from "../../components/features/Categories/FeaturedPublicationCard";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 import { useDataCache } from "../../context/DataContext";
+import { usePolling } from "../../hooks/usePolling";
 
 const NationalNewsPage: React.FC = () => {
   const { cache, updateCache } = useDataCache();
@@ -15,32 +16,26 @@ const NationalNewsPage: React.FC = () => {
 
   const [loading, setLoading] = useState(!cache.national);
   const [error, setError] = useState<string | null>(null);
+  const fetchPublications = useCallback(async () => {
+    try {
+      const response = await AxiosInstance.get(
+        "/publications/category/national"
+      );
 
-  useEffect(() => {
-    if (!cache.national) {
-      const fetchPublications = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          const response = await AxiosInstance.get(
-            "/publications/category/national"
-          );
-          setPublications(response.data);
-
-          updateCache("national", response.data);
-        } catch (err) {
-          console.error("Failed to fetch national publications:", err);
-          setError("Failed to load national publications.");
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchPublications();
-    } else {
+      setPublications(response.data);
+      updateCache("national", response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch national publications:", err);
+      if (publications.length === 0) {
+        setError("Failed to load national publications.");
+      }
+    } finally {
       setLoading(false);
     }
-  }, [cache.national, updateCache]);
+  }, [updateCache, publications.length]);
+
+  usePolling(fetchPublications, 60000);
 
   if (loading) {
     return (

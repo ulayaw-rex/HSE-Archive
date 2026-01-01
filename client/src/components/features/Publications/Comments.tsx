@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "../../../AxiosInstance";
 import { useAuth } from "../../../context/AuthContext";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
@@ -13,6 +13,7 @@ import {
   FaHistory,
 } from "react-icons/fa";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import { usePolling } from "../../../hooks/usePolling";
 
 interface CommentAuthor {
   id: number;
@@ -62,6 +63,20 @@ export function Comments({
 
   const [newComment, setNewComment] = useState("");
 
+  const fetchLatestComments = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `/publications/${publicationId}/comments`
+      );
+
+      setComments(response.data);
+    } catch (err) {
+      console.error("Silent comment sync failed", err);
+    }
+  }, [publicationId, setComments]);
+
+  usePolling(fetchLatestComments, 10000);
+
   const handleGuestClick = () => {
     setIsLoginModalOpen(true);
   };
@@ -78,6 +93,8 @@ export function Comments({
       );
       setComments([response.data, ...comments]);
       setNewComment("");
+
+      fetchLatestComments();
     } catch (err) {
       setError("Unable to post your comment. Please try again.");
     }
@@ -156,8 +173,12 @@ export function Comments({
 
   return (
     <section className="comments-section mt-8 border-t border-gray-200 pt-6">
-      <h3 className="text-xl font-bold text-green-800 mb-6">
+      <h3 className="text-xl font-bold text-green-800 mb-6 flex items-center gap-2">
         {user ? `Comments (${comments.length})` : "Comments"}
+        <span className="flex h-2 w-2 relative">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+        </span>
       </h3>
 
       {error && (

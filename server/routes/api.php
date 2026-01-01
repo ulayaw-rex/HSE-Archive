@@ -10,10 +10,19 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\CreditRequestController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\SecurityController; 
 use App\Http\Controllers\ContactController;
-
+use App\Http\Controllers\ChatBotController; 
 
 // PUBLIC ROUTES
+
+// Status Check
+Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystemStatus']);
+
+
+//  Chatbot (AI Assistant)
+Route::post('/chat', [ChatBotController::class, 'chat']); 
+
 //  Authentication 
 Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('web')->post('/login', [AuthController::class, 'login']);
@@ -63,13 +72,20 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
-    //  Analytics (Staff/Dashboard) 
+    //  Analytics & Security (Staff/Dashboard) 
     Route::prefix('analytics')->group(function () {
+        // Content Stats (AnalyticsController)
         Route::get('/articles', [AnalyticsController::class, 'getArticleStats']);
         Route::get('/staff', [AnalyticsController::class, 'getStaffStats']);
-        Route::get('/export', [AnalyticsController::class, 'exportStats']);
-        Route::get('/audit', [AnalyticsController::class, 'getAuditLogs']);
         Route::get('/trends', [AnalyticsController::class, 'getTrendStats']);
+        Route::get('/export', [AnalyticsController::class, 'exportStats']);
+        
+        // Security Logs (SecurityController)
+        Route::get('/audit', [SecurityController::class, 'getAuditLogs']);
+        Route::get('/logins', [SecurityController::class, 'getLoginHistory']);
+
+        // System Lockdown (SiteSettingController) 
+        Route::post('/toggle-status', [SiteSettingController::class, 'toggleSystemStatus']);
     });
 
     //  User Search 

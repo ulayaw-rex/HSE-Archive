@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import "../../App.css";
 
 import { useNavigate } from "react-router-dom";
+import { usePolling } from "../../hooks/usePolling";
 
 const ITEMS_PER_PAGE = 12;
 const TYPES = ["All", "Tabloids", "Magazines", "Folios", "Others"];
@@ -45,17 +46,14 @@ const PrintMediaPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { cache, updateCache } = useDataCache();
-
   const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>(
     cache.printMedia || []
   );
   const [loading, setLoading] = useState(!cache.printMedia);
-
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-
   const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(null);
   const [claimTarget, setClaimTarget] = useState<PrintMedia | null>(null);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
@@ -69,6 +67,7 @@ const PrintMediaPage: React.FC = () => {
   const fetchPrintMedia = useCallback(async () => {
     try {
       if (!cache.printMedia) setLoading(true);
+
       const response = await AxiosInstance.get<PrintMedia[]>("/print-media");
       setPrintMediaList(response.data);
       updateCache("printMedia", response.data);
@@ -79,9 +78,7 @@ const PrintMediaPage: React.FC = () => {
     }
   }, [updateCache, cache.printMedia]);
 
-  useEffect(() => {
-    void fetchPrintMedia();
-  }, [fetchPrintMedia]);
+  usePolling(fetchPrintMedia, 60000);
 
   const handleClaimClick = (e: React.MouseEvent, item: PrintMedia) => {
     e.stopPropagation();
@@ -174,7 +171,7 @@ const PrintMediaPage: React.FC = () => {
     });
   }, [printMediaList, activeType, searchQuery, selectedYear]);
 
-  useEffect(() => {
+  useMemo(() => {
     setCurrentPage(1);
   }, [activeType, searchQuery, selectedYear]);
 
