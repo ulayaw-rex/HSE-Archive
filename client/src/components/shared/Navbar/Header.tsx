@@ -104,7 +104,7 @@ const Header: React.FC = () => {
       <header className="sticky lg:relative top-0 z-[100] bg-green-700 text-white shadow-lg font-sans">
         <div className="container mx-auto px-4 py-2 w-[90%]">
           <div className="flex items-center justify-between relative">
-            <div className="flex items-center">
+            <div className="flex items-center flex-shrink-0">
               <button
                 onClick={toggleMobileMenu}
                 className="lg:hidden items-center justify-center focus:outline-none p-1 rounded-md hover:bg-green-600 transition-colors"
@@ -118,9 +118,9 @@ const Header: React.FC = () => {
               </button>
             </div>
 
-            <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-              <Link to="/" className="lg:hidden cursor-pointer">
-                <span className="text-lg font-bold text-white tracking-wide">
+            <div className="flex-1 flex justify-center lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:w-auto lg:block">
+              <Link to="/" className="lg:hidden cursor-pointer min-w-0">
+                <span className="text-lg font-bold text-white tracking-wide truncate block">
                   The Hillside Echo
                 </span>
               </Link>
@@ -137,7 +137,7 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center relative pl-4">
+            <div className="flex items-center justify-end relative pl-2 flex-shrink-0">
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
                   <div className="hidden md:block h-4 w-24 bg-green-500/50 rounded"></div>
@@ -221,7 +221,7 @@ const Header: React.FC = () => {
                   onClick={() => setIsLoginModalOpen(true)}
                   className="flex items-center space-x-2 text-sm font-medium text-green-100 hover:text-white transition-colors duration-200 bg-green-800/30 hover:bg-green-800/50 px-3 py-1.5 rounded-full"
                 >
-                  <span>Log in</span>
+                  <span className="hidden sm:inline">Log in</span>
                   <FaUserCircle size={16} />
                 </button>
               )}

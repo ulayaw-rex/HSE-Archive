@@ -1,6 +1,7 @@
 import React from "react";
 import { FaCalendarAlt, FaUser } from "react-icons/fa";
 import type { Publication } from "../../../types/Publication";
+import DOMPurify from "dompurify";
 
 interface PublicationViewModalProps {
   isOpen: boolean;
@@ -99,15 +100,11 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
             </div>
 
             <article className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
-              {(publication.body || "").split("\n").map((para, idx) =>
-                para.trim() ? (
-                  <p key={idx} className="mb-4">
-                    {para}
-                  </p>
-                ) : (
-                  <br key={idx} />
-                )
-              )}
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(publication.body || ""),
+                }}
+              />
             </article>
           </div>
         </div>
