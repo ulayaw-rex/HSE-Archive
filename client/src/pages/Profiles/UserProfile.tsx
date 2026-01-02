@@ -136,14 +136,15 @@ const UserProfile: React.FC = () => {
     );
 
   const isOwnProfile = currentUser?.id === profile.id;
+  const canSubmitArticle = isOwnProfile && currentUser?.role !== "alumni";
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+        <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
             <div className="flex-shrink-0">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-green-100 overflow-hidden bg-green-800 flex items-center justify-center shadow-lg">
+              <div className="w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-green-100 overflow-hidden bg-green-800 flex items-center justify-center shadow-lg">
                 {profile.avatar ? (
                   <img
                     src={profile.avatar}
@@ -151,32 +152,33 @@ const UserProfile: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-5xl font-bold text-white uppercase">
+                  <span className="text-4xl md:text-5xl font-bold text-white uppercase">
                     {profile.name.charAt(0)}
                   </span>
                 )}
               </div>
             </div>
             <div className="flex-1 text-center md:text-left pt-2">
-              <h1 className="text-3xl font-extrabold text-gray-900">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 break-words">
                 {profile.name}
               </h1>
-              <p className="text-gray-500 font-medium mt-1">
+              <p className="text-gray-500 font-medium mt-1 text-sm md:text-base break-all">
                 ({profile.email})
               </p>
               <div className="mt-3 space-y-1">
-                <p className="text-lg text-gray-700 font-semibold uppercase tracking-wide">
+                <p className="text-base md:text-lg text-gray-700 font-semibold uppercase tracking-wide">
                   {profile.course || "No Course Listed"}
                 </p>
-                <p className="text-xl text-green-700 font-bold">
+                <p className="text-lg md:text-xl text-green-700 font-bold">
                   {profile.position || "Member"}
                 </p>
               </div>
-              {isOwnProfile && (
+
+              {canSubmitArticle && (
                 <div className="mt-6">
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center px-6 py-2 bg-green-800 text-white font-bold rounded-full hover:bg-green-700 transition-colors shadow-md transform hover:scale-105"
+                    className="inline-flex items-center px-6 py-2 bg-green-800 text-white font-bold rounded-full hover:bg-green-700 transition-colors shadow-md transform hover:scale-105 text-sm md:text-base"
                   >
                     <FaPlus className="mr-2" /> Submit article
                   </button>
@@ -191,10 +193,10 @@ const UserProfile: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between border-b-2 border-gray-200 pb-2 mb-6">
-              <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900 uppercase tracking-wide">
                 Online Articles
               </h2>
-              <span className="text-gray-500 text-sm font-medium">
+              <span className="text-gray-500 text-xs md:text-sm font-medium">
                 {articles.length} Published
               </span>
             </div>
@@ -248,9 +250,9 @@ const UserProfile: React.FC = () => {
             )}
           </div>
 
-          <div className="hidden lg:block">
+          <div className="w-full">
             <div className="bg-green-800 text-white p-1 rounded-t-md">
-              <h3 className="text-center font-bold py-2 uppercase tracking-wider">
+              <h3 className="text-center font-bold py-2 uppercase tracking-wider text-sm md:text-base">
                 Collection
               </h3>
             </div>

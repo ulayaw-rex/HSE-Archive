@@ -280,7 +280,7 @@ export function Comments({
                         {(user.id === comment.user.id ||
                           user.role === "admin") &&
                           !editingId && (
-                            <div className="flex gap-2 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="flex gap-2 ml-2 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100">
                               <button
                                 onClick={() => startEditing(comment)}
                                 className="text-gray-400 hover:text-green-600 transition-colors"

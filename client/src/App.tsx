@@ -103,7 +103,8 @@ const AppContent = () => {
       </Routes>
 
       {!location.pathname.startsWith("/admin") &&
-        location.pathname !== "/login" && <Chatbot />}
+        location.pathname !== "/login" &&
+        location.pathname !== "/register" && <Chatbot />}
 
       <ToastContainer position="top-right" autoClose={3000} />
     </>

@@ -60,7 +60,6 @@ const CATEGORY_COLOR_MAP: Record<string, string> = {
   Sports: "#16a34a",
   Literary: "#9333ea",
   University: "#2563eb",
-
   Entertainment: "#db2777",
   "Sci-Tech": "#4f46e5",
   Opinion: "#ea580c",
@@ -216,19 +215,21 @@ const Analytics: React.FC = () => {
   }, [articleStats]);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">Analytics Center</h1>
-        <div className="flex gap-2">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          Analytics Center
+        </h1>
+        <div className="flex gap-2 w-full lg:w-auto">
           <button
             onClick={() => handleDownload("pdf")}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 shadow-sm text-sm font-medium"
+            className="flex-1 lg:flex-none bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 shadow-sm text-sm font-medium transition-colors"
           >
             Export PDF
           </button>
           <button
             onClick={() => handleDownload("excel")}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow-sm text-sm font-medium"
+            className="flex-1 lg:flex-none bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow-sm text-sm font-medium transition-colors"
           >
             Export CSV
           </button>
@@ -236,13 +237,13 @@ const Analytics: React.FC = () => {
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow-sm mb-6 border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-6 justify-between items-end">
-          <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 justify-between lg:items-end">
+          <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto">
             {["articles", "staff"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize whitespace-nowrap flex-1 lg:flex-none ${
                   activeTab === tab
                     ? "bg-white text-green-800 shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
@@ -254,8 +255,9 @@ const Analytics: React.FC = () => {
               </button>
             ))}
           </div>
-          <div className="flex gap-4">
-            <div>
+
+          <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+            <div className="flex-1 min-w-[140px]">
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 Start Date
               </label>
@@ -263,10 +265,10 @@ const Analytics: React.FC = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
               />
             </div>
-            <div>
+            <div className="flex-1 min-w-[140px]">
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 End Date
               </label>
@@ -274,7 +276,7 @@ const Analytics: React.FC = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
               />
             </div>
           </div>
@@ -283,8 +285,8 @@ const Analytics: React.FC = () => {
 
       {activeTab === "articles" && (
         <div className="space-y-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
               <h3 className="text-lg font-bold text-gray-800">
                 Production Trends
               </h3>
@@ -312,11 +314,11 @@ const Analytics: React.FC = () => {
               </div>
             </div>
 
-            <div className="w-full h-80">
+            <div className="w-full h-64 md:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={trendData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
                 >
                   <defs>
                     {trendCategories.map((cat, index) => {
@@ -344,7 +346,6 @@ const Analytics: React.FC = () => {
                       );
                     })}
                   </defs>
-
                   <XAxis
                     dataKey="date"
                     tickFormatter={(str) => {
@@ -360,11 +361,11 @@ const Analytics: React.FC = () => {
                       });
                     }}
                     minTickGap={30}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tick={{ fontSize: 10, fill: "#6b7280" }}
                   />
                   <YAxis
                     allowDecimals={false}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tick={{ fontSize: 10, fill: "#6b7280" }}
                   />
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <Tooltip
@@ -374,7 +375,10 @@ const Analytics: React.FC = () => {
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
                   />
-                  <Legend />
+                  <Legend
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                  />
 
                   {trendCategories.map((cat, index) => {
                     const color = getTrendColor(cat, index);
@@ -398,7 +402,7 @@ const Analytics: React.FC = () => {
 
           {!loading && articleStats.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">
                   Content Balance
                 </h3>
@@ -424,13 +428,13 @@ const Analytics: React.FC = () => {
                         ))}
                       </Pie>
                       <Tooltip />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: "12px" }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">
                   Reader Interests
                 </h3>
@@ -438,11 +442,11 @@ const Analytics: React.FC = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={viewsData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis />
+                      <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip cursor={{ fill: "#f3f4f6" }} />
                       <Bar dataKey="views" radius={[4, 4, 0, 0]}>
                         {viewsData.map((_, index) => (
@@ -461,142 +465,144 @@ const Analytics: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-        {activeTab === "articles" && (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Author(s)
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Views
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading && !hasLoadedOnce ? (
+      <div className="bg-white rounded-lg shadow border border-gray-200">
+        <div className="overflow-x-auto">
+          {activeTab === "articles" && (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-500">
-                    Loading data...
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Author(s)
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Views
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
                 </tr>
-              ) : articleStats.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-500">
-                    No articles found in this range.
-                  </td>
-                </tr>
-              ) : (
-                articleStats.map((stat, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      {stat.title}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                        {stat.category.charAt(0).toUpperCase() +
-                          stat.category.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {stat.author_name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                      {stat.views}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(stat.created_at).toLocaleDateString()}
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading && !hasLoadedOnce ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                      Loading data...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {activeTab === "staff" && (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Staff Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Position
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Articles Published
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Active
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading && !hasLoadedOnce ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    Loading data...
-                  </td>
-                </tr>
-              ) : staffStats.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    No active staff found in this range.
-                  </td>
-                </tr>
-              ) : (
-                staffStats.map((stat, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      {stat.name}
+                ) : articleStats.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                      No articles found in this range.
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {stat.position}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex items-center">
-                        <span className="font-bold text-gray-900 mr-2">
-                          {stat.article_count}
+                  </tr>
+                ) : (
+                  articleStats.map((stat, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                        {stat.title}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                          {stat.category.charAt(0).toUpperCase() +
+                            stat.category.slice(1)}
                         </span>
-                        <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-600"
-                            style={{
-                              width: `${Math.min(
-                                stat.article_count * 10,
-                                100
-                              )}%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(stat.last_active).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {stat.author_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                        {stat.views}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(stat.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+
+          {activeTab === "staff" && (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Staff Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Position
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Articles Published
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Last Active
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading && !hasLoadedOnce ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-8 text-gray-500">
+                      Loading data...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+                ) : staffStats.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-8 text-gray-500">
+                      No active staff found in this range.
+                    </td>
+                  </tr>
+                ) : (
+                  staffStats.map((stat, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                        {stat.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {stat.position}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex items-center">
+                          <span className="font-bold text-gray-900 mr-2">
+                            {stat.article_count}
+                          </span>
+                          <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden hidden sm:block">
+                            <div
+                              className="h-full bg-blue-600"
+                              style={{
+                                width: `${Math.min(
+                                  stat.article_count * 10,
+                                  100
+                                )}%`,
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(stat.last_active).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

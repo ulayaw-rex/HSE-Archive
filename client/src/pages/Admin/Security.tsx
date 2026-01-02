@@ -33,7 +33,6 @@ const Security: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Default to current month
   const [startDate, setStartDate] = useState(
     new Date().toISOString().slice(0, 7) + "-01"
   );
@@ -83,15 +82,14 @@ const Security: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fetchData]);
 
-  // --- HELPER: Action Styling ---
   const getActionStyle = (action: string) => {
     if (action.includes("Lockdown Enabled")) {
-      return "text-red-700 bg-red-50 border border-red-200"; // Critical Warning
+      return "text-red-700 bg-red-50 border border-red-200";
     }
     if (action.includes("Lockdown Disabled")) {
-      return "text-green-700 bg-green-50 border border-green-200"; // Restoration
+      return "text-green-700 bg-green-50 border border-green-200";
     }
-    return "text-blue-600"; // Standard Action
+    return "text-blue-600";
   };
 
   const getActionIcon = (action: string) => {
@@ -102,10 +100,10 @@ const Security: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen font-sans">
-      <div className="mb-6 flex justify-between items-start">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
             <FaShieldAlt className="text-green-700" />
             Security & Access Control
           </h1>
@@ -115,20 +113,19 @@ const Security: React.FC = () => {
         </div>
 
         {isRefreshing && (
-          <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full animate-pulse">
+          <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full animate-pulse self-start md:self-auto">
             <FaSync className="animate-spin" />
             Updating live...
           </div>
         )}
       </div>
 
-      {/* Date Filter & Tab Controls */}
       <div className="bg-white p-4 rounded-lg shadow-sm mb-6 border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-6 justify-between items-end">
-          <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 justify-between lg:items-end">
+          <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto">
             <button
               onClick={() => setActiveTab("audit")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap flex-1 lg:flex-none justify-center ${
                 activeTab === "audit"
                   ? "bg-white text-green-800 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -138,7 +135,7 @@ const Security: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab("logins")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap flex-1 lg:flex-none justify-center ${
                 activeTab === "logins"
                   ? "bg-white text-green-800 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -148,8 +145,8 @@ const Security: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex gap-4">
-            <div>
+          <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+            <div className="flex-1 min-w-[140px]">
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 Start Date
               </label>
@@ -157,10 +154,10 @@ const Security: React.FC = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
               />
             </div>
-            <div>
+            <div className="flex-1 min-w-[140px]">
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 End Date
               </label>
@@ -168,156 +165,155 @@ const Security: React.FC = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tables */}
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-        {activeTab === "audit" && (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date/Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Details
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  IP Address
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+      <div className="bg-white rounded-lg shadow border border-gray-200">
+        <div className="overflow-x-auto">
+          {activeTab === "audit" && (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-500">
-                    <FaSync className="animate-spin inline-block mr-2" />
-                    Loading audit logs...
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date/Time
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Action
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Details
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    IP Address
+                  </th>
                 </tr>
-              ) : auditLogs.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-500">
-                    No logs found within this date range.
-                  </td>
-                </tr>
-              ) : (
-                auditLogs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(log.date).toLocaleString()}
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                      <FaSync className="animate-spin inline-block mr-2" />
+                      Loading audit logs...
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      {log.user}
+                  </tr>
+                ) : auditLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                      No logs found within this date range.
                     </td>
-
-                    {/* CUSTOM STYLED ACTION COLUMN */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded-md ${getActionStyle(
-                          log.action
-                        )}`}
-                      >
-                        {getActionIcon(log.action)}
-                        {log.action}
-                      </span>
-                    </td>
-
-                    <td
-                      className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate"
-                      title={log.details}
+                  </tr>
+                ) : (
+                  auditLogs.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      {log.details || "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.ip}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(log.date).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                        {log.user}
+                      </td>
 
-        {/* Login History Table (Unchanged) */}
-        {activeTab === "logins" && (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date/Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  IP Address
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    <FaSync className="animate-spin inline-block mr-2" />
-                    Loading login history...
-                  </td>
-                </tr>
-              ) : loginHistory.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    No login records found.
-                  </td>
-                </tr>
-              ) : (
-                loginHistory.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(log.date).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      {log.user}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.ip}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          log.status === "Success"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-md ${getActionStyle(
+                            log.action
+                          )}`}
+                        >
+                          {getActionIcon(log.action)}
+                          {log.action}
+                        </span>
+                      </td>
+
+                      <td
+                        className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate"
+                        title={log.details}
                       >
-                        {log.status}
-                      </span>
+                        {log.details || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {log.ip}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+
+          {activeTab === "logins" && (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date/Time
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    IP Address
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-8 text-gray-500">
+                      <FaSync className="animate-spin inline-block mr-2" />
+                      Loading login history...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+                ) : loginHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-8 text-gray-500">
+                      No login records found.
+                    </td>
+                  </tr>
+                ) : (
+                  loginHistory.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(log.date).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                        {log.user}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {log.ip}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            log.status === "Success"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {log.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

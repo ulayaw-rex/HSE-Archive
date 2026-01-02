@@ -41,7 +41,11 @@ const About: React.FC = () => {
 
   const [loading, setLoading] = useState(!cache.about);
 
+  const [pageLoaded, setPageLoaded] = useState(false);
+
   useEffect(() => {
+    setTimeout(() => setPageLoaded(true), 100);
+
     if (!cache.about) {
       const fetchData = async () => {
         try {
@@ -109,44 +113,69 @@ const About: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div
-        className="relative w-full h-[60vh] min-h-[500px] bg-green-900 text-white bg-cover bg-center bg-no-repeat transition-all duration-500"
-        style={{
-          backgroundImage: teamPhotoUrl ? `url(${teamPhotoUrl})` : undefined,
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+      <div className="relative w-full h-[50vh] md:h-[65vh] min-h-[400px] overflow-hidden bg-gray-900">
+        <div
+          className={`absolute inset-0 bg-cover bg-center transition-all duration-[2000ms] ease-out transform ${
+            pageLoaded
+              ? "scale-100 opacity-100 blur-0"
+              : "scale-110 opacity-0 blur-sm"
+          }`}
+          style={{
+            backgroundImage: teamPhotoUrl ? `url(${teamPhotoUrl})` : undefined,
+          }}
+        />
 
-        <div className="absolute bottom-0 left-0 w-full pb-16">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
+
+        <div className="absolute bottom-0 left-0 w-full pb-12 md:pb-20 z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg text-left uppercase tracking-tight">
-              About
-            </h1>
-            <p className="text-green-50 drop-shadow-md whitespace-pre-wrap text-left leading-relaxed text-sm md:text-base">
-              {introText ||
-                "The brilliant minds and passionate voices behind The Hillside Echo."}
-            </p>
+            <div
+              className={`transition-all duration-1000 delay-500 ease-out transform ${
+                pageLoaded
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
+              }`}
+            >
+              <h1 className="text-4xl md:text-7xl font-extrabold mb-4 text-white drop-shadow-2xl text-left uppercase tracking-tighter">
+                About Us
+              </h1>
+              <div className="h-1 w-24 bg-green-500 mb-6 rounded-full shadow-lg"></div>
+              <p className="text-gray-100 drop-shadow-md whitespace-pre-wrap text-left leading-relaxed text-sm md:text-lg max-w-2xl font-light">
+                {introText ||
+                  "The brilliant minds and passionate voices behind The Hillside Echo."}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-        {sortedPositions.map((position) => (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-30">
+        {sortedPositions.map((position, posIndex) => (
           <div
             key={position}
-            className="mb-16 pt-20 scroll-mt-20"
+            className={`mb-16 md:mb-24 pt-16 md:pt-20 scroll-mt-20 transition-all duration-1000 ease-out transform ${
+              pageLoaded
+                ? "translate-y-0 opacity-100"
+                : "translate-y-20 opacity-0"
+            }`}
+            style={{ transitionDelay: `${700 + posIndex * 100}ms` }}
             id={position.toLowerCase().replace(/\s+/g, "-")}
           >
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-2xl font-bold text-green-800 uppercase tracking-wider whitespace-nowrap">
+            <div className="flex items-center gap-4 mb-8 md:mb-10">
+              <h2 className="text-xl md:text-2xl font-bold text-green-900 uppercase tracking-widest whitespace-nowrap">
                 {position}
               </h2>
-              <div className="h-px bg-green-200 w-full"></div>
+              <div className="h-px bg-green-200 w-full rounded-full"></div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {groupedMembers[position].map((member) => (
-                <MemberCard key={member.id} member={member} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+              {groupedMembers[position].map((member, index) => (
+                <MemberCard
+                  key={member.id}
+                  member={member}
+                  delay={index * 100}
+                  isVisible={pageLoaded}
+                />
               ))}
             </div>
           </div>
@@ -163,74 +192,83 @@ const About: React.FC = () => {
   );
 };
 
-const MemberCard: React.FC<{ member: Member }> = ({ member }) => {
+const MemberCard: React.FC<{
+  member: Member;
+  delay: number;
+  isVisible: boolean;
+}> = ({ member, delay, isVisible }) => {
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     member.name
   )}&background=047857&color=fff&size=256`;
 
   return (
-    <div className="group relative w-full h-96 perspective-1000">
-      <div className="relative w-full h-full bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-500 transform group-hover:-translate-y-2 group-hover:shadow-2xl">
-        <div className="h-full w-full bg-gray-200 flex flex-col items-center justify-start pt-12">
-          <img
-            src={avatarUrl}
-            alt={member.name}
-            className="w-32 h-32 rounded-full border-4 border-white shadow-md object-cover"
-          />
+    <div
+      className={`group relative w-full h-80 md:h-96 perspective-1000 transition-all duration-700 ease-out transform ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div className="relative w-full h-full bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-500 transform border border-gray-100">
+        <div className="h-full w-full bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-start pt-10 md:pt-14">
+          <div className="relative">
+            <div className="absolute inset-0 bg-green-200 rounded-full blur-md opacity-20 transform scale-110 transition-transform group-hover:scale-125"></div>
+            <img
+              src={avatarUrl}
+              alt={member.name}
+              className="relative w-32 h-32 md:w-36 md:h-36 rounded-full border-[5px] border-white shadow-lg object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
           <div className="mt-6 text-center px-4 w-full">
-            <h3 className="text-xl font-bold text-gray-800 transition-colors truncate px-2">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800 transition-colors truncate px-2 group-hover:text-green-700">
               {member.name}
             </h3>
 
             <div className="min-h-[3rem] flex items-center justify-center mt-2 px-2">
-              <p className="text-sm text-green-700 font-bold uppercase tracking-wide leading-tight line-clamp-2">
+              <p className="text-xs md:text-sm text-green-600 font-bold uppercase tracking-wider leading-tight line-clamp-2">
                 {member.position}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full h-full bg-green-900 text-white p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out flex flex-col justify-center">
+        <div className="absolute bottom-0 left-0 w-full h-full bg-green-900/95 backdrop-blur-sm text-white p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col justify-center">
           <div className="flex flex-col items-center text-center mb-6">
             <img
               src={avatarUrl}
               alt={member.name}
-              className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover mb-3"
+              className="w-20 h-20 rounded-full border-2 border-white/50 shadow-inner object-cover mb-3"
             />
-            <h4 className="text-xl font-bold truncate w-full px-4">
+            <h4 className="text-lg md:text-xl font-bold truncate w-full px-2">
               {member.name}
             </h4>
-            <div className="w-10 h-1 bg-green-400 mt-2 rounded-full"></div>
+            <div className="w-12 h-1 bg-green-400 mt-3 rounded-full"></div>
           </div>
 
-          <div className="w-full px-4">
+          <div className="w-full px-2">
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="h-6 flex items-center justify-center flex-shrink-0 w-6">
-                  <FaUserTie className="text-green-300 text-lg" />
+              <div className="flex items-center gap-3 bg-white/10 p-2 rounded-lg">
+                <div className="h-8 w-8 flex items-center justify-center bg-white/20 rounded-full shrink-0">
+                  <FaUserTie className="text-white text-sm" />
                 </div>
-                <div className="min-h-[1.5rem] flex items-center">
-                  <span className="text-green-100 font-medium leading-tight text-left">
-                    {member.position}
-                  </span>
-                </div>
+                <span className="text-green-50 font-medium text-xs md:text-sm leading-tight text-left">
+                  {member.position}
+                </span>
               </div>
 
-              <div className="flex items-start gap-3">
-                <div className="h-6 flex items-center justify-center flex-shrink-0 w-6">
-                  <FaGraduationCap className="text-green-300 text-lg" />
+              <div className="flex items-center gap-3 bg-white/10 p-2 rounded-lg">
+                <div className="h-8 w-8 flex items-center justify-center bg-white/20 rounded-full shrink-0">
+                  <FaGraduationCap className="text-white text-sm" />
                 </div>
-                <div className="min-h-[1.5rem] flex items-center">
-                  <span className="text-green-100 font-medium leading-tight text-left">
-                    {member.course}
-                  </span>
-                </div>
+                <span className="text-green-50 font-medium text-xs md:text-sm leading-tight text-left">
+                  {member.course}
+                </span>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-green-800 mt-4 text-center">
-              <p className="text-sm text-green-200 italic">
-                "Proud member of the {member.role} team."
+            <div className="pt-4 border-t border-white/10 mt-4 text-center">
+              <p className="text-xs text-green-200 italic opacity-80">
+                "{member.role} Team Member"
               </p>
             </div>
           </div>
