@@ -15,36 +15,28 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      console.log("Fetching users from API...");
       const response = await AxiosInstance.get("/users");
-      console.log("Users API response:", response.data);
       setUsers(response.data);
     } catch (err: any) {
       console.error("Error fetching users:", err);
-      console.error("Error details:", err.response?.data);
-      console.error("Error status:", err.response?.status);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log("UserManagement component mounted");
     fetchUsers();
   }, []);
 
   const handleCreateUser = async (userData: CreateUserData) => {
     try {
       setFormLoading(true);
-      console.log("Creating user with data:", userData);
       const response = await AxiosInstance.post("/users", userData);
-      console.log("Create user response:", response.data);
       setUsers((prev) => [response.data.user, ...prev]);
       setShowForm(false);
     } catch (err: any) {
-      console.error("Error creating user:", err);
-      console.error("Error details:", err.response?.data);
-      alert("Failed to create user. Please try again.");
+      console.error("Create User Failed:", err.response?.data);
+      throw err;
     } finally {
       setFormLoading(false);
     }
@@ -55,12 +47,10 @@ const UserManagement: React.FC = () => {
 
     try {
       setFormLoading(true);
-      console.log("Updating user with data:", userData);
       const response = await AxiosInstance.put(
         `/users/${editingUser.id}`,
         userData
       );
-      console.log("Update user response:", response.data);
       setUsers((prev) =>
         prev.map((user) =>
           user.id === editingUser.id ? response.data.user : user
@@ -69,21 +59,21 @@ const UserManagement: React.FC = () => {
       setEditingUser(null);
       setShowForm(false);
     } catch (err: any) {
-      console.error("Error updating user:", err);
-      console.error("Error details:", err.response?.data);
-      alert("Failed to update user. Please try again.");
+      console.error("Update User Failed:", err.response?.data);
+      throw err;
     } finally {
       setFormLoading(false);
     }
   };
 
   const handleDeleteUser = async (userId: number) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+
     try {
       await AxiosInstance.delete(`/users/${userId}`);
       setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (err: any) {
       console.error("Error deleting user:", err);
-      console.error("Error details:", err.response?.data);
       alert("Failed to delete user. Please try again.");
     }
   };
@@ -98,11 +88,11 @@ const UserManagement: React.FC = () => {
     setEditingUser(null);
   };
 
-  const handleSubmitForm = (data: CreateUserData | UpdateUserData) => {
+  const handleSubmitForm = async (data: CreateUserData | UpdateUserData) => {
     if (editingUser) {
-      handleUpdateUser(data as UpdateUserData);
+      await handleUpdateUser(data as UpdateUserData);
     } else {
-      handleCreateUser(data as CreateUserData);
+      await handleCreateUser(data as CreateUserData);
     }
   };
 
@@ -115,8 +105,7 @@ const UserManagement: React.FC = () => {
             Add New User
           </button>
         </div>
-
-        {/* User Form Modal */}
+        ={" "}
         {showForm && (
           <div className="user-modal-overlay">
             <div className="user-modal-container">
@@ -129,8 +118,7 @@ const UserManagement: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* User Table */}
+        ={" "}
         <UserTable
           users={users}
           onEdit={handleEditUser}
