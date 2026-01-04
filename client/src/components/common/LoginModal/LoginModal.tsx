@@ -21,15 +21,53 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [isPendingError, setIsPendingError] = useState(false);
+
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
+
+  const clearFieldError = (field: "email" | "password") => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    let isValid = true;
+
+    if (!credentials.email.trim()) {
+      newErrors.email = "Email address is required.";
+      isValid = false;
+    }
+
+    if (!credentials.password) {
+      newErrors.password = "Password is required.";
+      isValid = false;
+    }
+
+    setFieldErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsPendingError(false);
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -58,7 +96,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       );
 
       await checkAuth();
-
       onClose();
 
       if (data?.redirect) {
@@ -106,38 +143,46 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               <form onSubmit={handleSubmit} className="login-modal__form">
                 <h1 className="login-modal__title">LOG IN</h1>
 
-                <div className="login-modal__group">
+                <div className="login-modal__group mb-4">
                   <input
-                    className="login-modal__input"
+                    className={`login-modal__input ${
+                      fieldErrors.email ? "border-2 border-red-500" : ""
+                    }`}
                     type="email"
                     placeholder="Email"
                     value={credentials.email}
-                    onChange={(e) =>
-                      setCredentials({ ...credentials, email: e.target.value })
-                    }
-                    required
+                    onChange={(e) => {
+                      setCredentials({ ...credentials, email: e.target.value });
+                      clearFieldError("email");
+                    }}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-red-500 text-xs mt-1 text-left">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
 
-                <div className="login-modal__group relative">
+                <div className="login-modal__group relative mb-4">
                   <input
-                    className="login-modal__input login-modal__input--password pr-10"
+                    className={`login-modal__input login-modal__input--password pr-10 ${
+                      fieldErrors.password ? "border-2 border-red-500" : ""
+                    }`}
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     value={credentials.password}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setCredentials({
                         ...credentials,
                         password: e.target.value,
-                      })
-                    }
-                    required
+                      });
+                      clearFieldError("password");
+                    }}
                   />
-
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    className="absolute right-3 top-5 text-gray-400 hover:text-gray-600 focus:outline-none"
                     style={{
                       background: "none",
                       border: "none",
@@ -150,6 +195,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       <FaEye size={18} />
                     )}
                   </button>
+                  {fieldErrors.password && (
+                    <p className="text-red-500 text-xs mt-1 text-left">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
 
                 {error && (
