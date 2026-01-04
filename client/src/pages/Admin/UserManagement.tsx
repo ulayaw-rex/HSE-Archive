@@ -104,8 +104,7 @@ const UserManagement: React.FC = () => {
           <button onClick={() => setShowForm(true)} className="btn btn-primary">
             Add New User
           </button>
-        </div>
-        ={" "}
+        </div>{" "}
         {showForm && (
           <div className="user-modal-overlay">
             <div className="user-modal-container">
@@ -117,8 +116,7 @@ const UserManagement: React.FC = () => {
               />
             </div>
           </div>
-        )}
-        ={" "}
+        )}{" "}
         <UserTable
           users={users}
           onEdit={handleEditUser}

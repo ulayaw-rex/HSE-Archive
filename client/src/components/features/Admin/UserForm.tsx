@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash, FaExclamationTriangle } from "react-icons/fa";
 import "../../../App.css";
 
+// ... (AlertModal and CustomDropdown components remain exactly the same) ...
 interface AlertModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -283,8 +284,20 @@ const UserForm: React.FC<UserFormProps> = ({
       : formData;
 
     try {
+      // 1. Attempt to submit
       await onSubmit(submitData);
+
+      // 2. ONLY if the above line doesn't throw an error:
+      // Show success toast here instead of parent
+      toast.success(
+        isEditing ? "User updated successfully!" : "User created successfully!"
+      );
+
+      // 3. Close the modal/form
+      onCancel();
     } catch (error: any) {
+      // 4. If submission fails, we land here.
+      // Success toast above is SKIPPED.
       console.error("UserForm caught error:", error);
 
       let msg = "An unexpected error occurred.";
