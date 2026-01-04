@@ -89,6 +89,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
   };
 
   const handleCloseAttempt = () => {
+    if (loading) return;
+
     if (hasUnsavedChanges()) {
       setShowCloseConfirm(true);
     } else {
@@ -177,10 +179,25 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
         }}
       >
         <div className="user-modal-container relative bg-white rounded-lg shadow-xl w-full md:w-auto md:min-w-[700px] lg:min-w-[900px] max-w-6xl p-6 md:p-10 max-h-[90vh] overflow-y-auto">
+          {loading && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center rounded-lg">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
+              <p className="text-lg font-semibold text-gray-700">
+                Uploading files...
+              </p>
+              <p className="text-sm text-gray-500">
+                Please do not close this window.
+              </p>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleCloseAttempt}
-            className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+            disabled={loading}
+            className={`absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -216,6 +233,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 <input
                   id="byline"
                   type="text"
+                  disabled={loading}
                   placeholder="Writer"
                   value={formData.byline}
                   onChange={(e) => {
@@ -223,7 +241,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                     clearError("byline");
                   }}
                   className={`w-full h-[50px] p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 
-                    ${errors.byline ? "border-red-500" : "border-gray-700"}`}
+                    ${errors.byline ? "border-red-500" : "border-gray-700"}
+                    ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
                 />
                 {errors.byline && (
                   <p className="text-red-500 text-xs mt-1">{errors.byline}</p>
@@ -239,11 +258,13 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 </label>
                 <select
                   id="type"
+                  disabled={loading}
                   value={formData.type}
                   onChange={(e) =>
                     setFormData({ ...formData, type: e.target.value })
                   }
-                  className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
+                  className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white
+                    ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
                 >
                   <option value="folio">Folio</option>
                   <option value="magazine">Magazine</option>
@@ -262,6 +283,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 <input
                   id="date_published"
                   type="date"
+                  disabled={loading}
                   value={formData.date_published}
                   onChange={(e) => {
                     setFormData({
@@ -275,7 +297,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                       errors.date_published
                         ? "border-red-500"
                         : "border-gray-700"
-                    }`}
+                    }
+                    ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
                 />
                 {errors.date_published && (
                   <p className="text-red-500 text-xs mt-1">
@@ -295,6 +318,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
               <input
                 id="title"
                 type="text"
+                disabled={loading}
                 placeholder="Add a title"
                 value={formData.title}
                 onChange={(e) => {
@@ -302,7 +326,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                   clearError("title");
                 }}
                 className={`w-full h-[50px] p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 
-                  ${errors.title ? "border-red-500" : "border-gray-700"}`}
+                  ${errors.title ? "border-red-500" : "border-gray-700"}
+                  ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
               />
               {errors.title && (
                 <p className="text-red-500 text-xs mt-1">{errors.title}</p>
@@ -318,6 +343,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
               </label>
               <textarea
                 id="description"
+                disabled={loading}
                 placeholder="Add description"
                 value={formData.description}
                 onChange={(e) => {
@@ -325,7 +351,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                   clearError("description");
                 }}
                 className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 h-56 resize-none 
-                  ${errors.description ? "border-red-500" : "border-gray-700"}`}
+                  ${errors.description ? "border-red-500" : "border-gray-700"}
+                  ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
               />
               {errors.description && (
                 <p className="text-red-500 text-xs mt-1">
@@ -339,8 +366,12 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 <div className="flex flex-col">
                   <label
                     htmlFor="upload-file"
-                    className={`cursor-pointer bg-gray-800 text-white px-4 py-3 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-900 transition-colors w-full md:w-auto ${
-                      errors.file ? "ring-2 ring-red-500" : ""
+                    className={`cursor-pointer bg-gray-800 text-white px-4 py-3 rounded-md flex items-center justify-center space-x-2 transition-colors w-full md:w-auto 
+                    ${errors.file ? "ring-2 ring-red-500" : ""}
+                    ${
+                      loading
+                        ? "opacity-50 cursor-not-allowed pointer-events-none"
+                        : "hover:bg-gray-900"
                     }`}
                   >
                     <svg
@@ -363,6 +394,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                     <input
                       id="upload-file"
                       type="file"
+                      disabled={loading}
                       accept=".pdf"
                       onChange={(e) => {
                         setFile(e.target.files?.[0] || null);
@@ -381,8 +413,12 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                 <div className="flex flex-col">
                   <label
                     htmlFor="upload-thumbnail"
-                    className={`cursor-pointer bg-gray-800 text-white px-4 py-3 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-900 transition-colors w-full md:w-auto ${
-                      errors.thumbnail ? "ring-2 ring-red-500" : ""
+                    className={`cursor-pointer bg-gray-800 text-white px-4 py-3 rounded-md flex items-center justify-center space-x-2 transition-colors w-full md:w-auto 
+                    ${errors.thumbnail ? "ring-2 ring-red-500" : ""}
+                    ${
+                      loading
+                        ? "opacity-50 cursor-not-allowed pointer-events-none"
+                        : "hover:bg-gray-900"
                     }`}
                   >
                     <svg
@@ -405,6 +441,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                     <input
                       id="upload-thumbnail"
                       type="file"
+                      disabled={loading}
                       accept="image/*"
                       onChange={(e) => {
                         setThumbnail(e.target.files?.[0] || null);
@@ -424,9 +461,38 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="!bg-green-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-800 disabled:opacity-50 w-full md:w-auto shadow-md"
+                className={`!bg-green-700 text-white px-8 py-3 rounded-full font-semibold shadow-md w-full md:w-auto flex items-center justify-center space-x-2
+                  ${loading ? "opacity-70 cursor-wait" : "hover:bg-green-800"}`}
               >
-                {mode === "edit" ? "Update Archive" : "Post Archive +"}
+                {loading && (
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                )}
+                <span>
+                  {loading
+                    ? "Uploading..."
+                    : mode === "edit"
+                    ? "Update Archive"
+                    : "Post Archive +"}
+                </span>
               </button>
             </div>
           </form>

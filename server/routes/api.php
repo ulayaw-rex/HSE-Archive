@@ -16,6 +16,7 @@ use App\Http\Controllers\ChatBotController;
 
 // PUBLIC ROUTES
 
+
 // Status Check
 Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystemStatus']);
 

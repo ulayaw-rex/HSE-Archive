@@ -95,6 +95,8 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   };
 
   const handleCloseAttempt = () => {
+    if (loading) return;
+
     if (hasUnsavedChanges()) {
       setShowCloseConfirm(true);
     } else {
@@ -172,10 +174,25 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         }}
       >
         <div className="user-modal-container relative bg-white rounded-lg shadow-xl w-full md:w-auto md:min-w-[800px] lg:min-w-[1000px] max-w-6xl p-6 md:p-10 max-h-[90vh] overflow-y-auto">
+          {loading && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center rounded-lg">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
+              <p className="text-lg font-semibold text-gray-700">
+                Publishing article...
+              </p>
+              <p className="text-sm text-gray-500">
+                Please wait while we process your request.
+              </p>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleCloseAttempt}
-            className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+            disabled={loading}
+            className={`absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -216,11 +233,11 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     />
                   ) : (
                     <div
-                      className={
+                      className={`${
                         errors.writer_ids
                           ? "border border-red-500 rounded-md"
                           : ""
-                      }
+                      } ${loading ? "opacity-60 pointer-events-none" : ""}`}
                     >
                       <WriterSelect
                         selectedIds={formData.writer_ids}
@@ -245,10 +262,13 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   </label>
                   <select
                     value={formData.category}
+                    disabled={loading}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
+                    className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white ${
+                      loading ? "bg-gray-100 cursor-not-allowed" : ""
+                    }`}
                   >
                     <option value="university">University</option>
                     <option value="local">Local</option>
@@ -267,6 +287,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   </label>
                   <input
                     type="date"
+                    disabled={loading}
                     value={formData.date_published}
                     onChange={(e) => {
                       setFormData({
@@ -280,7 +301,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                         errors.date_published
                           ? "border-red-500"
                           : "border-gray-700"
-                      }`}
+                      } ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
                   />
                   {errors.date_published && (
                     <p className="text-red-500 text-xs mt-1">
@@ -295,6 +316,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   </label>
                   <input
                     type="text"
+                    disabled={loading}
                     placeholder="Photographer Name"
                     value={formData.photo_credits}
                     onChange={(e) =>
@@ -303,7 +325,9 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                         photo_credits: e.target.value,
                       })
                     }
-                    className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                    className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 ${
+                      loading ? "bg-gray-100 cursor-not-allowed" : ""
+                    }`}
                   />
                 </div>
               </div>
@@ -314,12 +338,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 </label>
                 <input
                   type="text"
+                  disabled={loading}
                   placeholder="Custom Byline (e.g. John & Jane)"
                   value={formData.byline}
                   onChange={(e) =>
                     setFormData({ ...formData, byline: e.target.value })
                   }
-                  className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 ${
+                    loading ? "bg-gray-100 cursor-not-allowed" : ""
+                  }`}
                 />
               </div>
             </div>
@@ -331,6 +358,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
               <input
                 type="text"
+                disabled={loading}
                 placeholder="Add a headline"
                 value={formData.title}
                 onChange={(e) => {
@@ -338,13 +366,16 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   clearError("title");
                 }}
                 className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 mb-1 text-lg font-medium
-                  ${errors.title ? "border-red-500" : "border-gray-700"}`}
+                  ${errors.title ? "border-red-500" : "border-gray-700"} ${
+                  loading ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
               />
               {errors.title && (
                 <p className="text-red-500 text-xs mb-3">{errors.title}</p>
               )}
 
               <textarea
+                disabled={loading}
                 placeholder="Add body text..."
                 value={formData.body}
                 onChange={(e) => {
@@ -352,7 +383,9 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   clearError("body");
                 }}
                 className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 h-64 resize-none leading-relaxed
-                   ${errors.body ? "border-red-500" : "border-gray-700"}`}
+                   ${errors.body ? "border-red-500" : "border-gray-700"} ${
+                  loading ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
               />
               {errors.body && (
                 <p className="text-red-500 text-xs mt-1">{errors.body}</p>
@@ -360,7 +393,13 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4 pt-6 border-t border-gray-200">
-              <label className="cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto hover:bg-gray-900 transition-colors">
+              <label
+                className={`cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto transition-colors ${
+                  loading
+                    ? "opacity-50 cursor-not-allowed pointer-events-none"
+                    : "hover:bg-gray-900"
+                }`}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -378,17 +417,52 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <span>{image ? image.name : "Upload photo"}</span>
                 <input
                   type="file"
+                  disabled={loading}
                   accept="image/*"
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
                   className="hidden"
                 />
               </label>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-green-700 text-white px-8 py-3 rounded-full font-bold hover:bg-green-800 disabled:opacity-50 w-full md:w-auto shadow-md"
+                className={`bg-green-700 text-white px-8 py-3 rounded-full font-bold shadow-md w-full md:w-auto flex items-center justify-center space-x-2
+                  ${
+                    loading
+                      ? "opacity-70 cursor-wait"
+                      : "hover:bg-green-800 disabled:opacity-50"
+                  }`}
               >
-                {mode === "edit" ? "Update Article" : "Post Article +"}
+                {loading && (
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                )}
+                <span>
+                  {loading
+                    ? "Publishing..."
+                    : mode === "edit"
+                    ? "Update Article"
+                    : "Post Article +"}
+                </span>
               </button>
             </div>
 
