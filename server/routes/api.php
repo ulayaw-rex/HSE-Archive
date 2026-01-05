@@ -119,6 +119,7 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
         Route::put('/admin/contact-submissions/{id}/read', [ContactController::class, 'markAsRead']);
         Route::delete('/admin/contact-submissions/{id}', [ContactController::class, 'destroy']);
         Route::post('/admin/contact-submissions/{id}/reply', [ContactController::class, 'reply']);
+        Route::get('/admin/inquiries/unread-count', [ContactController::class, 'unreadCount']);
 
         // Site Settings (Write) 
         Route::post('/admin/site-settings/team-photo', [SiteSettingController::class, 'uploadTeamPhoto']);

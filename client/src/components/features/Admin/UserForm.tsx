@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import type { User, CreateUserData, UpdateUserData } from "../../../types/User";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash, FaExclamationTriangle } from "react-icons/fa";
+import {
+  DEPARTMENTS_DATA,
+  ROLES,
+  POSITION_OPTIONS,
+} from "../../../types/SchoolData";
 import "../../../App.css";
 
-// ... (AlertModal and CustomDropdown components remain exactly the same) ...
 interface AlertModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,17 +32,14 @@ const AlertModal: React.FC<AlertModalProps> = ({
       />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500" />
-
         <div className="text-center">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
             <FaExclamationTriangle className="h-7 w-7" />
           </div>
-
           <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
           <p className="text-sm text-gray-500 mb-8 leading-relaxed px-2">
             {message}
           </p>
-
           <div className="flex justify-center">
             <button
               type="button"
@@ -62,6 +63,7 @@ interface CustomDropdownProps {
   onChange: (name: string, value: string) => void;
   error?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -72,6 +74,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   onChange,
   error,
   placeholder = "Select an option",
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -89,6 +92,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const toggleDropdown = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">
@@ -96,8 +105,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       </label>
 
       <div
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-2.5 rounded-lg text-sm border shadow-sm cursor-pointer flex justify-between items-center bg-white transition-all ${
+        onClick={toggleDropdown}
+        className={`w-full px-4 py-2.5 rounded-lg text-sm border shadow-sm flex justify-between items-center bg-white transition-all ${
+          disabled
+            ? "bg-gray-100 cursor-not-allowed opacity-70"
+            : "cursor-pointer"
+        } ${
           error
             ? "border-red-300 text-red-900 bg-red-50"
             : "border-gray-300 text-gray-900 hover:border-gray-400"
@@ -129,25 +142,31 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         </p>
       )}
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-fadeIn">
           <ul className="max-h-48 overflow-y-auto custom-scrollbar">
-            {options.map((option) => (
-              <li
-                key={option}
-                onClick={() => {
-                  onChange(name, option);
-                  setIsOpen(false);
-                }}
-                className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-green-50 hover:text-green-700 transition-colors ${
-                  value === option
-                    ? "bg-green-50 text-green-800 font-semibold"
-                    : "text-gray-700"
-                }`}
-              >
-                {option}
+            {options.length > 0 ? (
+              options.map((option) => (
+                <li
+                  key={option}
+                  onClick={() => {
+                    onChange(name, option);
+                    setIsOpen(false);
+                  }}
+                  className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-green-50 hover:text-green-700 transition-colors ${
+                    value === option
+                      ? "bg-green-50 text-green-800 font-semibold"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {option}
+                </li>
+              ))
+            ) : (
+              <li className="px-4 py-2.5 text-sm text-gray-400 italic">
+                No options available
               </li>
-            ))}
+            )}
           </ul>
         </div>
       )}
@@ -156,8 +175,10 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 };
 
 interface ExtendedFormData extends CreateUserData {
+  department?: string;
   course?: string;
   position?: string;
+  year_graduated?: string;
 }
 
 interface UserFormProps {
@@ -173,55 +194,31 @@ const UserForm: React.FC<UserFormProps> = ({
   onCancel,
   loading = false,
 }) => {
-  const courseOptions = [
-    "BS in Information Technology",
-    "BS in Nursing",
-    "BS in Accountancy",
-    "BS in Business Administration",
-    "BS in Hospitality Management",
-    "BS in Criminology",
-    "BA in Communication",
-    "BA in Psychology",
-    "Bachelor of Elementary Education",
-    "Bachelor of Secondary Education",
-  ];
-
-  const positionOptions = [
-    "Editor-in-Chief",
-    "Associate Editor for Print",
-    "Associate Editor for Online",
-    "Managing Editor for Finance and Property",
-    "Managing Editor for Communications",
-    "Online Editor",
-    "Newspaper Editor",
-    "Magazine Editor",
-    "Literary Editor",
-    "Art Director",
-    "Photojournalist",
-    "Sport Editor",
-    "Editorial Assistant",
-    "Contributor",
-  ];
-
   const [formData, setFormData] = useState<ExtendedFormData>({
     name: "",
     email: "",
     password: "",
     role: "hillsider",
+    department: "",
     course: "",
     position: "",
+    year_graduated: "",
   });
 
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isEditing = !!user;
+
+  const activeCourseOptions = useMemo(() => {
+    return formData.department
+      ? DEPARTMENTS_DATA[formData.department] || []
+      : [];
+  }, [formData.department]);
 
   useEffect(() => {
     if (user) {
@@ -230,8 +227,10 @@ const UserForm: React.FC<UserFormProps> = ({
         email: user.email,
         password: "",
         role: user.role,
+        department: (user as any).department || "",
         course: user.course || "",
         position: user.position || "",
+        year_graduated: (user as any).year_graduated || "",
       });
       setConfirmPassword("");
     }
@@ -248,9 +247,19 @@ const UserForm: React.FC<UserFormProps> = ({
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Please enter a valid email address.";
 
-    if (formData.role !== "admin") {
+    if (formData.role !== "admin" && (formData.role as string) !== "guest") {
+      if (!formData.department)
+        newErrors.department = "Please select a department.";
       if (!formData.course) newErrors.course = "Please select a course.";
       if (!formData.position) newErrors.position = "Please select a position.";
+    }
+
+    if (formData.role === "alumni") {
+      if (!formData.year_graduated) {
+        newErrors.year_graduated = "Year graduated is required for alumni.";
+      } else if (!/^\d{4}$/.test(formData.year_graduated)) {
+        newErrors.year_graduated = "Please enter a valid 4-digit year.";
+      }
     }
 
     const isPasswordProvided = !!formData.password.trim();
@@ -284,22 +293,13 @@ const UserForm: React.FC<UserFormProps> = ({
       : formData;
 
     try {
-      // 1. Attempt to submit
       await onSubmit(submitData);
-
-      // 2. ONLY if the above line doesn't throw an error:
-      // Show success toast here instead of parent
       toast.success(
         isEditing ? "User updated successfully!" : "User created successfully!"
       );
-
-      // 3. Close the modal/form
       onCancel();
     } catch (error: any) {
-      // 4. If submission fails, we land here.
-      // Success toast above is SKIPPED.
       console.error("UserForm caught error:", error);
-
       let msg = "An unexpected error occurred.";
 
       if (error.response) {
@@ -331,7 +331,22 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   const handleDropdownChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const updates: Partial<ExtendedFormData> = { [name]: value };
+
+      if (name === "department") {
+        updates.course = "";
+      }
+
+      if (name === "role") {
+        if (value !== "alumni") {
+          updates.year_graduated = "";
+        }
+      }
+
+      return { ...prev, ...updates };
+    });
+
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -405,25 +420,74 @@ const UserForm: React.FC<UserFormProps> = ({
               )}
             </div>
 
+            <div className="md:col-span-2">
+              <CustomDropdown
+                label="Department / College"
+                name="department"
+                value={formData.department || ""}
+                options={Object.keys(DEPARTMENTS_DATA)}
+                onChange={handleDropdownChange}
+                error={errors.department}
+                placeholder="Select Department"
+              />
+            </div>
+
             <CustomDropdown
-              label="Course / Degree"
+              label="Course / Program"
               name="course"
               value={formData.course || ""}
-              options={courseOptions}
+              options={activeCourseOptions}
               onChange={handleDropdownChange}
               error={errors.course}
-              placeholder="Select Course"
+              placeholder={
+                formData.department
+                  ? "Select Course"
+                  : "Select a department first"
+              }
+              disabled={!formData.department}
             />
 
             <CustomDropdown
               label="Position / Title"
               name="position"
               value={formData.position || ""}
-              options={positionOptions}
+              options={POSITION_OPTIONS}
               onChange={handleDropdownChange}
               error={errors.position}
               placeholder="Select Position"
             />
+
+            <div className={formData.role === "alumni" ? "" : "md:col-span-2"}>
+              <CustomDropdown
+                label="System Role"
+                name="role"
+                value={formData.role}
+                options={ROLES}
+                onChange={handleDropdownChange}
+                error={errors.role}
+              />
+            </div>
+
+            {formData.role === "alumni" && (
+              <div className="animate-fadeIn">
+                <label className={labelClass}>Year Graduated</label>
+                <input
+                  type="number"
+                  name="year_graduated"
+                  value={formData.year_graduated}
+                  onChange={handleChange}
+                  className={inputClass(!!errors.year_graduated)}
+                  placeholder="e.g. 2023"
+                  min="1900"
+                  max="2099"
+                />
+                {errors.year_graduated && (
+                  <p className="text-red-500 text-xs mt-1 font-medium animate-fadeIn">
+                    {errors.year_graduated}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div>
               <label className={labelClass}>
@@ -486,17 +550,6 @@ const UserForm: React.FC<UserFormProps> = ({
                   {errors.confirmPassword}
                 </p>
               )}
-            </div>
-
-            <div className="md:col-span-2">
-              <CustomDropdown
-                label="System Role"
-                name="role"
-                value={formData.role}
-                options={["hillsider", "alumni", "admin"]}
-                onChange={handleDropdownChange}
-                error={errors.role}
-              />
             </div>
           </div>
 

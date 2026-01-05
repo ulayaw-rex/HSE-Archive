@@ -6,6 +6,7 @@ export type SidebarItemType = {
   icon?: ReactNode;
   end?: boolean;
   children?: SidebarItemType[];
+  badgeId?: string;
 };
 
 export const adminSidebarItems: SidebarItemType[] = [
@@ -160,6 +161,7 @@ export const adminSidebarItems: SidebarItemType[] = [
   {
     to: "/admin/feedback",
     label: "Feedback & Inquiries",
+    badgeId: "feedback",
     icon: (
       <svg
         className="h-5 w-5"

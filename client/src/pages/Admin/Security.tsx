@@ -9,9 +9,15 @@ import {
   FaUnlock,
 } from "react-icons/fa";
 
+type UserInfo = {
+  id: number;
+  name: string;
+  email: string;
+};
+
 interface AuditLog {
   id: number;
-  user: string;
+  user: UserInfo | string;
   action: string;
   details: string;
   ip: string;
@@ -20,7 +26,7 @@ interface AuditLog {
 
 interface LoginHistory {
   id: number;
-  user: string;
+  user: UserInfo | string;
   ip: string;
   status: "Success" | "Failed";
   date: string;
@@ -97,6 +103,18 @@ const Security: React.FC = () => {
     if (action.includes("Lockdown Disabled"))
       return <FaUnlock className="mr-1" />;
     return null;
+  };
+
+  const renderUser = (user: UserInfo | string) => {
+    if (typeof user === "object" && user !== null) {
+      return (
+        <div className="flex flex-col">
+          <span className="font-bold text-gray-900">{user.name}</span>
+          <span className="text-xs text-gray-400">{user.email}</span>
+        </div>
+      );
+    }
+    return <span className="font-medium text-gray-900">{user}</span>;
   };
 
   return (
@@ -218,8 +236,9 @@ const Security: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(log.date).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                        {log.user}
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {renderUser(log.user)}
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -290,9 +309,11 @@ const Security: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(log.date).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                        {log.user}
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {renderUser(log.user)}
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {log.ip}
                       </td>

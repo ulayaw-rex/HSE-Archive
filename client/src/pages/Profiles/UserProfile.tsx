@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { FaPlus, FaBookOpen, FaFileDownload } from "react-icons/fa";
+import {
+  FaPlus,
+  FaBookOpen,
+  FaFileDownload,
+  FaUserGraduate,
+} from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type {
@@ -137,14 +142,21 @@ const UserProfile: React.FC = () => {
 
   const isOwnProfile = currentUser?.id === profile.id;
   const canSubmitArticle = isOwnProfile && currentUser?.role !== "alumni";
+  const isAlumni = profile.role === "alumni";
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-            <div className="flex-shrink-0">
-              <div className="w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-green-100 overflow-hidden bg-green-800 flex items-center justify-center shadow-lg">
+            <div className="flex-shrink-0 relative">
+              <div
+                className={`w-28 h-28 md:w-40 md:h-40 rounded-full border-4 overflow-hidden flex items-center justify-center shadow-lg ${
+                  isAlumni
+                    ? "border-purple-100 bg-purple-900"
+                    : "border-green-100 bg-green-800"
+                }`}
+              >
                 {profile.avatar ? (
                   <img
                     src={profile.avatar}
@@ -157,8 +169,24 @@ const UserProfile: React.FC = () => {
                   </span>
                 )}
               </div>
+
+              {isAlumni && (
+                <div
+                  className="absolute -bottom-2 -right-2 bg-purple-600 text-white p-2 rounded-full border-4 border-white shadow-md"
+                  title="Alumni Member"
+                >
+                  <FaUserGraduate size={20} />
+                </div>
+              )}
             </div>
+
             <div className="flex-1 text-center md:text-left pt-2">
+              {isAlumni && (
+                <span className="inline-block px-3 py-1 mb-2 text-xs font-extrabold tracking-widest text-purple-700 bg-purple-100 rounded-full uppercase">
+                  Alumni Member
+                </span>
+              )}
+
               <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 break-words">
                 {profile.name}
               </h1>
@@ -169,7 +197,11 @@ const UserProfile: React.FC = () => {
                 <p className="text-base md:text-lg text-gray-700 font-semibold uppercase tracking-wide">
                   {profile.course || "No Course Listed"}
                 </p>
-                <p className="text-lg md:text-xl text-green-700 font-bold">
+                <p
+                  className={`text-lg md:text-xl font-bold ${
+                    isAlumni ? "text-purple-700" : "text-green-700"
+                  }`}
+                >
                   {profile.position || "Member"}
                 </p>
               </div>
@@ -251,7 +283,11 @@ const UserProfile: React.FC = () => {
           </div>
 
           <div className="w-full">
-            <div className="bg-green-800 text-white p-1 rounded-t-md">
+            <div
+              className={`text-white p-1 rounded-t-md ${
+                isAlumni ? "bg-purple-800" : "bg-green-800"
+              }`}
+            >
               <h3 className="text-center font-bold py-2 uppercase tracking-wider text-sm md:text-base">
                 Collection
               </h3>

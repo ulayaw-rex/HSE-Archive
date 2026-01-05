@@ -18,7 +18,6 @@ const UserTable: React.FC<UserTableProps> = ({
   loading = false,
 }) => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-
   const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -93,7 +92,7 @@ const UserTable: React.FC<UserTableProps> = ({
   return (
     <>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -105,16 +104,22 @@ const UserTable: React.FC<UserTableProps> = ({
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Department
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Course
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Position
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Year
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date Created
@@ -128,7 +133,7 @@ const UserTable: React.FC<UserTableProps> = ({
                 {users.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={10}
                       className="px-6 py-4 text-center text-gray-500"
                     >
                       No users found
@@ -151,7 +156,18 @@ const UserTable: React.FC<UserTableProps> = ({
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
+                        <div
+                          className="text-sm text-gray-500 max-w-[150px] truncate"
+                          title={(user as any).department}
+                        >
+                          {(user as any).department || "-"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div
+                          className="text-sm text-gray-500 max-w-[150px] truncate"
+                          title={user.course}
+                        >
                           {user.course || "-"}
                         </div>
                       </td>
@@ -159,6 +175,21 @@ const UserTable: React.FC<UserTableProps> = ({
                         <div className="text-sm text-gray-500">
                           {user.position || "-"}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {(user as any).year_graduated || "-"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(
+                            user.role
+                          )}`}
+                        >
+                          {user.role.charAt(0).toUpperCase() +
+                            user.role.slice(1)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {user.status ? (
@@ -173,16 +204,6 @@ const UserTable: React.FC<UserTableProps> = ({
                         ) : (
                           <span className="text-sm text-gray-500">-</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(
-                            user.role
-                          )}`}
-                        >
-                          {user.role.charAt(0).toUpperCase() +
-                            user.role.slice(1)}
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(user.created_at)}

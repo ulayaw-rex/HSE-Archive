@@ -11,7 +11,6 @@ import PendingReviewsWidget from "../../components/features/Admin/PendingReviews
 import type { Publication } from "../../types/Publication";
 import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
 import CreditRequestsWidget from "../../components/features/Admin/CreditRequestsWidget";
-// IMPORT THE HOOK
 import { usePolling } from "../../hooks/usePolling";
 
 interface PendingUser {

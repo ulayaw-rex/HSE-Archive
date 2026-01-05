@@ -13,15 +13,35 @@ import {
   FaInfoCircle,
   FaUserClock,
   FaUserCircle,
+  FaExclamationTriangle,
+  FaTimesCircle,
+  FaSpinner,
 } from "react-icons/fa";
 import type { PrintMedia } from "../../types/PrintMedia";
 import { useDataCache } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
-import { toast } from "react-toastify";
 import "../../App.css";
 
 import { useNavigate } from "react-router-dom";
 import { usePolling } from "../../hooks/usePolling";
+
+interface MediaOwner {
+  id: number;
+  name: string;
+}
+
+interface ExtendedPrintMedia extends PrintMedia {
+  owners?: MediaOwner[];
+  has_pending_request?: boolean;
+  owner_name?: string;
+}
+
+interface StatusModalState {
+  isOpen: boolean;
+  type: "success" | "warning" | "error" | "info";
+  title: string;
+  message: string;
+}
 
 const ITEMS_PER_PAGE = 12;
 const TYPES = ["All", "Tabloids", "Magazines", "Folios", "Others"];
@@ -46,21 +66,31 @@ const PrintMediaPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { cache, updateCache } = useDataCache();
-  const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>(
-    cache.printMedia || []
+  const [printMediaList, setPrintMediaList] = useState<ExtendedPrintMedia[]>(
+    (cache.printMedia as ExtendedPrintMedia[]) || []
   );
   const [loading, setLoading] = useState(!cache.printMedia);
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(null);
-  const [claimTarget, setClaimTarget] = useState<PrintMedia | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<ExtendedPrintMedia | null>(
+    null
+  );
+  const [claimTarget, setClaimTarget] = useState<ExtendedPrintMedia | null>(
+    null
+  );
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [requestingCredit, setRequestingCredit] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showAlreadySubmittedModal, setShowAlreadySubmittedModal] =
-    useState(false);
+
+  const [statusModal, setStatusModal] = useState<StatusModalState>({
+    isOpen: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   const [pendingRequestIds, setPendingRequestIds] = useState<number[]>([]);
 
@@ -68,7 +98,9 @@ const PrintMediaPage: React.FC = () => {
     try {
       if (!cache.printMedia) setLoading(true);
 
-      const response = await AxiosInstance.get<PrintMedia[]>("/print-media");
+      const response = await AxiosInstance.get<ExtendedPrintMedia[]>(
+        "/print-media"
+      );
       setPrintMediaList(response.data);
       updateCache("printMedia", response.data);
     } catch (error: unknown) {
@@ -80,7 +112,11 @@ const PrintMediaPage: React.FC = () => {
 
   usePolling(fetchPrintMedia, 60000);
 
-  const handleClaimClick = (e: React.MouseEvent, item: PrintMedia) => {
+  const closeStatusModal = () => {
+    setStatusModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleClaimClick = (e: React.MouseEvent, item: ExtendedPrintMedia) => {
     e.stopPropagation();
     setClaimTarget(item);
     setIsClaimModalOpen(true);
@@ -96,17 +132,39 @@ const PrintMediaPage: React.FC = () => {
       );
       setPendingRequestIds((prev) => [...prev, claimTarget.print_media_id]);
       setIsClaimModalOpen(false);
-      setShowSuccessModal(true);
+
+      setStatusModal({
+        isOpen: true,
+        type: "success",
+        title: "Request Sent!",
+        message: "The administrator will review your claim shortly.",
+      });
+
+      fetchPrintMedia();
     } catch (error: any) {
+      setIsClaimModalOpen(false);
       if (error.response?.status === 409) {
         setPendingRequestIds((prev) => [...prev, claimTarget.print_media_id]);
-        setIsClaimModalOpen(false);
-        setShowAlreadySubmittedModal(true);
+        setStatusModal({
+          isOpen: true,
+          type: "info",
+          title: "Request Pending",
+          message: "You have already submitted a request for this item.",
+        });
       } else if (error.response?.status === 422) {
-        toast.warning("You are already listed as an owner.");
-        setIsClaimModalOpen(false);
+        setStatusModal({
+          isOpen: true,
+          type: "warning",
+          title: "Already Owner",
+          message: "You are already listed as an owner of this item.",
+        });
       } else {
-        toast.error("Failed to send request. Please try again.");
+        setStatusModal({
+          isOpen: true,
+          type: "error",
+          title: "Submission Failed",
+          message: "Failed to send request. Please try again later.",
+        });
       }
     } finally {
       setRequestingCredit(false);
@@ -117,13 +175,28 @@ const PrintMediaPage: React.FC = () => {
     return filePath?.toLowerCase().endsWith(".pdf");
   };
 
-  const handleDownload = async (e: React.MouseEvent, item: PrintMedia) => {
+  const handleDownload = async (
+    e: React.MouseEvent,
+    item: ExtendedPrintMedia
+  ) => {
     e.stopPropagation();
+
+    setDownloadingId(item.print_media_id);
+
     try {
       const downloadUrl = `/api/print-media/${item.print_media_id}/download`;
+
       window.open(downloadUrl, "_blank");
     } catch (error) {
-      toast.error("Download failed.");
+      setStatusModal({
+        isOpen: true,
+        type: "error",
+        title: "Download Failed",
+        message:
+          "We encountered an issue downloading this file. Please try again.",
+      });
+    } finally {
+      setTimeout(() => setDownloadingId(null), 1000);
     }
   };
 
@@ -132,16 +205,26 @@ const PrintMediaPage: React.FC = () => {
     navigate(`/profile/${userId}`);
   };
 
-  const handleCardClick = (e: React.MouseEvent, item: PrintMedia) => {
+  const handleCardClick = (e: React.MouseEvent, item: ExtendedPrintMedia) => {
     if ((e.target as HTMLElement).closest("button")) return;
     if ((e.target as HTMLElement).closest(".user-link")) return;
+    if ((e.target as HTMLElement).closest(".owner-chip")) return;
 
     if (isPdf(item.file_path)) {
       setSelectedMedia(item);
     } else {
       handleDownload(e, item);
-      toast.info("Downloading file (Preview not available for this format).");
     }
+  };
+
+  const getOwners = (item: ExtendedPrintMedia): MediaOwner[] => {
+    if (item.owners && Array.isArray(item.owners) && item.owners.length > 0) {
+      return item.owners;
+    }
+    if (item.owner_name && item.user_id) {
+      return [{ id: item.user_id, name: item.owner_name }];
+    }
+    return [];
   };
 
   const availableYears = useMemo(() => {
@@ -160,13 +243,21 @@ const PrintMediaPage: React.FC = () => {
       const itemDateStr =
         item.date_published || item.created_at || new Date().toISOString();
       const itemYear = new Date(itemDateStr).getFullYear().toString();
-      const matchesType =
-        activeType === "All" || item.type === activeType.slice(0, -1);
+
+      const owners = getOwners(item);
+
       const matchesSearch =
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.description &&
-          item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        owners.some((owner) =>
+          owner.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+      const matchesType =
+        activeType === "All" || item.type === activeType.slice(0, -1);
       const matchesYear = selectedYear === "All" || itemYear === selectedYear;
+
       return matchesType && matchesSearch && matchesYear;
     });
   }, [printMediaList, activeType, searchQuery, selectedYear]);
@@ -188,60 +279,63 @@ const PrintMediaPage: React.FC = () => {
         onClose={() => !requestingCredit && setIsClaimModalOpen(false)}
         onConfirm={submitClaimRequest}
         title="Claim Ownership"
-        message={`Are you sure you want to claim ownership of "${claimTarget?.title}"?`}
+        message={`Are you sure you want to be added as an author/owner of "${claimTarget?.title}"?`}
         confirmLabel="Submit Request"
         cancelLabel="Cancel"
         isLoading={requestingCredit}
         isDangerous={false}
       />
 
-      {showSuccessModal && (
+      {statusModal.isOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowSuccessModal(false)}
+            onClick={closeStatusModal}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-              <FaCheckCircle className="h-10 w-10 text-green-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Request Sent!
-            </h3>
-            <p className="text-gray-500 mb-8">
-              The administrator will review your claim shortly.
-            </p>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all"
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div
+              className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6 ${
+                statusModal.type === "success"
+                  ? "bg-green-100"
+                  : statusModal.type === "error"
+                  ? "bg-red-100"
+                  : statusModal.type === "warning"
+                  ? "bg-orange-100"
+                  : "bg-blue-100"
+              }`}
             >
-              Okay, Got it
-            </button>
-          </div>
-        </div>
-      )}
+              {statusModal.type === "success" && (
+                <FaCheckCircle className="h-10 w-10 text-green-600" />
+              )}
+              {statusModal.type === "error" && (
+                <FaTimesCircle className="h-10 w-10 text-red-600" />
+              )}
+              {statusModal.type === "warning" && (
+                <FaExclamationTriangle className="h-9 w-9 text-orange-600" />
+              )}
+              {statusModal.type === "info" && (
+                <FaInfoCircle className="h-10 w-10 text-blue-600" />
+              )}
+            </div>
 
-      {showAlreadySubmittedModal && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowAlreadySubmittedModal(false)}
-          />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
-              <FaInfoCircle className="h-10 w-10 text-blue-600" />
-            </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Request Pending
+              {statusModal.title}
             </h3>
-            <p className="text-gray-500 mb-8">
-              You have already submitted a request for this item.
-            </p>
+            <p className="text-gray-500 mb-8">{statusModal.message}</p>
+
             <button
-              onClick={() => setShowAlreadySubmittedModal(false)}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all"
+              onClick={closeStatusModal}
+              className={`w-full py-3 px-4 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg ${
+                statusModal.type === "success"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : statusModal.type === "error"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : statusModal.type === "warning"
+                  ? "bg-orange-500 hover:bg-orange-600"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Close
+              {statusModal.type === "error" ? "Close" : "Got it"}
             </button>
           </div>
         </div>
@@ -357,14 +451,17 @@ const PrintMediaPage: React.FC = () => {
                     item.date_published || item.created_at
                   );
                   const badgeColorClass = getCategoryColor(item.type);
+                  const owners = getOwners(item);
                   const isOwner =
                     user &&
-                    ((item as any).user_id === user.id ||
+                    (owners.some((o) => o.id === user.id) ||
                       user.role === "admin");
                   const isPending =
-                    (item as any).has_pending_request ||
+                    item.has_pending_request ||
                     pendingRequestIds.includes(item.print_media_id);
                   const fileIsPdf = isPdf(item.file_path);
+
+                  const isDownloading = downloadingId === item.print_media_id;
 
                   return (
                     <div
@@ -406,10 +503,18 @@ const PrintMediaPage: React.FC = () => {
                           {isOwner && (
                             <button
                               onClick={(e) => handleDownload(e, item)}
-                              className="bg-white text-gray-700 p-2 rounded-full shadow-lg hover:bg-green-600 hover:text-white transition-colors"
+                              className={`bg-white text-gray-700 p-2 rounded-full shadow-lg transition-colors ${
+                                isDownloading
+                                  ? "bg-green-100 text-green-700"
+                                  : "hover:bg-green-600 hover:text-white"
+                              }`}
                               title="Download PDF"
                             >
-                              <FaDownload size={14} />
+                              {isDownloading ? (
+                                <FaSpinner className="animate-spin" size={14} />
+                              ) : (
+                                <FaDownload size={14} />
+                              )}
                             </button>
                           )}
                           {user && !isOwner && isPending && (
@@ -439,23 +544,31 @@ const PrintMediaPage: React.FC = () => {
                           {item.title}
                         </h3>
 
-                        {(item as any).owner_name && (
-                          <div className="flex items-center gap-2 mb-4 w-fit">
-                            <div
-                              className="flex items-center gap-1.5 cursor-pointer group/author"
-                              onClick={(e) =>
-                                handleUserClick(e, (item as any).user_id)
-                              }
-                            >
-                              <FaUserCircle
-                                className="text-gray-400 group-hover/author:text-green-600 transition-colors"
-                                size={14}
-                              />
-                              <span className="text-xs font-semibold text-gray-600 group-hover/author:text-green-700 transition-colors">
-                                {(item as any).owner_name}
+                        {owners.length > 0 ? (
+                          <div className="flex items-center gap-2 mb-4">
+                            {owners.slice(0, 1).map((owner) => (
+                              <div
+                                key={owner.id}
+                                className="owner-chip flex items-center gap-1.5 cursor-pointer group/author bg-gray-50 px-2 py-1 rounded-full border border-gray-100 hover:border-gray-300 transition-all max-w-[70%]"
+                                onClick={(e) => handleUserClick(e, owner.id)}
+                              >
+                                <FaUserCircle
+                                  className="text-gray-400 group-hover/author:text-green-600 transition-colors flex-shrink-0"
+                                  size={12}
+                                />
+                                <span className="text-xs font-semibold text-gray-600 group-hover/author:text-green-700 transition-colors truncate">
+                                  {owner.name}
+                                </span>
+                              </div>
+                            ))}
+                            {owners.length > 1 && (
+                              <span className="text-xs text-gray-400 font-medium flex-shrink-0">
+                                +{owners.length - 1} more
                               </span>
-                            </div>
+                            )}
                           </div>
+                        ) : (
+                          <div className="mb-4 h-6"></div>
                         )}
 
                         <p className="text-sm text-gray-500 mb-4 line-clamp-2 h-10 leading-relaxed">
@@ -475,7 +588,11 @@ const PrintMediaPage: React.FC = () => {
                               fileIsPdf ? "text-green-600" : "text-blue-600"
                             }`}
                           >
-                            {fileIsPdf ? "READ NOW →" : "DOWNLOAD ↓"}
+                            {isDownloading
+                              ? "DOWNLOADING..."
+                              : fileIsPdf
+                              ? "READ NOW →"
+                              : "DOWNLOAD ↓"}
                           </span>
                         </div>
                       </div>

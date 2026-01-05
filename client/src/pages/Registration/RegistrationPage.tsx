@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { toast } from "react-toastify";
 import logo from "../../assets/Login.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { DEPARTMENTS_DATA, POSITION_OPTIONS } from "../../types/SchoolData";
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -84,6 +85,7 @@ interface CustomDropdownProps {
   onChange: (val: string) => void;
   placeholder: string;
   error?: string;
+  disabled?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -92,14 +94,25 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   onChange,
   placeholder,
   error,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const toggleOpen = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
+  };
 
   return (
     <div className="relative mb-4 text-left">
       <div
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full p-4 rounded-lg text-sm flex justify-between items-center cursor-pointer transition-colors border-2 ${
+        onClick={toggleOpen}
+        className={`w-full p-4 rounded-lg text-sm flex justify-between items-center transition-colors border-2 ${
+          disabled
+            ? "bg-gray-100 border-transparent cursor-not-allowed opacity-60"
+            : "cursor-pointer"
+        } ${
           error
             ? "bg-red-50 border-red-500 text-red-900"
             : isOpen
@@ -123,20 +136,26 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         <p className="mt-1 text-xs text-red-600 font-medium ml-1">{error}</p>
       )}
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-50 w-full bg-white border border-gray-100 shadow-xl rounded-lg mt-1 max-h-48 overflow-y-auto custom-scrollbar animate-fadeIn">
-          {options.map((opt) => (
-            <div
-              key={opt}
-              onClick={() => {
-                onChange(opt);
-                setIsOpen(false);
-              }}
-              className="px-4 py-3 hover:bg-green-50 text-sm cursor-pointer text-gray-700 hover:text-green-800 transition-colors border-b border-gray-50 last:border-0 font-medium"
-            >
-              {opt}
+          {options.length > 0 ? (
+            options.map((opt) => (
+              <div
+                key={opt}
+                onClick={() => {
+                  onChange(opt);
+                  setIsOpen(false);
+                }}
+                className="px-4 py-3 hover:bg-green-50 text-sm cursor-pointer text-gray-700 hover:text-green-800 transition-colors border-b border-gray-50 last:border-0 font-medium"
+              >
+                {opt}
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-3 text-sm text-gray-400 italic">
+              No options available
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
@@ -160,37 +179,17 @@ const RegistrationPage: React.FC = () => {
     password: "",
     password_confirmation: "",
     role: "hillsider",
+    department: "",
     course: "",
     position: "",
+    year_graduated: "",
   });
 
-  const courseOptions = [
-    "BS in Information Technology",
-    "BS in Nursing",
-    "BS in Accountancy",
-    "BA in Communication",
-    "BS in Business Administration",
-    "BS in Hospitality Management",
-    "BS in Criminology",
-    "Bachelor of Elementary Education",
-    "Bachelor of Secondary Education",
-  ];
-  const positionOptions = [
-    "Editor-in-Chief",
-    "Associate Editor for Print",
-    "Associate Editor for Online",
-    "Managing Editor for Finance and Property",
-    "Managing Editor for Communications",
-    "Online Editor",
-    "Newspaper Editor",
-    "Magazine Editor",
-    "Literary Editor",
-    "Art Director",
-    "Photojournalist",
-    "Sport Editor",
-    "Editorial Assistant",
-    "Contributor",
-  ];
+  const activeCourseOptions = useMemo(() => {
+    return formData.department
+      ? DEPARTMENTS_DATA[formData.department] || []
+      : [];
+  }, [formData.department]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -202,7 +201,20 @@ const RegistrationPage: React.FC = () => {
   };
 
   const handleDropdownChange = (field: string, val: string) => {
-    setFormData({ ...formData, [field]: val });
+    setFormData((prev) => {
+      const updates = { ...prev, [field]: val };
+
+      if (field === "department") {
+        updates.course = "";
+      }
+
+      if (field === "role" && val !== "alumni") {
+        updates.year_graduated = "";
+      }
+
+      return updates;
+    });
+
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -237,8 +249,18 @@ const RegistrationPage: React.FC = () => {
     e.preventDefault();
 
     const newErrors: Record<string, string> = {};
+    if (!formData.department)
+      newErrors.department = "Please select a department.";
     if (!formData.course) newErrors.course = "Please select a course.";
     if (!formData.position) newErrors.position = "Please select a position.";
+
+    if (formData.role === "alumni") {
+      if (!formData.year_graduated) {
+        newErrors.year_graduated = "Year graduated is required.";
+      } else if (!/^\d{4}$/.test(formData.year_graduated)) {
+        newErrors.year_graduated = "Enter a valid 4-digit year.";
+      }
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -351,7 +373,7 @@ const RegistrationPage: React.FC = () => {
               <InputField
                 name="name"
                 type="text"
-                placeholder="Username / Full Name*"
+                placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
                 error={errors.name}
@@ -423,7 +445,7 @@ const RegistrationPage: React.FC = () => {
                   <button
                     key={role}
                     type="button"
-                    onClick={() => setFormData({ ...formData, role })}
+                    onClick={() => handleDropdownChange("role", role)}
                     className={`flex-1 py-2 rounded-full text-xs font-bold uppercase transition-all ${
                       formData.role === role
                         ? "bg-white text-green-800 shadow-sm"
@@ -436,20 +458,46 @@ const RegistrationPage: React.FC = () => {
               </div>
 
               <CustomDropdown
-                placeholder="Select Course / Degree"
+                placeholder="Select Department / College"
+                value={formData.department}
+                options={Object.keys(DEPARTMENTS_DATA)}
+                onChange={(val) => handleDropdownChange("department", val)}
+                error={errors.department}
+              />
+
+              <CustomDropdown
+                placeholder={
+                  formData.department
+                    ? "Select Course / Degree"
+                    : "Select Department first"
+                }
                 value={formData.course}
-                options={courseOptions}
+                options={activeCourseOptions}
                 onChange={(val) => handleDropdownChange("course", val)}
                 error={errors.course}
+                disabled={!formData.department}
               />
 
               <CustomDropdown
                 placeholder="Select Position / Title"
                 value={formData.position}
-                options={positionOptions}
+                options={POSITION_OPTIONS}
                 onChange={(val) => handleDropdownChange("position", val)}
                 error={errors.position}
               />
+
+              {formData.role === "alumni" && (
+                <div className="animate-fadeIn mb-4">
+                  <InputField
+                    name="year_graduated"
+                    type="number"
+                    placeholder="Year Graduated (e.g. 2023)"
+                    value={formData.year_graduated}
+                    onChange={handleChange}
+                    error={errors.year_graduated}
+                  />
+                </div>
+              )}
 
               <div className="mt-8 flex gap-3">
                 <button

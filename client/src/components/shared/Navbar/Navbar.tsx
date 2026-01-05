@@ -70,7 +70,7 @@ const Navbar: React.FC = () => {
   const handleMouseLeave = () => {
     timeoutRef.current = window.setTimeout(() => {
       setHoveredDropdown(null);
-    }, 150); // Small delay to make it feel smoother
+    }, 150);
   };
 
   useEffect(() => {
@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      <div className="hidden lg:block sticky top-0 z-50 bg-green-700 text-white shadow-lg">
+      <div className="hidden lg:block sticky top-12 z-[100] bg-green-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-3 w-[90%]">
           <div className="flex items-center justify-between">
             <nav className="flex items-center flex-1">
@@ -120,7 +120,6 @@ const Navbar: React.FC = () => {
                           text-white hover:text-green-200 transition-all duration-200 
                           font-semibold text-base uppercase tracking-wider 
                           px-4 py-2 rounded-md flex items-center gap-1 whitespace-nowrap
-                          ${""}
                           ${
                             isActive || isDropdownOpen
                               ? "bg-green-800 text-green-100 shadow-inner"

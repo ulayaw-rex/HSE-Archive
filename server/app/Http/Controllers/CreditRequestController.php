@@ -32,7 +32,9 @@ class CreditRequestController extends Controller
             $request->requestable->writers()->syncWithoutDetaching([$request->user_id]);
         } 
         elseif ($request->requestable_type === PrintMedia::class || $request->requestable instanceof PrintMedia) {
-            $request->requestable->update(['user_id' => $request->user_id]);
+            
+
+            $request->requestable->owners()->syncWithoutDetaching([$request->user_id]);
         }
 
         $request->update(['status' => 'approved']);

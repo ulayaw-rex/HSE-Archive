@@ -5,10 +5,11 @@ import {
   FaInstagram,
   FaCheckCircle,
   FaTimes,
+  FaExclamationTriangle,
+  FaPaperPlane,
 } from "react-icons/fa";
 import Logo from "../../../assets/LOGO.png";
 import AxiosInstance from "../../../AxiosInstance";
-import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 
 type NavigationLink = {
@@ -33,18 +34,39 @@ const rightNavigationLinks: NavigationLink[] = [
   { id: "contact", text: "CONTACT", href: "/contact" },
 ];
 
+type FeedbackState = {
+  isOpen: boolean;
+  type: "success" | "error";
+  title: string;
+  message: string;
+};
+
 const Footer: React.FC = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackState>({
+    isOpen: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const closeFeedback = () => {
+    setFeedback((prev) => ({ ...prev, isOpen: false }));
+  };
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!message.trim()) {
-      toast.error("Please enter a message.");
+      setFeedback({
+        isOpen: true,
+        type: "error",
+        title: "Missing Message",
+        message: "Please enter a message before sending.",
+      });
       return;
     }
 
@@ -56,21 +78,36 @@ const Footer: React.FC = () => {
         message,
       });
 
-      setShowSuccessModal(true);
+      setFeedback({
+        isOpen: true,
+        type: "success",
+        title: "Message Sent!",
+        message:
+          "Thank you for reaching out. We have received your message and will get back to you shortly.",
+      });
 
       setEmail("");
       setMessage("");
     } catch (error) {
       console.error(error);
       const err = error as AxiosError;
+      let errorMsg = "Failed to send message. Please try again later.";
+      let errorTitle = "Transmission Failed";
 
       if (err.response && err.response.status === 422) {
-        toast.warning("Invalid email address. Please check the domain.");
+        errorTitle = "Invalid Input";
+        errorMsg = "Invalid email address. Please check the domain.";
       } else if (err.response && err.response.status === 429) {
-        toast.error("Too many requests. Please try again in a few minutes.");
-      } else {
-        toast.error("Failed to send message. Please try again later.");
+        errorTitle = "Too Many Requests";
+        errorMsg = "Please wait a few minutes before sending another message.";
       }
+
+      setFeedback({
+        isOpen: true,
+        type: "error",
+        title: errorTitle,
+        message: errorMsg,
+      });
     } finally {
       setSending(false);
     }
@@ -78,39 +115,50 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {feedback.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setShowSuccessModal(false)}
+            onClick={closeFeedback}
           />
 
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-gray-100">
             <button
-              onClick={() => setShowSuccessModal(false)}
+              onClick={closeFeedback}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <FaTimes size={18} />
             </button>
 
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-              <FaCheckCircle className="h-10 w-10 text-green-600" />
+            <div
+              className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6 ${
+                feedback.type === "success" ? "bg-green-100" : "bg-red-100"
+              }`}
+            >
+              {feedback.type === "success" ? (
+                <FaCheckCircle className="h-9 w-9 text-green-600" />
+              ) : (
+                <FaExclamationTriangle className="h-8 w-8 text-red-600" />
+              )}
             </div>
 
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Message Sent!
+              {feedback.title}
             </h3>
 
-            <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-              Thank you for reaching out. We have received your message and will
-              get back to you shortly.
+            <p className="text-gray-500 mb-8 text-sm leading-relaxed px-2">
+              {feedback.message}
             </p>
 
             <button
-              onClick={() => setShowSuccessModal(false)}
-              className="w-full py-3 px-4 bg-green-800 hover:bg-green-900 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg"
+              onClick={closeFeedback}
+              className={`w-full py-3 px-4 font-semibold rounded-xl transition-all shadow-md hover:shadow-lg text-white ${
+                feedback.type === "success"
+                  ? "bg-green-800 hover:bg-green-900"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
             >
-              Okay, Got it
+              {feedback.type === "success" ? "Okay, Got it" : "Try Again"}
             </button>
           </div>
         </div>
@@ -131,7 +179,7 @@ const Footer: React.FC = () => {
                 />
               </div>
               <p className="text-sm text-gray-200 leading-relaxed max-w-sm">
-                The Hillside Echo is student publication, bringing you the
+                The Hillside Echo is the student publication, bringing you the
                 latest news, sports, and opinions.
               </p>
             </div>
@@ -193,7 +241,7 @@ const Footer: React.FC = () => {
                   placeholder="Your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-50"
+                  className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-60 transition-all"
                   required
                   disabled={sending}
                 />
@@ -202,16 +250,23 @@ const Footer: React.FC = () => {
                   rows={3}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none disabled:opacity-50"
+                  className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none disabled:opacity-60 transition-all"
                   required
                   disabled={sending}
                 />
                 <button
                   type="submit"
                   disabled={sending}
-                  className="w-full px-8 py-3 bg-white text-green-800 font-semibold rounded-lg hover:bg-gray-100 shadow-sm hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full px-8 py-3 bg-white text-green-800 font-bold rounded-lg hover:bg-green-50 shadow-sm hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {sending ? "Sending..." : "Send Message"}
+                  {sending ? (
+                    <span className="animate-pulse">Sending...</span>
+                  ) : (
+                    <>
+                      <span>Send Message</span>
+                      <FaPaperPlane size={12} />
+                    </>
+                  )}
                 </button>
               </form>
             </div>

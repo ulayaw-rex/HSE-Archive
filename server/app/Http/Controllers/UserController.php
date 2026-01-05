@@ -16,7 +16,7 @@ class UserController extends Controller
 
     public function index(): JsonResponse
     {
-        $users = User::select('id', 'name', 'email', 'role', 'course', 'position', 'status', 'created_at')
+        $users = User::select('id', 'name', 'email', 'role', 'course', 'position', 'department', 'year_graduated', 'status', 'created_at')
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -33,9 +33,9 @@ class UserController extends Controller
         }
 
         $users = User::where('name', 'LIKE', "%{$query}%")
-                     ->select('id', 'name') 
-                     ->limit(10)
-                     ->get();
+                      ->select('id', 'name') 
+                      ->limit(10)
+                      ->get();
 
         return response()->json($users);
     }
@@ -50,9 +50,11 @@ class UserController extends Controller
                 'string',
                 PasswordRule::min(8)->mixedCase()->numbers()->symbols(),
             ],
-            'role' => ['required', Rule::in(['guest', 'hillsider', 'alumni', 'admin'])],
+            'role' => ['required', 'string'], 
+            'department' => 'nullable|string|max:255',
             'course' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
+            'year_graduated' => 'nullable|required_if:role,Alumni,alumni|string|max:4',
         ]);
 
         $user = User::create([
@@ -60,8 +62,10 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'department' => $validated['department'] ?? null,
             'course' => $validated['course'] ?? null,
             'position' => $validated['position'] ?? null,
+            'year_graduated' => $validated['year_graduated'] ?? null,
             'status' => 'approved' 
         ]);
 
@@ -72,13 +76,16 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'department' => $user->department,
                 'course' => $user->course,
                 'position' => $user->position,
+                'year_graduated' => $user->year_graduated,
                 'status' => $user->status, 
                 'created_at' => $user->created_at,
             ]
         ], 201);
     }
+
     public function show(Request $request, $id = null)
     {
         $viewer = $request->user('sanctum'); 
@@ -102,8 +109,10 @@ class UserController extends Controller
                 'id' => $targetUser->id,
                 'name' => $targetUser->name,
                 'role' => $targetUser->role,
+                'department' => $targetUser->department,
                 'course' => $targetUser->course,     
                 'position' => $targetUser->position, 
+                'year_graduated' => $targetUser->year_graduated,
                 'created_at' => $targetUser->created_at,
             ]);
         }
@@ -127,9 +136,11 @@ class UserController extends Controller
                 'string',
                 PasswordRule::min(8)->mixedCase()->numbers()->symbols(),
             ],
-            'role' => ['sometimes', 'required', Rule::in(['hillsider', 'alumni', 'admin'])],
+            'role' => ['sometimes', 'required', 'string'],
+            'department' => 'nullable|string|max:255',
             'course' => 'nullable|string|max:255',   
             'position' => 'nullable|string|max:255', 
+            'year_graduated' => 'nullable|string|max:4',
         ]);
 
         $updateData = [];
@@ -139,8 +150,10 @@ class UserController extends Controller
         if (isset($validated['role'])) $updateData['role'] = $validated['role'];
         if (isset($validated['password'])) $updateData['password'] = Hash::make($validated['password']);
         
+        if (array_key_exists('department', $validated)) $updateData['department'] = $validated['department'];
         if (array_key_exists('course', $validated)) $updateData['course'] = $validated['course'];
         if (array_key_exists('position', $validated)) $updateData['position'] = $validated['position'];
+        if (array_key_exists('year_graduated', $validated)) $updateData['year_graduated'] = $validated['year_graduated'];
 
         $user->update($updateData);
 
@@ -151,8 +164,10 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'department' => $user->department,
                 'course' => $user->course,      
                 'position' => $user->position,   
+                'year_graduated' => $user->year_graduated,
                 'created_at' => $user->created_at,
             ]
         ]);
@@ -181,7 +196,7 @@ class UserController extends Controller
         $members = User::where('status', 'approved')
             ->whereNotNull('position')
             ->where('position', '!=', '') 
-            ->select('id', 'name', 'course', 'position', 'role', 'created_at') 
+            ->select('id', 'name', 'course', 'position', 'role', 'department', 'year_graduated', 'created_at') 
             ->get();
 
         return response()->json($members);

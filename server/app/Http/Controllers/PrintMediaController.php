@@ -14,7 +14,7 @@ class PrintMediaController extends Controller
 {
     public function index()
     {
-        $media = PrintMedia::with('user') 
+        $media = PrintMedia::with(['user', 'owners']) 
             ->orderBy('date_published', 'desc')
             ->get()
             ->map(function ($item) {
@@ -23,12 +23,12 @@ class PrintMediaController extends Controller
 
         return response()->json($media);
     }
+
     public function show($id)
     {
-        $media = PrintMedia::findOrFail($id);
+        $media = PrintMedia::with(['user', 'owners'])->findOrFail($id);
         return response()->json($this->transformMedia($media));
     }
-
 
     public function store(Request $request)
     {
@@ -70,9 +70,15 @@ class PrintMediaController extends Controller
             }
 
             $media = PrintMedia::create($data);
+
+            if ($user) {
+                $media->owners()->attach($user->id);
+            }
              
             \App\Models\AuditLog::record('Created Print Media', "Title: {$media->title}");
              
+            $media->load('owners');
+            
             return response()->json($this->transformMedia($media), 201);
 
         } catch (\Exception $e) {
@@ -101,7 +107,6 @@ class PrintMediaController extends Controller
         }
 
         $printMedia = PrintMedia::findOrFail($id);
-
         $printMedia->fill($request->only(['title', 'description', 'byline']));
          
         if ($request->has('date_published')) {
@@ -128,6 +133,7 @@ class PrintMediaController extends Controller
         }
 
         $printMedia->save();
+        $printMedia->load(['user', 'owners']); // Reload relations
 
         return response()->json([
             'message' => 'Print media updated successfully',
@@ -152,23 +158,34 @@ class PrintMediaController extends Controller
 
         return response()->json(['message' => 'Deleted successfully']);
     }
+
     public function requestCredit(Request $request, $id)
     {
         $media = PrintMedia::findOrFail($id);
         $user = $request->user();
 
-        if ($media->user_id === $user->id) {
-            return response()->json(['message' => 'You are already the owner.'], 422);
+        if ($media->owners()->where('users.id', $user->id)->exists()) {
+            return response()->json(['message' => 'You are already an owner.'], 422);
         }
 
         $existingRequest = CreditRequest::where('user_id', $user->id)
             ->where('requestable_id', $id)
             ->where('requestable_type', PrintMedia::class)
-            ->where('status', 'pending')
-            ->first();
+            ->first(); 
 
         if ($existingRequest) {
-            return response()->json(['message' => 'Request already pending.'], 409);
+            if ($existingRequest->status === 'pending') {
+                return response()->json(['message' => 'Request already pending.'], 409);
+            }
+            
+            if ($existingRequest->status === 'approved') {
+                 return response()->json(['message' => 'You are already an owner.'], 422);
+            }
+
+            if ($existingRequest->status === 'rejected') {
+                $existingRequest->update(['status' => 'pending']);
+                return response()->json(['message' => 'Credit request re-submitted successfully.']);
+            }
         }
 
         CreditRequest::create([
@@ -188,17 +205,17 @@ class PrintMediaController extends Controller
         }
         return response()->file(Storage::disk('public')->path($path));
     }
-     
+      
     public function download(Request $request, $id)
     {
-        $media = PrintMedia::findOrFail($id);
+        $media = PrintMedia::with('owners')->findOrFail($id);
         $user = $request->user();
 
-        $isOwner = $media->user_id === $user->id;
+        $isOwner = $media->user_id === $user->id || $media->owners->contains($user->id);
         $isAdmin = $user->role === 'admin'; 
 
         if (!$isOwner && !$isAdmin) {
-            return response()->json(['message' => 'Unauthorized. Only the owner can download this file.'], 403);
+            return response()->json(['message' => 'Unauthorized. Only an owner can download this file.'], 403);
         }
 
         if (!$media->file_path || !Storage::disk('public')->exists($media->file_path)) {
@@ -214,7 +231,7 @@ class PrintMediaController extends Controller
     public function viewPdf($id)
     {
         $media = PrintMedia::findOrFail($id);
-         
+          
         if (!$media->file_path || !Storage::disk('public')->exists($media->file_path)) {
              return response()->json(['message' => 'File not found'], 404);
         }
@@ -230,7 +247,6 @@ class PrintMediaController extends Controller
     private function transformMedia(PrintMedia $media)
     {
         $user = auth('sanctum')->user();
-
         $hasPendingRequest = false; 
 
         if ($user) {
@@ -241,6 +257,14 @@ class PrintMediaController extends Controller
                 ->exists();
         }
 
+        $allOwners = $media->owners;
+
+        if ($media->user) {
+            $allOwners = $allOwners->concat([$media->user]);
+        }
+
+        $uniqueOwners = $allOwners->unique('id')->values();
+
         return [
             'print_media_id'    => $media->print_media_id,
             'title'             => $media->title,
@@ -249,7 +273,15 @@ class PrintMediaController extends Controller
             'description'       => $media->description,
             'byline'            => $media->byline,
             'user_id'           => $media->user_id,
-            'owner_name' => $media->user ? $media->user->name : null,
+            'owner_name'        => $media->user ? $media->user->name : null,
+            
+            'owners'            => $uniqueOwners->map(function($owner) {
+                return [
+                    'id' => $owner->id,
+                    'name' => $owner->name,
+                ];
+            }),
+
             'has_pending_request' => $hasPendingRequest, 
             'file_path'         => $media->file_path,
             'file_url'          => $media->file_path ? Storage::url($media->file_path) : null,

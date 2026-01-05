@@ -9,14 +9,29 @@ use App\Models\ContactSubmission;
 
 class ContactController extends Controller
 {
-
     public function submit(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name'    => 'nullable|string|max:255',
-            'email'   => 'required|email:rfc,dns',
             'subject' => 'nullable|string|max:255',
             'message' => 'required|string|min:5',
+            
+            'email'   => [
+                'required',
+                'email:rfc,dns',
+                
+                function ($attribute, $value, $fail) {
+                    $blockedDomains = [
+                        'tempmail.com', '10minutemail.com', 'mailinator.com', 
+                        'throwawaymail.com', 'yopmail.com', 'guerrillamail.com'
+                    ];
+                    
+                    $domain = substr(strrchr($value, "@"), 1);
+                    if (in_array($domain, $blockedDomains)) {
+                        $fail('Please use a permanent email address.');
+                    }
+                },
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -41,18 +56,20 @@ class ContactController extends Controller
                 'user_message' => $request->message, 
             ];
 
-            Mail::send('emails.contact', $data, function($message) use ($request, $senderName) {
-                $message->to(env('MAIL_FROM_ADDRESS')) 
+            $adminEmail = config('mail.from.address') ?? 'admin@localhost.com'; 
+
+            Mail::send('emails.contact', $data, function($message) use ($request, $senderName, $adminEmail) {
+                $message->to($adminEmail) 
                         ->subject('New Inquiry: ' . ($request->subject ?? 'Website Contact'));
                 
                 $message->replyTo($request->email, $senderName); 
             });
         } catch (\Exception $e) {
+            \Log::error("Contact Form Mail Error: " . $e->getMessage());
         }
 
         return response()->json(['message' => 'Message sent successfully!']);
     }
-
 
     public function index()
     {
@@ -87,7 +104,6 @@ class ContactController extends Controller
             Mail::send('emails.reply', ['replyMessage' => $request->message], function ($message) use ($submission, $request) {
                 $message->to($submission->email)
                         ->subject($request->subject);
-                
             });
             
             return response()->json(['message' => 'Reply sent successfully!']);
@@ -95,5 +111,11 @@ class ContactController extends Controller
             \Log::error("Mail Error: " . $e->getMessage());
             return response()->json(['message' => 'Failed to send email. Check logs.'], 500);
         }
+    }
+
+    public function unreadCount()
+    {
+        $count = ContactSubmission::where('is_read', false)->count();
+        return response()->json(['count' => $count]);
     }
 }
