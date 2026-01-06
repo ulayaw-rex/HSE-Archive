@@ -134,7 +134,7 @@ class PublicationController extends Controller
             'category' => 'required|string',
             'writer_ids' => 'required|array',
             'writer_ids.*' => 'exists:users,id',
-            'image' => 'nullable|image|max:10240', 
+            'image' => 'nullable|image|max:51200', 
             'byline' => 'nullable|string',
             'date_published' => 'nullable|date',
         ]);
@@ -184,7 +184,7 @@ class PublicationController extends Controller
             'body' => 'required|string',
             'category' => 'required|string|max:100',
             'photo_credits' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:10240', 
+            'image' => 'nullable|image|max:51200', 
             'writer_ids' => 'sometimes|array',
             'writer_ids.*' => 'exists:users,id',
             'status' => 'in:pending,approved,rejected',

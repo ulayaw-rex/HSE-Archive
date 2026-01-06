@@ -21,6 +21,30 @@ const categories = [
   "literary",
 ];
 
+const getCategoryColor = (category: string) => {
+  const lowerCat = category.toLowerCase();
+  switch (lowerCat) {
+    case "university":
+      return "bg-green-600";
+    case "local":
+      return "bg-blue-600";
+    case "national":
+      return "bg-red-600";
+    case "entertainment":
+      return "bg-purple-600";
+    case "sci-tech":
+      return "bg-indigo-600";
+    case "sports":
+      return "bg-orange-500";
+    case "opinion":
+      return "bg-teal-600";
+    case "literary":
+      return "bg-pink-600";
+    default:
+      return "bg-gray-800";
+  }
+};
+
 const HomePage: React.FC = () => {
   const [userRole] = useState<"guest" | "admin">("guest");
   const { cache, updateCache } = useDataCache();
@@ -90,14 +114,22 @@ const HomePage: React.FC = () => {
         {categories.map((category) =>
           categoryArticles[category]?.length > 0 ? (
             <section key={category} className="space-y-6 mt-12">
-              <div className="flex items-center justify-between border-b-2 border-green-600/20 pb-2">
-                <h2 className="text-2xl font-bold text-gray-800 capitalize">
-                  {category.replace("-", " ")}
-                </h2>
+              <div className="flex items-center justify-between border-b-2 border-gray-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`h-8 w-2 rounded-full ${getCategoryColor(
+                      category
+                    )}`}
+                  ></div>
+
+                  <h2 className="text-3xl font-black text-gray-900 capitalize tracking-tight">
+                    {category.replace("-", " ")} News
+                  </h2>
+                </div>
 
                 <Link
                   to={`/news/${category}`}
-                  className="group flex items-center gap-1 text-sm font-bold text-green-700 hover:text-green-900 transition-colors uppercase tracking-wider"
+                  className="group flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-green-700 transition-colors uppercase tracking-wider"
                 >
                   See More
                   <span className="transform transition-transform duration-300 group-hover:translate-x-1">
