@@ -5,6 +5,8 @@ import {
   FaBookOpen,
   FaFileDownload,
   FaUserGraduate,
+  FaCheckCircle,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -14,7 +16,7 @@ import type {
 } from "../../types/Publication";
 import type { PrintMedia } from "../../types/PrintMedia";
 import { useAuth } from "../../context/AuthContext";
-import { toast } from "react-toastify";
+// Removed react-toastify import
 import PublicationForm from "../../components/features/Publications/PublicationForm";
 import PublicationViewModal from "../../components/features/Admin/PublicationViewModal";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
@@ -63,6 +65,11 @@ const UserProfile: React.FC = () => {
     null
   );
 
+  // --- MODAL STATE ---
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("Something went wrong.");
+
   const targetId = id || currentUser?.id;
 
   useEffect(() => {
@@ -76,6 +83,7 @@ const UserProfile: React.FC = () => {
 
         setProfile(response.data.user);
         setArticles(response.data.articles);
+        // This will now display authored print media if the backend returns it
         setPrintMedia(response.data.print_media || []);
       } catch (error) {
         console.error("Failed to load profile", error);
@@ -109,9 +117,12 @@ const UserProfile: React.FC = () => {
 
       setArticles([response.data, ...articles]);
       setIsModalOpen(false);
-      toast.success("Article submitted successfully!");
+      setShowSuccessModal(true); // Show Success Modal
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to submit article");
+      setErrorMessage(
+        error.response?.data?.message || "Failed to submit article"
+      );
+      setShowErrorModal(true); // Show Error Modal
     }
   };
 
@@ -123,7 +134,7 @@ const UserProfile: React.FC = () => {
     } else {
       const url = `/api/print-media/${item.print_media_id}/download`;
       window.open(url, "_blank");
-      toast.info("Downloading file...");
+      // Toast removed; browser UI handles download feedback
     }
   };
 
@@ -146,6 +157,56 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      {/* --- SUCCESS MODAL --- */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowSuccessModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+              <FaCheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Success!</h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              Article submitted successfully! It is now pending approval.
+            </p>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg shadow-green-200 transition-all"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- ERROR MODAL --- */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowErrorModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+              <FaExclamationCircle className="h-10 w-10 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Submission Failed
+            </h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">{errorMessage}</p>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg shadow-red-200 transition-all"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
@@ -356,7 +417,7 @@ const UserProfile: React.FC = () => {
               ) : (
                 <div className="p-8 text-center">
                   <span className="text-4xl block mb-2 opacity-20">📚</span>
-                  <p className="text-gray-400 text-sm">No print media owned.</p>
+                  <p className="text-gray-400 text-sm">No print media found.</p>
                 </div>
               )}
             </div>

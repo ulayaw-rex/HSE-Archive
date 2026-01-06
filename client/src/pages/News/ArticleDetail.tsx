@@ -5,11 +5,11 @@ import {
   FaUserPlus,
   FaCheckCircle,
   FaInfoCircle,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
-import { toast } from "react-toastify";
 import type { Publication } from "../../types/Publication";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -54,6 +54,9 @@ const ArticleDetail: React.FC = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAlreadySubmittedModal, setShowAlreadySubmittedModal] =
     useState(false);
+  const [showAlreadyWriterModal, setShowAlreadyWriterModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
   const [requestingCredit, setRequestingCredit] = useState(false);
 
   useEffect(() => {
@@ -106,14 +109,14 @@ const ArticleDetail: React.FC = () => {
       setIsClaimModalOpen(false);
       setShowSuccessModal(true);
     } catch (error: any) {
+      setIsClaimModalOpen(false);
+
       if (error.response?.status === 409) {
-        setIsClaimModalOpen(false);
         setShowAlreadySubmittedModal(true);
       } else if (error.response?.status === 422) {
-        toast.warning("You are already listed as a writer.");
-        setIsClaimModalOpen(false);
+        setShowAlreadyWriterModal(true);
       } else {
-        toast.error("Failed to send request. Please try again.");
+        setShowErrorModal(true);
       }
     } finally {
       setRequestingCredit(false);
@@ -138,7 +141,6 @@ const ArticleDetail: React.FC = () => {
     );
 
   const isWriter = user && publication.writers?.some((w) => w.id === user.id);
-
   const badgeColorClass = getCategoryColor(publication.category);
 
   return (
@@ -197,11 +199,65 @@ const ArticleDetail: React.FC = () => {
             </h3>
             <p className="text-gray-500 mb-8 leading-relaxed">
               You have already submitted a request for this article. Please wait
-              for the administrator to approve it.
+              for approval.
             </p>
             <button
               onClick={() => setShowAlreadySubmittedModal(false)}
               className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-200 transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showAlreadyWriterModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowAlreadyWriterModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
+              <FaInfoCircle className="h-10 w-10 text-yellow-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Already Listed
+            </h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              You are already credited as a writer for this article. No further
+              action is needed.
+            </p>
+            <button
+              onClick={() => setShowAlreadyWriterModal(false)}
+              className="w-full py-3 px-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg shadow-yellow-200 transition-all"
+            >
+              Understood
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showErrorModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowErrorModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+              <FaExclamationCircle className="h-10 w-10 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Something Went Wrong
+            </h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              We couldn't process your request at this time. Please try again
+              later.
+            </p>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg shadow-red-200 transition-all"
             >
               Close
             </button>

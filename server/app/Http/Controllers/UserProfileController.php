@@ -41,9 +41,14 @@ class UserProfileController extends Controller
             return $publication;
         });
 
-        $printMedia = PrintMedia::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $printMediaQuery = PrintMedia::whereHas('owners', function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })
+        ->with('owners') 
+        ->orderBy('created_at', 'desc');
+
+
+        $printMedia = $printMediaQuery->get();
 
         return response()->json([
             'user' => [

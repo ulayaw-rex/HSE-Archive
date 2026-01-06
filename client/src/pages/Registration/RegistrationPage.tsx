@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
-import { toast } from "react-toastify";
+import { FaEye, FaEyeSlash, FaExclamationCircle } from "react-icons/fa";
 import logo from "../../assets/Login.png";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { DEPARTMENTS_DATA, POSITION_OPTIONS } from "../../types/SchoolData";
 
 interface SuccessModalProps {
@@ -168,6 +167,8 @@ const RegistrationPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -198,6 +199,7 @@ const RegistrationPage: React.FC = () => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    if (generalError) setGeneralError(null);
   };
 
   const handleDropdownChange = (field: string, val: string) => {
@@ -247,6 +249,7 @@ const RegistrationPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGeneralError(null);
 
     const newErrors: Record<string, string> = {};
     if (!formData.department)
@@ -297,9 +300,14 @@ const RegistrationPage: React.FC = () => {
 
         if (hasStep1Error) {
           setStep(1);
+          setGeneralError(
+            "There are errors in Step 1. Please check your inputs."
+          );
         }
       } else {
-        toast.error("Something went wrong. Please try again.");
+        setGeneralError(
+          "Something went wrong. Please check your connection and try again."
+        );
       }
     } finally {
       setLoading(false);
@@ -355,6 +363,15 @@ const RegistrationPage: React.FC = () => {
             <span>Profile Set Up</span>
           </div>
         </div>
+
+        {generalError && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-left animate-fadeIn">
+            <FaExclamationCircle className="text-red-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-700 font-medium leading-tight">
+              {generalError}
+            </p>
+          </div>
+        )}
 
         <form
           onSubmit={step === 1 ? handleNext : handleSubmit}
