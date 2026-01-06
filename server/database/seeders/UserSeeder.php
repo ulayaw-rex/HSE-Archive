@@ -14,9 +14,9 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@example.com'], // <-- Unique identifier to find the user
+            ['email' => 'thehillsideecho@filamer.edu.ph'], // <-- Unique identifier to find the user
             [
-                'name' => 'Admin User',
+                'name' => 'The Hillside Echo',
                 'password' => Hash::make('password'), // <-- Change 'password' to a secure password
                 'role' => User::ROLE_ADMIN, // <-- Use the constant from your User model
                 'email_verified_at' => now(), // <-- Optionally verify the email right away

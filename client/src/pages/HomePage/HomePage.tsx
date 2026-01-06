@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
+import { Link } from "react-router-dom";
 import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
@@ -35,31 +36,16 @@ const HomePage: React.FC = () => {
 
   const fetchPublicationsData = useCallback(async () => {
     try {
-      const featuredPromise = AxiosInstance.get<Publication[]>("/publications");
+      const response = await AxiosInstance.get("/home-data");
 
-      const categoryPromises = categories.map((category) =>
-        AxiosInstance.get<Publication[]>(`/publications/category/${category}`)
-      );
+      const { featured, categories } = response.data;
 
-      const [featuredRes, ...categoryResponses] = await Promise.all([
-        featuredPromise,
-        ...categoryPromises,
-      ]);
-
-      const newFeatured = featuredRes.data.slice(0, 3);
-      const newCategoryData: Record<string, Publication[]> = {};
-
-      categoryResponses.forEach((res, index) => {
-        const categoryName = categories[index];
-        newCategoryData[categoryName] = res.data.slice(0, 4);
-      });
-
-      setFeaturedArticles(newFeatured);
-      setCategoryArticles(newCategoryData);
+      setFeaturedArticles(featured);
+      setCategoryArticles(categories);
 
       updateCache("home", {
-        featured: newFeatured,
-        categories: newCategoryData,
+        featured: featured,
+        categories: categories,
       });
     } catch (err) {
       console.error("Failed to fetch homepage data", err);
@@ -71,6 +57,10 @@ const HomePage: React.FC = () => {
   usePolling(fetchPublicationsData, 60000);
 
   useEffect(() => {
+    if (!cache.home) {
+      fetchPublicationsData();
+    }
+
     const handlePublicationCreated = () => {
       fetchPublicationsData();
     };
@@ -82,7 +72,7 @@ const HomePage: React.FC = () => {
         handlePublicationCreated
       );
     };
-  }, [fetchPublicationsData]);
+  }, [fetchPublicationsData, cache.home]);
 
   if (loading) {
     return (
@@ -106,6 +96,16 @@ const HomePage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-800 capitalize">
                   {category.replace("-", " ")}
                 </h2>
+
+                <Link
+                  to={`/news/${category}`}
+                  className="group flex items-center gap-1 text-sm font-bold text-green-700 hover:text-green-900 transition-colors uppercase tracking-wider"
+                >
+                  See More
+                  <span className="transform transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-5">

@@ -298,11 +298,10 @@ public function dashboardStats()
             ];
         }
 
-        // --- FIX STARTS HERE: Added ->toBase() ---
         
         $articles = Publication::select('publication_id', 'title', 'created_at')
             ->latest()->take(5)->get()
-            ->toBase() // <--- CRITICAL FIX: Converts to generic collection
+            ->toBase() 
             ->map(function ($item) {
                 return [
                     'id' => 'art-' . $item->publication_id,
@@ -315,7 +314,7 @@ public function dashboardStats()
 
         $printMedia = PrintMedia::select('print_media_id', 'title', 'created_at')
             ->latest()->take(5)->get()
-            ->toBase() // <--- CRITICAL FIX
+            ->toBase() 
             ->map(function ($item) {
                 return [
                     'id' => 'pm-' . $item->print_media_id,
@@ -326,19 +325,12 @@ public function dashboardStats()
                 ];
             });
         
-        // Now ->merge() will work safely because they are basic collections
         $recentUploads = $articles->merge($printMedia)->sortByDesc('timestamp')->values()->take(6);
 
         $recentComments = Comment::with('user:id,name')
             ->latest()->take(6)->get()
-            ->toBase() // Optional here, but good practice when mapping
+            ->toBase() 
             ->map(function ($item) {
-                // Note: When using toBase(), relationships like 'user' might need manual handling 
-                // BUT since we did ->get() first, the relationship is loaded.
-                // However, toBase() turns models into raw objects/arrays usually.
-                // Safer for comments is to keep Eloquent but return array in map.
-                // Since we don't merge comments with other types, we can skip toBase() here OR simply use it carefully.
-                // Actually, let's leave Comment as is, it wasn't part of the merge error.
                 return [
                     'id' => 'com-' . $item->id,
                     'type' => 'comment',
@@ -350,7 +342,7 @@ public function dashboardStats()
 
         $recentUsers = User::select('id', 'name', 'email', 'created_at')
             ->latest()->take(6)->get()
-            ->toBase() // Good practice
+            ->toBase() 
             ->map(function ($item) {
                 return [
                     'id' => 'usr-' . $item->id,
@@ -400,4 +392,47 @@ public function dashboardStats()
 
         return response()->json(['message' => 'Credit request submitted successfully.']);
     }
+
+    public function getNewsHubData()
+    {
+        return \Illuminate\Support\Facades\Cache::remember('news_hub_data', 300, function () {
+            
+            $newsCategories = ['News', 'University', 'Local', 'National', 'International'];
+            
+            $featured = Publication::with('writers')
+                ->whereIn('category', $newsCategories)
+                ->where('status', 'approved')
+                ->orderBy('date_published', 'desc')
+                ->first();
+
+            if ($featured) {
+                $featured->image = $featured->image_path ? asset('storage/' . $featured->image_path) : null;
+            }
+
+            $sections = ['university', 'local', 'national', 'international'];
+            $categoryData = [];
+
+            foreach ($sections as $section) {
+                $dbCategory = ucfirst($section); 
+
+                $categoryData[$section] = Publication::with('writers')
+                    ->where('category', $dbCategory)
+                    ->where('status', 'approved')
+                    ->orderBy('date_published', 'desc')
+                    ->limit(4)
+                    ->get()
+                    ->map(function ($pub) {
+                        $pub->image = $pub->image_path ? asset('storage/' . $pub->image_path) : null;
+                        return $pub;
+                    });
+            }
+
+            return response()->json([
+                'featured' => $featured,
+                'categories' => $categoryData
+            ]);
+        });
+    }
+
+
 }

@@ -13,9 +13,13 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\SecurityController; 
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ChatBotController; 
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SiteContentController;
 
 // PUBLIC ROUTES
 
+// Homepage Content
+Route::get('/home-data', [HomeController::class, 'index']);
 
 // Status Check
 Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystemStatus']);
@@ -39,6 +43,7 @@ Route::post('/contact-us', [ContactController::class, 'submit'])
 // Publications (Read-Only) 
 Route::get('/publications/search', [PublicationController::class, 'search']);
 Route::get('/publications/recent', [PublicationController::class, 'recent']);
+Route::get('/publications/news-hub', [PublicationController::class, 'getNewsHubData']);
 Route::get('/publications/category/{category}', [PublicationController::class, 'getByCategory']);
 Route::apiResource('publications', PublicationController::class)->only(['index', 'show']);
 

@@ -6,7 +6,6 @@ import AxiosInstance from "../../AxiosInstance";
 import { DashboardCharts } from "../../components/features/Admin/DashboardCharts";
 import { MostViewedChart } from "../../components/features/Admin/MostViewedCharts";
 import { RecentActivity } from "../../components/features/Admin/RecentActivity";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PendingReviewsWidget from "../../components/features/Admin/PendingReviewsWidget";
 import type { Publication } from "../../types/Publication";
 import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
@@ -61,7 +60,6 @@ const AdminPage: React.FC = () => {
   const loadAllData = async () => {
     try {
       if (!dashboardStats) setLoading(true);
-
       if (!dashboardStats) setError(null);
 
       const [statsRes, pubsRes, usersRes, creditsRes] = await Promise.all([
@@ -92,6 +90,38 @@ const AdminPage: React.FC = () => {
 
   usePolling(loadAllData, 10000);
 
+  const AdminSkeleton = () => (
+    <div className="animate-pulse space-y-10">
+      <section>
+        <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+          <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+          <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+        </div>
+      </section>
+
+      <section>
+        <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
+
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
+          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
+          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
+          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="h-80 bg-gray-200 rounded-lg border border-gray-300"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-80 bg-gray-200 rounded-lg border border-gray-300"></div>
+            <div className="h-80 bg-gray-200 rounded-lg border border-gray-300"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+
   return (
     <div className="admin-container bg-gray-50 min-h-screen">
       <div className="admin-content p-6 max-w-7xl mx-auto">
@@ -103,20 +133,13 @@ const AdminPage: React.FC = () => {
         </div>
 
         {loading && !dashboardStats ? (
-          <div className="flex h-96 items-center justify-center">
-            <div className="text-center">
-              <LoadingSpinner />
-              <p className="text-green-800 mt-4 font-medium animate-pulse">
-                Loading analytics...
-              </p>
-            </div>
-          </div>
+          <AdminSkeleton />
         ) : error ? (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 font-medium">
             Error: {error}
           </div>
         ) : dashboardStats ? (
-          <div className="space-y-10">
+          <div className="space-y-10 animate-in fade-in duration-500">
             <section>
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <span className="w-2 h-6 bg-yellow-500 rounded-full"></span>

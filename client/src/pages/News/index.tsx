@@ -13,21 +13,21 @@ const getCategoryTextColor = (category: string) => {
   const lowerCat = category.toLowerCase();
   switch (lowerCat) {
     case "university":
-      return "text-green-700";
+      return "text-green-600";
     case "local":
-      return "text-blue-700";
+      return "text-blue-600";
     case "national":
-      return "text-red-700";
+      return "text-red-600";
     case "entertainment":
-      return "text-purple-700";
+      return "text-purple-600";
     case "sci-tech":
-      return "text-indigo-700";
+      return "text-indigo-600";
     case "sports":
-      return "text-orange-600";
+      return "text-orange-500";
     case "opinion":
-      return "text-teal-700";
+      return "text-teal-600";
     case "literary":
-      return "text-pink-700";
+      return "text-pink-600";
     default:
       return "text-gray-800";
   }
@@ -47,24 +47,10 @@ const NewsPage: React.FC = () => {
 
   const fetchAllData = useCallback(async () => {
     try {
-      const mainPromise = AxiosInstance.get<Publication[]>("/publications");
+      if (!featuredArticle) setLoading(true);
 
-      const categoryPromises = categories.map((cat) =>
-        AxiosInstance.get<Publication[]>(`/publications/category/${cat}`)
-      );
-
-      const [mainRes, ...categoryResponses] = await Promise.all([
-        mainPromise,
-        ...categoryPromises,
-      ]);
-
-      const featured = mainRes.data.length > 0 ? mainRes.data[0] : null;
-
-      const newCategoryData: Record<string, Publication[]> = {};
-      categoryResponses.forEach((res, index) => {
-        const categoryName = categories[index];
-        newCategoryData[categoryName] = res.data.slice(0, 4);
-      });
+      const response = await AxiosInstance.get("/publications/news-hub");
+      const { featured, categories: newCategoryData } = response.data;
 
       setFeaturedArticle(featured);
       setCategoryArticles(newCategoryData);
@@ -78,25 +64,25 @@ const NewsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [updateCache]);
+  }, [updateCache, featuredArticle]);
 
   usePolling(fetchAllData, 60000);
 
   useEffect(() => {
-    const handlePublicationCreated = () => {
+    if (!cache.newsHub) {
       fetchAllData();
-    };
-    window.addEventListener("publicationCreated", handlePublicationCreated);
+    }
 
-    return () => {
+    const handlePublicationCreated = () => fetchAllData();
+    window.addEventListener("publicationCreated", handlePublicationCreated);
+    return () =>
       window.removeEventListener(
         "publicationCreated",
         handlePublicationCreated
       );
-    };
-  }, [fetchAllData]);
+  }, [fetchAllData, cache.newsHub]);
 
-  if (loading) {
+  if (loading && !featuredArticle) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <LoadingSpinner />
@@ -105,63 +91,111 @@ const NewsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-12">
-      {featuredArticle && (
-        <div className="relative h-[70vh] w-full mb-12 group overflow-hidden">
-          <Link
-            to={`/news/${featuredArticle.publication_id}`}
-            className="block h-full w-full cursor-pointer"
-          >
-            <div className="absolute inset-0">
-              <img
-                src={featuredArticle.image || ""}
-                alt={featuredArticle.title || ""}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
-            </div>
+    <div className="min-h-screen bg-gray-50 pb-12 animate-in fade-in duration-500">
+      <style>{`
+        @keyframes slowZoom {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.15); }
+        }
+        @keyframes slideUpFade {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        /* Applied directly since we don't have .slick-active here */
+        .animate-slowZoom {
+          animation: slowZoom 10s ease-out forwards;
+        }
+        .animate-reveal-1 {
+          animation: slideUpFade 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+          animation-delay: 0.3s;
+          opacity: 0;
+        }
+        .animate-reveal-2 {
+          animation: slideUpFade 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+          animation-delay: 0.4s;
+          opacity: 0;
+        }
+        .animate-reveal-3 {
+          animation: slideUpFade 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+          animation-delay: 0.5s;
+          opacity: 0;
+        }
+      `}</style>
 
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 pb-16 md:pb-20">
-              <div className="container mx-auto w-[90%]">
-                <div className="max-w-4xl">
-                  <div className="mb-4">
+      {featuredArticle && (
+        <div className="relative h-[80vh] w-full outline-none overflow-hidden mb-16 shadow-2xl bg-black group">
+          <div className="absolute inset-0 z-0">
+            <img
+              src={featuredArticle.image || "/placeholder-image.jpg"}
+              alt={featuredArticle.title}
+              className="w-full h-full object-cover animate-slowZoom origin-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40"></div>
+          </div>
+
+          <div className="absolute inset-0 z-10 flex items-end pb-24 pointer-events-none">
+            <div className="w-full mx-auto px-6 md:px-12 relative z-20">
+              <div className="w-full pointer-events-auto">
+                <div className="mb-4 animate-reveal-1">
+                  <div className="flex items-center gap-3">
                     <span
-                      className={`inline-block bg-white px-4 py-1.5 rounded-md text-xs md:text-sm font-extrabold uppercase tracking-widest shadow-lg ${getCategoryTextColor(
+                      className={`bg-white px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.25em] shadow-xl ${getCategoryTextColor(
                         featuredArticle.category
                       )}`}
                     >
                       {featuredArticle.category}
                     </span>
+                    <div className="h-px w-20 bg-white/40 hidden md:block"></div>
                   </div>
+                </div>
 
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
-                    {featuredArticle.title}
-                  </h1>
+                <div className="animate-reveal-2">
+                  <Link
+                    to={`/news/${featuredArticle.publication_id}`}
+                    className="group/title block"
+                  >
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 leading-[1.1] drop-shadow-2xl group-hover/title:text-green-400 transition-colors duration-300 w-full">
+                      {featuredArticle.title}
+                    </h2>
+                  </Link>
 
-                  <p className="text-gray-200 text-lg md:text-xl mb-6 line-clamp-2 drop-shadow-md max-w-2xl opacity-90">
+                  <p className="text-gray-200 text-base md:text-lg font-light mb-6 line-clamp-2 w-full leading-relaxed drop-shadow-lg opacity-90">
                     {featuredArticle.body}
                   </p>
+                </div>
 
-                  <div className="flex items-center text-gray-300 font-medium text-sm md:text-base border-l-4 border-green-600 pl-4">
-                    <span className="text-white">{featuredArticle.byline}</span>
-                    <span className="mx-3 text-white/40">•</span>
-                    <span className="text-gray-400 uppercase tracking-wide text-xs">
-                      {new Date(featuredArticle.created_at).toLocaleDateString(
-                        undefined,
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
+                <div className="animate-reveal-3 flex flex-wrap items-center gap-4 text-sm font-medium tracking-wide">
+                  <div className="flex items-center text-white/90 border-l-2 border-green-500 pl-3 h-8">
+                    <span className="uppercase tracking-widest text-[10px] md:text-xs font-bold">
+                      {featuredArticle.byline}
                     </span>
                   </div>
+
+                  <span className="text-gray-400 uppercase tracking-widest text-[10px]">
+                    {new Date(featuredArticle.created_at).toLocaleDateString(
+                      undefined,
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </span>
+
+                  <Link
+                    to={`/news/${featuredArticle.publication_id}`}
+                    className="ml-auto px-6 py-2 bg-white text-black hover:bg-green-600 hover:text-white text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
+                  >
+                    Read Story
+                  </Link>
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
         </div>
       )}
+
       <div className="container mx-auto px-4 w-[90%]">
         {categories.map((category) => {
           const articles = categoryArticles[category];
@@ -169,14 +203,19 @@ const NewsPage: React.FC = () => {
           if (!articles || articles.length === 0) return null;
 
           return (
-            <section key={category} className="space-y-6 mb-12">
-              <div className="flex items-center justify-between border-b-2 border-green-600/20 pb-2">
-                <h2 className="text-2xl font-bold text-green-900 capitalize flex items-center gap-2">
+            <section key={category} className="space-y-8 mb-20">
+              <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
+                <div
+                  className={`h-8 w-2 rounded-full ${getCategoryTextColor(
+                    category
+                  ).replace("text-", "bg-")}`}
+                ></div>
+                <h2 className="text-3xl font-black text-gray-900 capitalize tracking-tight">
                   {category.replace("-", " ")} News
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 {articles.map((article: Publication, index: number) => (
                   <GuestPublicationCard key={index} publication={article} />
                 ))}

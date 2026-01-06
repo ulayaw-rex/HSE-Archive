@@ -65,7 +65,7 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
   const fullPdfUrl = `/api/print-media/file/${printMedia.file_path}`;
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-999">
       <div
         className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm"
         aria-hidden="true"

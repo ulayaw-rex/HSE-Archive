@@ -611,7 +611,10 @@ const PrintMediaPage: React.FC = () => {
                     return (
                       <button
                         key={pageNumber}
-                        onClick={() => setCurrentPage(pageNumber)}
+                        onClick={() => {
+                          setCurrentPage(pageNumber);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
                         className={`w-8 h-8 rounded-full text-sm font-medium transition-all duration-200 ${
                           isActive
                             ? "bg-green-700 text-white shadow-md scale-110"
