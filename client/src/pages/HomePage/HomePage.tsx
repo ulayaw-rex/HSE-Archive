@@ -57,9 +57,7 @@ const HomePage: React.FC = () => {
   usePolling(fetchPublicationsData, 60000);
 
   useEffect(() => {
-    if (!cache.home) {
-      fetchPublicationsData();
-    }
+    fetchPublicationsData();
 
     const handlePublicationCreated = () => {
       fetchPublicationsData();
@@ -72,7 +70,7 @@ const HomePage: React.FC = () => {
         handlePublicationCreated
       );
     };
-  }, [fetchPublicationsData, cache.home]);
+  }, [fetchPublicationsData]);
 
   if (loading) {
     return (
