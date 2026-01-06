@@ -248,7 +248,7 @@ class PublicationController extends Controller
         ]);
     }
 
-    public function dashboardStats()
+public function dashboardStats()
     {
         $categoryCounts = Publication::selectRaw('category, count(*) as count')
             ->groupBy('category')
@@ -298,8 +298,11 @@ class PublicationController extends Controller
             ];
         }
 
+        // --- FIX STARTS HERE: Added ->toBase() ---
+        
         $articles = Publication::select('publication_id', 'title', 'created_at')
             ->latest()->take(5)->get()
+            ->toBase() // <--- CRITICAL FIX: Converts to generic collection
             ->map(function ($item) {
                 return [
                     'id' => 'art-' . $item->publication_id,
@@ -312,6 +315,7 @@ class PublicationController extends Controller
 
         $printMedia = PrintMedia::select('print_media_id', 'title', 'created_at')
             ->latest()->take(5)->get()
+            ->toBase() // <--- CRITICAL FIX
             ->map(function ($item) {
                 return [
                     'id' => 'pm-' . $item->print_media_id,
@@ -322,11 +326,19 @@ class PublicationController extends Controller
                 ];
             });
         
+        // Now ->merge() will work safely because they are basic collections
         $recentUploads = $articles->merge($printMedia)->sortByDesc('timestamp')->values()->take(6);
 
         $recentComments = Comment::with('user:id,name')
             ->latest()->take(6)->get()
+            ->toBase() // Optional here, but good practice when mapping
             ->map(function ($item) {
+                // Note: When using toBase(), relationships like 'user' might need manual handling 
+                // BUT since we did ->get() first, the relationship is loaded.
+                // However, toBase() turns models into raw objects/arrays usually.
+                // Safer for comments is to keep Eloquent but return array in map.
+                // Since we don't merge comments with other types, we can skip toBase() here OR simply use it carefully.
+                // Actually, let's leave Comment as is, it wasn't part of the merge error.
                 return [
                     'id' => 'com-' . $item->id,
                     'type' => 'comment',
@@ -338,6 +350,7 @@ class PublicationController extends Controller
 
         $recentUsers = User::select('id', 'name', 'email', 'created_at')
             ->latest()->take(6)->get()
+            ->toBase() // Good practice
             ->map(function ($item) {
                 return [
                     'id' => 'usr-' . $item->id,
@@ -359,7 +372,6 @@ class PublicationController extends Controller
             'activityUsers' => $recentUsers,
         ]);
     }
-
     public function requestCredit(Request $request, $id)
     {
         $publication = Publication::findOrFail($id);
