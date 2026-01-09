@@ -22,21 +22,22 @@ class SecurityController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('action', '!=', 'Login')
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'id' => $log->id,
-                    'user' => $log->user ? [
-                        'id' => $log->user->id,
-                        'name' => $log->user->name,
-                        'email' => $log->user->email,
-                    ] : 'System',
-                    'action' => $log->action,
-                    'details' => $log->details,
-                    'ip' => $log->ip_address,
-                    'date' => $log->created_at->format('Y-m-d H:i:s'),
-                ];
-            });
+            ->paginate(10);
+
+        $logs->through(function ($log) {
+            return [
+                'id' => $log->id,
+                'user' => $log->user ? [
+                    'id' => $log->user->id,
+                    'name' => $log->user->name,
+                    'email' => $log->user->email,
+                ] : 'System',
+                'action' => $log->action,
+                'details' => $log->details,
+                'ip' => $log->ip_address,
+                'date' => $log->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
 
         return response()->json($logs);
     }
@@ -55,20 +56,21 @@ class SecurityController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('action', 'Login')
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'id' => $log->id,
-                    'user' => $log->user ? [
-                        'id' => $log->user->id,
-                        'name' => $log->user->name,
-                        'email' => $log->user->email,
-                    ] : 'Unknown',
-                    'ip' => $log->ip_address,
-                    'status' => 'Success',
-                    'date' => $log->created_at->format('Y-m-d H:i:s'),
-                ];
-            });
+            ->paginate(10);
+
+        $logs->through(function ($log) {
+            return [
+                'id' => $log->id,
+                'user' => $log->user ? [
+                    'id' => $log->user->id,
+                    'name' => $log->user->name,
+                    'email' => $log->user->email,
+                ] : 'Unknown',
+                'ip' => $log->ip_address,
+                'status' => 'Success',
+                'date' => $log->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
 
         return response()->json($logs);
     }

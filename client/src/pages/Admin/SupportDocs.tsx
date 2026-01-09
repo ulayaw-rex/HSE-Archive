@@ -334,7 +334,7 @@ const SupportDocs: React.FC = () => {
                 <FaServer className="text-gray-500" />
                 <div>
                   <p className="text-xs text-gray-500 uppercase">Backend</p>
-                  <p className="text-white font-medium">Laravel 10 (PHP)</p>
+                  <p className="text-white font-medium">Laravel 12 (PHP)</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-gray-800/50 p-3 rounded-lg md:bg-transparent md:p-0">

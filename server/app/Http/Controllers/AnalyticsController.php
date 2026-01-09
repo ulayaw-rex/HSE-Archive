@@ -22,20 +22,21 @@ class AnalyticsController extends Controller
             ->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
             ->where('status', 'approved')
             ->orderBy('views', 'desc')
-            ->get()
-            ->map(function ($pub) {
-                $publishedDate = $pub->date_published ? Carbon::parse($pub->date_published) : null;
-                $createdDate = Carbon::parse($pub->created_at);
+            ->paginate(10);
 
-                return [
-                    'title' => $pub->title,
-                    'category' => ucfirst($pub->category),
-                    'views' => $pub->views,
-                    'date_published' => $publishedDate ? $publishedDate->format('Y-m-d') : null,
-                    'created_at' => $createdDate->format('Y-m-d'),
-                    'author_name' => $pub->writers->pluck('name')->implode(', ') ?: 'Unknown',
-                ];
-            });
+        $stats->through(function ($pub) {
+            $publishedDate = $pub->date_published ? Carbon::parse($pub->date_published) : null;
+            $createdDate = Carbon::parse($pub->created_at);
+
+            return [
+                'title' => $pub->title,
+                'category' => ucfirst($pub->category),
+                'views' => $pub->views,
+                'date_published' => $publishedDate ? $publishedDate->format('Y-m-d') : null,
+                'created_at' => $createdDate->format('Y-m-d'),
+                'author_name' => $pub->writers->pluck('name')->implode(', ') ?: 'Unknown',
+            ];
+        });
 
         return response()->json($stats);
     }
@@ -54,17 +55,18 @@ class AnalyticsController extends Controller
                       ->where('status', 'approved');
             })
             ->orderBy('publications_count', 'desc')
-            ->get()
-            ->map(function ($user) {
-                $lastActive = $user->updated_at ? Carbon::parse($user->updated_at)->format('Y-m-d') : 'N/A';
-                
-                return [
-                    'name' => $user->name,
-                    'position' => $user->position ?? 'Staff',
-                    'article_count' => $user->publications_count,
-                    'last_active' => $lastActive,
-                ];
-            });
+            ->paginate(10); 
+
+        $stats->through(function ($user) {
+            $lastActive = $user->updated_at ? Carbon::parse($user->updated_at)->format('Y-m-d') : 'N/A';
+            
+            return [
+                'name' => $user->name,
+                'position' => $user->position ?? 'Staff',
+                'article_count' => $user->publications_count,
+                'last_active' => $lastActive,
+            ];
+        });
 
         return response()->json($stats);
     }

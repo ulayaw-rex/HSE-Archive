@@ -34,52 +34,27 @@ const AdminPage: React.FC = () => {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
     null
   );
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [users, setUsers] = useState<PendingUser[]>([]);
+
+  const [pendingReviews, setPendingReviews] = useState<Publication[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [creditRequests, setCreditRequests] = useState<CreditRequest[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPublications = async () => {
-    const res = await AxiosInstance.get("/admin/all-publications");
-    setPublications(res.data);
-  };
-
-  const fetchUsers = async () => {
-    const res = await AxiosInstance.get("/users");
-    const pending = res.data.filter((u: any) => u.status === "pending");
-    setUsers(pending);
-  };
-
-  const fetchCreditRequests = async () => {
-    const res = await AxiosInstance.get("/admin/credit-requests");
-    setCreditRequests(res.data);
-  };
-
   const loadAllData = async () => {
     try {
       if (!dashboardStats) setLoading(true);
-      if (!dashboardStats) setError(null);
+      setError(null);
 
-      const [statsRes, pubsRes, usersRes, creditsRes] = await Promise.all([
-        AxiosInstance.get("publications/dashboard/stats"),
-        AxiosInstance.get("/admin/all-publications"),
-        AxiosInstance.get("/users"),
-        AxiosInstance.get("/admin/credit-requests"),
-      ]);
+      const res = await AxiosInstance.get("/admin/dashboard");
 
-      setDashboardStats(statsRes.data);
-      setPublications(pubsRes.data);
-
-      const pendingUsers = usersRes.data.filter(
-        (u: any) => u.status === "pending"
-      );
-      setUsers(pendingUsers);
-
-      setCreditRequests(creditsRes.data);
+      setDashboardStats(res.data.stats);
+      setPendingUsers(res.data.pendingUsers);
+      setPendingReviews(res.data.pendingReviews);
+      setCreditRequests(res.data.creditRequests);
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Error fetching dashboard:", err);
       if (!dashboardStats) {
         setError("Failed to fetch dashboard data.");
       }
@@ -92,33 +67,13 @@ const AdminPage: React.FC = () => {
 
   const AdminSkeleton = () => (
     <div className="animate-pulse space-y-10">
-      <section>
-        <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-          <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-          <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-        </div>
-      </section>
-
-      <section>
-        <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
-
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
-          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
-          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
-          <div className="h-32 bg-gray-200 rounded-lg border border-gray-300"></div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="h-80 bg-gray-200 rounded-lg border border-gray-300"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-80 bg-gray-200 rounded-lg border border-gray-300"></div>
-            <div className="h-80 bg-gray-200 rounded-lg border border-gray-300"></div>
-          </div>
-        </div>
-      </section>
+      <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+        <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+        <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+      </div>
+      <div className="h-32 w-full bg-gray-200 rounded-lg"></div>
     </div>
   );
 
@@ -149,22 +104,22 @@ const AdminPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="h-96">
                   <PendingUsersWidget
-                    users={users}
-                    onActionComplete={fetchUsers}
+                    users={pendingUsers}
+                    onActionComplete={loadAllData}
                   />
                 </div>
 
                 <div className="h-96">
                   <PendingReviewsWidget
-                    publications={publications}
-                    onReviewComplete={fetchPublications}
+                    publications={pendingReviews}
+                    onReviewComplete={loadAllData}
                   />
                 </div>
 
                 <div className="h-96">
                   <CreditRequestsWidget
                     requests={creditRequests}
-                    onActionComplete={fetchCreditRequests}
+                    onActionComplete={loadAllData}
                   />
                 </div>
               </div>

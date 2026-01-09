@@ -66,9 +66,13 @@ const PrintMediaPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { cache, updateCache } = useDataCache();
+
   const [printMediaList, setPrintMediaList] = useState<ExtendedPrintMedia[]>(
-    (cache.printMedia as ExtendedPrintMedia[]) || []
+    Array.isArray(cache.printMedia)
+      ? (cache.printMedia as ExtendedPrintMedia[])
+      : []
   );
+
   const [loading, setLoading] = useState(!cache.printMedia);
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,20 +95,27 @@ const PrintMediaPage: React.FC = () => {
   });
 
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-
   const [pendingRequestIds, setPendingRequestIds] = useState<number[]>([]);
 
   const fetchPrintMedia = useCallback(async () => {
     try {
       if (!cache.printMedia) setLoading(true);
 
-      const response = await AxiosInstance.get<ExtendedPrintMedia[]>(
-        "/print-media"
-      );
-      setPrintMediaList(response.data);
-      updateCache("printMedia", response.data);
+      const response = await AxiosInstance.get("/print-media?per_page=100");
+
+      let dataToSet: ExtendedPrintMedia[] = [];
+
+      if (response.data && Array.isArray(response.data.data)) {
+        dataToSet = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        dataToSet = response.data;
+      }
+
+      setPrintMediaList(dataToSet);
+      updateCache("printMedia", dataToSet);
     } catch (error: unknown) {
       console.error("Failed to fetch print media");
+      setPrintMediaList([]);
     } finally {
       setLoading(false);
     }
@@ -185,7 +196,6 @@ const PrintMediaPage: React.FC = () => {
 
     try {
       const downloadUrl = `/api/print-media/${item.print_media_id}/download`;
-
       window.open(downloadUrl, "_blank");
     } catch (error) {
       setStatusModal({
@@ -239,6 +249,8 @@ const PrintMediaPage: React.FC = () => {
   }, [printMediaList]);
 
   const filteredMedia = useMemo(() => {
+    if (!Array.isArray(printMediaList)) return [];
+
     return printMediaList.filter((item) => {
       const itemDateStr =
         item.date_published || item.created_at || new Date().toISOString();

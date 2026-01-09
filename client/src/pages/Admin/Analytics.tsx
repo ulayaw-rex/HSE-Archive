@@ -33,6 +33,12 @@ interface StaffStat {
   last_active: string;
 }
 
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
 const GREEN_COLORS = [
   "#047857",
   "#059669",
@@ -80,13 +86,21 @@ const Analytics: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"articles" | "staff" | "audit">(
     "articles"
   );
+
   const [articleStats, setArticleStats] = useState<ArticleStat[]>([]);
   const [staffStats, setStaffStats] = useState<StaffStat[]>([]);
   const [trendData, setTrendData] = useState<any[]>([]);
   const [trendCategories, setTrendCategories] = useState<string[]>([]);
 
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+  });
+
   const [viewMode, setViewMode] = useState<"weekly" | "monthly">("weekly");
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
@@ -114,29 +128,48 @@ const Analytics: React.FC = () => {
     }
   };
 
-  const fetchArticleStatsOnly = async () => {
+  const fetchArticleStatsOnly = async (page = 1) => {
     try {
-      const res = await AxiosInstance.get("/analytics/articles", {
+      const res = await AxiosInstance.get(`/analytics/articles?page=${page}`, {
         params: { start_date: startDate, end_date: endDate },
       });
-      setArticleStats(res.data);
+      setArticleStats(res.data.data);
+      setPagination({
+        current_page: res.data.current_page,
+        last_page: res.data.last_page,
+        total: res.data.total,
+      });
     } catch (error) {
       console.error("Error fetching articles", error);
     }
   };
 
+  const fetchStaffStatsOnly = async (page = 1) => {
+    try {
+      const res = await AxiosInstance.get(`/analytics/staff?page=${page}`, {
+        params: { start_date: startDate, end_date: endDate },
+      });
+      setStaffStats(res.data.data);
+      setPagination({
+        current_page: res.data.current_page,
+        last_page: res.data.last_page,
+        total: res.data.total,
+      });
+    } catch (error) {
+      console.error("Error fetching staff", error);
+    }
+  };
+
   const fetchMainData = useCallback(
-    async (silent = false) => {
+    async (silent = false, page = 1) => {
       if (!silent) setLoading(true);
 
       try {
         if (activeTab === "articles") {
-          await Promise.all([fetchTrendsOnly(), fetchArticleStatsOnly()]);
+          if (page === 1) await fetchTrendsOnly();
+          await fetchArticleStatsOnly(page);
         } else if (activeTab === "staff") {
-          const res = await AxiosInstance.get("/analytics/staff", {
-            params: { start_date: startDate, end_date: endDate },
-          });
-          setStaffStats(res.data);
+          await fetchStaffStatsOnly(page);
         }
       } catch (error) {
         console.error("Error fetching main data", error);
@@ -144,19 +177,26 @@ const Analytics: React.FC = () => {
         if (!silent) setLoading(false);
       }
     },
-    [activeTab, startDate, endDate]
+    [activeTab, startDate, endDate, viewMode]
   );
 
   useEffect(() => {
-    fetchMainData(false);
+    fetchMainData(false, 1);
   }, [fetchMainData]);
 
-  usePolling(() => fetchMainData(true), 30000);
+  usePolling(() => fetchMainData(true, pagination.current_page), 30000);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.last_page) {
+      fetchMainData(false, newPage);
+    }
+  };
+
+  const handleDataUpdate = () => {
+    fetchMainData(true, pagination.current_page);
+  };
 
   useEffect(() => {
-    const handleDataUpdate = () => {
-      fetchMainData(true);
-    };
     window.addEventListener("publicationUpdated", handleDataUpdate);
     window.addEventListener("publicationCreated", handleDataUpdate);
     window.addEventListener("publicationDeleted", handleDataUpdate);
@@ -165,7 +205,7 @@ const Analytics: React.FC = () => {
       window.removeEventListener("publicationCreated", handleDataUpdate);
       window.removeEventListener("publicationDeleted", handleDataUpdate);
     };
-  }, [fetchMainData]);
+  }, [fetchMainData, pagination.current_page]);
 
   const handleViewModeChange = (mode: "weekly" | "monthly") => {
     setViewMode(mode);
@@ -185,6 +225,9 @@ const Analytics: React.FC = () => {
   };
 
   const handleDownload = async (format: "pdf" | "excel") => {
+    if (exporting) return;
+    setExporting(true);
+
     try {
       const response = await AxiosInstance.get("/analytics/export", {
         params: {
@@ -207,6 +250,8 @@ const Analytics: React.FC = () => {
       link.parentNode?.removeChild(link);
     } catch (error) {
       console.error("Download failed", error);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -280,15 +325,25 @@ const Analytics: React.FC = () => {
         <div className="flex gap-2 w-full lg:w-auto">
           <button
             onClick={() => handleDownload("pdf")}
-            className="flex-1 lg:flex-none bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 shadow-sm text-sm font-medium transition-colors"
+            disabled={exporting}
+            className={`flex-1 lg:flex-none px-4 py-2 rounded shadow-sm text-sm font-medium transition-colors ${
+              exporting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700"
+            } text-white`}
           >
-            Export PDF
+            {exporting ? "Generating..." : "Export PDF"}
           </button>
           <button
             onClick={() => handleDownload("excel")}
-            className="flex-1 lg:flex-none bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow-sm text-sm font-medium transition-colors"
+            disabled={exporting}
+            className={`flex-1 lg:flex-none px-4 py-2 rounded shadow-sm text-sm font-medium transition-colors ${
+              exporting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            } text-white`}
           >
-            Export CSV
+            {exporting ? "Generating..." : "Export CSV"}
           </button>
         </div>
       </div>
@@ -642,6 +697,42 @@ const Analytics: React.FC = () => {
                 </table>
               )}
             </div>
+
+            {!loading && pagination.last_page > 1 && (
+              <div className="flex items-center justify-end border-t border-gray-100 p-4">
+                <nav className="flex items-center gap-4">
+                  <button
+                    onClick={() =>
+                      handlePageChange(pagination.current_page - 1)
+                    }
+                    disabled={pagination.current_page === 1}
+                    className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                  >
+                    Previous
+                  </button>
+
+                  <div className="text-sm">
+                    <span className="font-bold text-green-700">
+                      {pagination.current_page}
+                    </span>
+                    <span className="text-gray-400 mx-1">/</span>
+                    <span className="text-gray-600">
+                      {pagination.last_page}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      handlePageChange(pagination.current_page + 1)
+                    }
+                    disabled={pagination.current_page === pagination.last_page}
+                    className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                  >
+                    Next
+                  </button>
+                </nav>
+              </div>
+            )}
           </div>
         </>
       )}

@@ -5,7 +5,6 @@ import UserManagement from "../pages/Admin/UserManagement";
 import PrintMediaPage from "../pages/Admin/PrintMediaPage";
 import SiteSettings from "../pages/Admin/SiteSettings";
 import Analytics from "../pages/Admin/Analytics";
-import { ContentArchivesPage } from "./../pages/Admin/Placeholders";
 import Security from "../pages/Admin/Security";
 import Modules from "../pages/Admin/Modules";
 import SupportDocs from "../pages/Admin/SupportDocs";
@@ -13,22 +12,29 @@ import Feedback from "../pages/Admin/Feedback";
 
 export default (
   <>
+    {/* Admin Dashboard (Dashboard Home) */}
     <Route index element={<AdminPage />} />
+
     {/* Content Management */}
     <Route path="publications" element={<PublicationsPage />} />
-    <Route path="content/archives" element={<ContentArchivesPage />} />
+
     <Route path="print-media" element={<PrintMediaPage />} />
     <Route path="site-settings" element={<SiteSettings />} />
+
     {/* User Management */}
     <Route path="users" element={<UserManagement />} />
-    {/* Feedback */}
+
+    {/* Feedback & Interaction */}
     <Route path="feedback" element={<Feedback />} />
-    {/* Analytics */}
+
+    {/* Analytics & Logs */}
     <Route path="analytics" element={<Analytics />} />
-    {/* Settings */}
+
+    {/* System Settings */}
     <Route path="settings/modules" element={<Modules />} />
     <Route path="settings/security" element={<Security />} />
-    {/* Help */}
+
+    {/* Support */}
     <Route path="help" element={<SupportDocs />} />
   </>
 );

@@ -15,13 +15,13 @@ class UserController extends Controller
 {
 
     public function index(): JsonResponse
-    {
-        $users = User::select('id', 'name', 'email', 'role', 'course', 'position', 'department', 'year_graduated', 'status', 'created_at')
-            ->orderBy('created_at', 'asc')
-            ->get();
+{
+    $users = User::select('id', 'name', 'email', 'role', 'course', 'position', 'department', 'year_graduated', 'status', 'created_at')
+        ->orderBy('created_at', 'desc') 
+        ->paginate(10);
 
-        return response()->json($users);
-    }
+    return response()->json($users);
+}
     
 
     public function search(Request $request): JsonResponse

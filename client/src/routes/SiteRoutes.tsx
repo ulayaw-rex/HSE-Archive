@@ -15,8 +15,9 @@ import ArticleDetail from "../pages/News/ArticleDetail";
 import SearchResults from "../pages/HomePage/SearchResults";
 import UserProfile from "../pages/Profiles/UserProfile";
 import RegistrationPage from "../pages/Registration/RegistrationPage";
+import Login from "../pages/Maintenance/LoginPage";
 
-export default (
+const SiteRoutes = (
   <>
     {/* Home */}
     <Route path="/" element={<HomePage />} />
@@ -29,7 +30,7 @@ export default (
     <Route path="/news/entertainment" element={<EntertainmentNewsPage />} />
     <Route path="/news/sci-tech" element={<SciTechNewsPage />} />
 
-    {/* Single Article View (Handles both ID and Slug) */}
+    {/* Single Article View (Public Read) */}
     <Route path="/news/:idOrSlug" element={<ArticleDetail />} />
 
     {/* Main Sections */}
@@ -43,8 +44,12 @@ export default (
     <Route path="/search" element={<SearchResults />} />
     <Route path="/register" element={<RegistrationPage />} />
 
-    {/* Profile Routes (Handles "My Profile" and "Viewing Other Users") */}
-    <Route path="/profile" element={<UserProfile />} />
+    {/*  Login Route */}
+    <Route path="/login" element={<Login />} />
+
+    {/* Public Author Profile */}
     <Route path="/profile/:id" element={<UserProfile />} />
   </>
 );
+
+export default SiteRoutes;

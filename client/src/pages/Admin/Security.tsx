@@ -32,10 +32,29 @@ interface LoginHistory {
   date: string;
 }
 
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
 const Security: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"audit" | "logins">("audit");
+
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loginHistory, setLoginHistory] = useState<LoginHistory[]>([]);
+
+  const [auditPagination, setAuditPagination] = useState<PaginationMeta>({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+  });
+  const [loginPagination, setLoginPagination] = useState<PaginationMeta>({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+  });
+
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -54,21 +73,38 @@ const Security: React.FC = () => {
   }, []);
 
   const fetchData = useCallback(
-    async (silent = false) => {
+    async (silent = false, page = 1) => {
       if (silent) setIsRefreshing(true);
       else setLoading(true);
 
       try {
         if (activeTab === "audit") {
-          const res = await AxiosInstance.get("/analytics/audit", {
+          const res = await AxiosInstance.get(`/analytics/audit?page=${page}`, {
             params: { start_date: startDate, end_date: endDate },
           });
-          if (isMounted.current) setAuditLogs(res.data);
+          if (isMounted.current) {
+            setAuditLogs(res.data.data);
+            setAuditPagination({
+              current_page: res.data.current_page,
+              last_page: res.data.last_page,
+              total: res.data.total,
+            });
+          }
         } else {
-          const res = await AxiosInstance.get("/analytics/logins", {
-            params: { start_date: startDate, end_date: endDate },
-          });
-          if (isMounted.current) setLoginHistory(res.data);
+          const res = await AxiosInstance.get(
+            `/analytics/logins?page=${page}`,
+            {
+              params: { start_date: startDate, end_date: endDate },
+            }
+          );
+          if (isMounted.current) {
+            setLoginHistory(res.data.data);
+            setLoginPagination({
+              current_page: res.data.current_page,
+              last_page: res.data.last_page,
+              total: res.data.total,
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching security data", error);
@@ -83,10 +119,31 @@ const Security: React.FC = () => {
   );
 
   useEffect(() => {
-    fetchData(false);
-    const intervalId = setInterval(() => fetchData(true), 15000);
-    return () => clearInterval(intervalId);
+    fetchData(false, 1);
   }, [fetchData]);
+
+  useEffect(() => {
+    const currentPage =
+      activeTab === "audit"
+        ? auditPagination.current_page
+        : loginPagination.current_page;
+    const intervalId = setInterval(() => fetchData(true, currentPage), 15000);
+    return () => clearInterval(intervalId);
+  }, [
+    fetchData,
+    activeTab,
+    auditPagination.current_page,
+    loginPagination.current_page,
+  ]);
+
+  const handlePageChange = (newPage: number) => {
+    const currentMeta =
+      activeTab === "audit" ? auditPagination : loginPagination;
+    if (newPage >= 1 && newPage <= currentMeta.last_page) {
+      fetchData(false, newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const getActionStyle = (action: string) => {
     if (action.includes("Lockdown Enabled")) {
@@ -116,6 +173,8 @@ const Security: React.FC = () => {
     }
     return <span className="font-medium text-gray-900">{user}</span>;
   };
+
+  const pagination = activeTab === "audit" ? auditPagination : loginPagination;
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
@@ -335,6 +394,36 @@ const Security: React.FC = () => {
             </table>
           )}
         </div>
+
+        {!loading && pagination.last_page > 1 && (
+          <div className="flex items-center justify-end border-t border-gray-100 p-4">
+            <nav className="flex items-center gap-4">
+              <button
+                onClick={() => handlePageChange(pagination.current_page - 1)}
+                disabled={pagination.current_page === 1}
+                className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+              >
+                Previous
+              </button>
+
+              <div className="text-sm">
+                <span className="font-bold text-green-700">
+                  {pagination.current_page}
+                </span>
+                <span className="text-gray-400 mx-1">/</span>
+                <span className="text-gray-600">{pagination.last_page}</span>
+              </div>
+
+              <button
+                onClick={() => handlePageChange(pagination.current_page + 1)}
+                disabled={pagination.current_page === pagination.last_page}
+                className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+              >
+                Next
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -22,28 +22,34 @@ import { adminSidebarItems } from "./pages/Admin/SidebarItems";
 import SiteRoutes from "./routes/SiteRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import Maintenance from "./pages/Maintenance";
-import LoginPage from "../src/pages/Maintenance/LoginPage";
+import LoginPage from "./pages/Maintenance/LoginPage";
+
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
 
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-8">
-        <div>
-          <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-64"></div>
-        </div>
-
-        <div>
-          <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-            <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-            <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-          </div>
-        </div>
-
+      <div className="animate-pulse space-y-8 p-10">
+        <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
         <div className="h-32 bg-gray-200 rounded-lg w-full"></div>
       </div>
     );
@@ -59,7 +65,6 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 const AppContent = () => {
   const { user } = useAuth();
   const location = useLocation();
-
   const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
@@ -87,7 +92,17 @@ const AppContent = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 
-        <Route element={<SiteLayout />}>{SiteRoutes}</Route>
+        <Route element={<SiteLayout />}>
+          {SiteRoutes}
+
+          <Route
+            element={
+              <RequireAuth>
+                <Outlet />
+              </RequireAuth>
+            }
+          ></Route>
+        </Route>
 
         <Route
           path="/admin"

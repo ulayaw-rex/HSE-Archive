@@ -94,7 +94,7 @@ const HomePage: React.FC = () => {
         handlePublicationCreated
       );
     };
-  }, [fetchPublicationsData]);
+  }, []);
 
   if (loading) {
     return (
@@ -123,7 +123,7 @@ const HomePage: React.FC = () => {
                   ></div>
 
                   <h2 className="text-3xl font-black text-gray-900 capitalize tracking-tight">
-                    {category.replace("-", " ")} News
+                    {category.replace("-", " ")}
                   </h2>
                 </div>
 

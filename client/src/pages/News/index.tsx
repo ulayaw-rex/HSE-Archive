@@ -101,7 +101,6 @@ const NewsPage: React.FC = () => {
           0% { opacity: 0; transform: translateY(20px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-        /* Applied directly since we don't have .slick-active here */
         .animate-slowZoom {
           animation: slowZoom 10s ease-out forwards;
         }
@@ -211,7 +210,7 @@ const NewsPage: React.FC = () => {
                   ).replace("text-", "bg-")}`}
                 ></div>
                 <h2 className="text-3xl font-black text-gray-900 capitalize tracking-tight">
-                  {category.replace("-", " ")} News
+                  {category.replace("-", " ")}
                 </h2>
               </div>
 

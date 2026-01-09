@@ -13,6 +13,7 @@ export interface Publication {
   updated_at: string;
   status?: "pending" | "approved" | "rejected";
   writers?: User[];
+  thumbnail?: string;
 }
 
 export interface CreatePublicationData {

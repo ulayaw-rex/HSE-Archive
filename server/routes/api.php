@@ -14,119 +14,103 @@ use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ChatBotController; 
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\SiteContentController;
+use App\Http\Controllers\DashboardController; 
 
-// PUBLIC ROUTES
 
-// Homepage Content
+//  Homepage & News Hub 
 Route::get('/home-data', [HomeController::class, 'index']);
+Route::get('/publications/news-hub', [HomeController::class, 'getNewsHubData']);
 
-// Status Check
-Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystemStatus']);
-
-// Chatbot (AI Assistant)
-Route::post('/chat', [ChatBotController::class, 'chat']); 
-
-// Authentication 
-Route::post('/register', [AuthController::class, 'register']);
-Route::middleware('web')->post('/login', [AuthController::class, 'login']);
-
-// General Site Info 
-Route::get('/members', [UserController::class, 'getMembers']);
-Route::get('/site-settings/team-photo', [SiteSettingController::class, 'getTeamPhoto']);
-Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamIntro']);
-
-// Contact Form (Throttled) 
-Route::post('/contact-us', [ContactController::class, 'submit'])
-    ->middleware('throttle:2,1');
-
-// Publications (Read-Only) 
+//  Content Access (Read-Only) 
 Route::get('/publications/search', [PublicationController::class, 'search']);
 Route::get('/publications/recent', [PublicationController::class, 'recent']);
-Route::get('/publications/news-hub', [PublicationController::class, 'getNewsHubData']);
 Route::get('/publications/category/{category}', [PublicationController::class, 'getByCategory']);
 Route::apiResource('publications', PublicationController::class)->only(['index', 'show']);
 
-// Print Media (Read-Only) 
+//  Print Media Access 
 Route::apiResource('print-media', PrintMediaController::class)->only(['index', 'show']);
 Route::get('/print-media/{id}/view', [PrintMediaController::class, 'viewPdf']);
 Route::get('/print-media/file/{path}', [PrintMediaController::class, 'serveFile'])->where('path', '.*');
 
-// User Profiles 
+//  Authentication & Users 
+Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('web')->post('/login', [AuthController::class, 'login']);
+Route::get('/members', [UserController::class, 'getMembers']);
 Route::get('/profile/{id?}', [UserProfileController::class, 'show']);
 
+//  System & Utils 
+Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystemStatus']);
+Route::get('/site-settings/team-photo', [SiteSettingController::class, 'getTeamPhoto']);
+Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamIntro']);
+Route::post('/chat', [ChatBotController::class, 'chat']); 
+Route::post('/contact-us', [ContactController::class, 'submit'])->middleware('throttle:2,1');
 
-// PROTECTED ROUTES
+
+// Protected Routes (Login Required)
 Route::middleware(['web', 'auth:sanctum'])->group(function () {
 
-    // Auth User Actions 
+    //  User Actions 
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/users/search', [UserController::class, 'search']);
 
-    // Content Interactions 
-    Route::post('/publications', [PublicationController::class, 'store']); // Submit Article
-    Route::post('/publications/{id}/request-credit', [PublicationController::class, 'requestCredit']);
-    Route::post('/print-media/{id}/request-credit', [PrintMediaController::class, 'requestCredit']);
-    Route::get('/print-media/{id}/download', [PrintMediaController::class, 'download']); // Secure Download
-
-    // Comments (ALL Actions: Read, Write, History) 
-    Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
-    Route::get('/comments/{id}/history', [CommentController::class, 'history']);
+    //  Writer/Content Actions 
+    Route::post('/publications', [PublicationController::class, 'store']); 
     
+    Route::post('/publications/{id}/request-credit', [CreditRequestController::class, 'store']); 
+    
+    Route::post('/print-media/{id}/request-credit', [CreditRequestController::class, 'storePrintMedia']);
+    Route::get('/print-media/{id}/download', [PrintMediaController::class, 'download']);
+
+    //  Comments (Read/Write/Delete) 
+    Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
     Route::post('/publications/{publication}/comments', [CommentController::class, 'store']);
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+    Route::get('/comments/{id}/history', [CommentController::class, 'history']);
 
-    // Analytics & Security (Staff/Dashboard) 
+    //  Staff Analytics & Security (Shared Dashboard) 
     Route::prefix('analytics')->group(function () {
-        // Content Stats (AnalyticsController)
         Route::get('/articles', [AnalyticsController::class, 'getArticleStats']);
         Route::get('/staff', [AnalyticsController::class, 'getStaffStats']);
         Route::get('/trends', [AnalyticsController::class, 'getTrendStats']);
         Route::get('/export', [AnalyticsController::class, 'exportStats']);
-        
-        // Security Logs (SecurityController)
         Route::get('/audit', [SecurityController::class, 'getAuditLogs']);
         Route::get('/logins', [SecurityController::class, 'getLoginHistory']);
-
-        // System Lockdown (SiteSettingController) 
         Route::post('/toggle-status', [SiteSettingController::class, 'toggleSystemStatus']);
     });
 
-    // User Search 
-    Route::get('/users/search', [UserController::class, 'search']);
-
-    // Admin-Only Routes
+    //  Admin Routes 
     Route::middleware('role:admin')->group(function () {
 
-        // Dashboard & Content Management 
-        Route::get('/admin/all-publications', [PublicationController::class, 'index']);
-        Route::get('/publications/dashboard/stats', [PublicationController::class, 'dashboardStats']);
+        //  DASHBOARD 
+        Route::get('/admin/dashboard', [DashboardController::class, 'index']); 
         
-        // Full CRUD for content
+        //  Content Management (Approvals & Edits) 
+        Route::get('/admin/all-publications', [PublicationController::class, 'index']); 
+        Route::put('/publications/{id}/review', [PublicationController::class, 'review']); 
+        
+        // Full CRUD Access
         Route::apiResource('publications', PublicationController::class)->except(['index', 'show', 'store']);
         Route::apiResource('print-media', PrintMediaController::class)->except(['index', 'show']);
-        
-        // Approvals
-        Route::put('/publications/{id}/review', [PublicationController::class, 'review']);
 
-        // User Management 
+        //  User Management 
         Route::put('/users/{id}/approve', [UserController::class, 'approveUser']);
         Route::apiResource('users', UserController::class);
 
-        // Credit Requests 
+        //  Credit Request Approvals 
         Route::get('/admin/credit-requests', [CreditRequestController::class, 'index']);
         Route::put('/admin/credit-requests/{id}/approve', [CreditRequestController::class, 'approve']);
         Route::put('/admin/credit-requests/{id}/reject', [CreditRequestController::class, 'reject']);
 
-        // Feedback / Contact Inquiries 
+        //  Contact & Feedback 
         Route::get('/admin/contact-submissions', [ContactController::class, 'index']);
         Route::put('/admin/contact-submissions/{id}/read', [ContactController::class, 'markAsRead']);
         Route::delete('/admin/contact-submissions/{id}', [ContactController::class, 'destroy']);
         Route::post('/admin/contact-submissions/{id}/reply', [ContactController::class, 'reply']);
         Route::get('/admin/inquiries/unread-count', [ContactController::class, 'unreadCount']);
 
-        // Site Settings (Write) 
+        //  Site Settings 
         Route::post('/admin/site-settings/team-photo', [SiteSettingController::class, 'uploadTeamPhoto']);
         Route::post('/admin/site-settings/team-intro', [SiteSettingController::class, 'updateTeamIntro']);
     });

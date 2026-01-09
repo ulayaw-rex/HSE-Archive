@@ -47,17 +47,12 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
       <div className="w-full h-48 bg-gray-200 shrink-0 overflow-hidden relative">
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 z-10" />
 
-        {publication.image ? (
-          <img
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            src={publication.image}
-            alt={publication.title || "Article Image"}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            <span className="text-4xl opacity-20">📰</span>
-          </div>
-        )}
+        <img
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          src={publication.thumbnail || publication.image || "/placeholder.jpg"}
+          alt={publication.title || "Article Image"}
+          loading="lazy"
+        />
       </div>
 
       <div className="px-6 py-4 flex flex-col flex-grow">

@@ -139,7 +139,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
       `}</style>
 
       <Slider {...settings}>
-        {articles.map((article) => {
+        {articles.map((article, index) => {
           const displayDate = new Date(
             article.date_published || article.created_at
           );
@@ -153,8 +153,13 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
             >
               <div className="absolute inset-0 z-0">
                 <img
-                  src={article.image || "/placeholder-image.jpg"}
+                  src={
+                    article.image ||
+                    article.thumbnail ||
+                    "/placeholder-image.jpg"
+                  }
                   alt={article.title}
+                  loading={index === 0 ? "eager" : "lazy"}
                   className="w-full h-full object-cover animate-slowZoom origin-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90"></div>
@@ -177,7 +182,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
 
                     <div className="animate-reveal-2">
                       <Link
-                        to={`/news/${article.publication_id}`}
+                        to={`/article/${article.publication_id}`}
                         className="group/title block"
                       >
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 leading-[1.1] drop-shadow-2xl group-hover/title:text-green-400 transition-colors duration-300 w-full">
@@ -206,7 +211,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                       </span>
 
                       <Link
-                        to={`/news/${article.publication_id}`}
+                        to={`/article/${article.publication_id}`}
                         className="ml-auto px-6 py-2 bg-white text-black hover:bg-green-600 hover:text-white text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
                       >
                         Read Story
