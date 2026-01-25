@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+// ✅ RESTORED IMPORT for Admins
 import WriterSelect from "./WriterSelect";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import AxiosInstance from "../../../AxiosInstance";
+import { useAuth } from "../../../context/AuthContext";
 import type {
   Publication,
   CreatePublicationData,
@@ -14,20 +17,20 @@ interface ExtendedCreatePublicationData extends CreatePublicationData {
 interface PublicationFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ExtendedCreatePublicationData) => Promise<void>;
-  publication?: Publication | null;
-  mode?: "add" | "edit";
-  currentUser?: { id: number; name: string } | null;
+  onSuccess: () => void;
+  publicationToEdit?: Publication | null;
 }
 
 const PublicationForm: React.FC<PublicationFormProps> = ({
   isOpen,
   onClose,
-  onSubmit,
-  publication,
-  mode = "add",
-  currentUser,
+  onSuccess,
+  publicationToEdit,
 }) => {
+  const { user: currentUser } = useAuth();
+  const mode = publicationToEdit ? "edit" : "add";
+  const isAdmin = currentUser?.role === "admin";
+
   const [formData, setFormData] = useState<ExtendedCreatePublicationData>({
     title: "",
     byline: "",
@@ -39,7 +42,6 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const [image, setImage] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,34 +51,40 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   useEffect(() => {
     if (isOpen) {
       setErrors({});
-
       let startData: ExtendedCreatePublicationData;
 
-      if (publication) {
-        const existingDate = publication.date_published
-          ? new Date(publication.date_published).toISOString().split("T")[0]
-          : new Date(publication.created_at).toISOString().split("T")[0];
+      if (publicationToEdit) {
+        // EDIT MODE
+        const existingDate = publicationToEdit.date_published
+          ? new Date(publicationToEdit.date_published)
+              .toISOString()
+              .split("T")[0]
+          : new Date(publicationToEdit.created_at).toISOString().split("T")[0];
 
         startData = {
-          title: publication.title,
-          byline: publication.byline || "",
-          body: publication.body,
-          category: publication.category,
-          photo_credits: publication.photo_credits || "",
-          writer_ids: publication.writers
-            ? publication.writers.map((w) => w.id)
-            : [],
+          title: publicationToEdit.title,
+          byline: publicationToEdit.byline || "",
+          body: publicationToEdit.body,
+          category: publicationToEdit.category,
+          photo_credits: publicationToEdit.photo_credits || "",
+          writer_ids:
+            publicationToEdit.writers && publicationToEdit.writers.length > 0
+              ? publicationToEdit.writers.map((w: any) => w.id)
+              : currentUser
+                ? [currentUser.id]
+                : [],
           date_published: existingDate,
         };
-        setExistingImageUrl(publication.image || null);
+        setExistingImageUrl(publicationToEdit.image || null);
       } else {
+        // ADD MODE
         startData = {
           title: "",
-          byline: currentUser ? currentUser.name : "",
+          byline: isAdmin ? "" : currentUser ? currentUser.name : "",
           body: "",
           category: "university",
           photo_credits: "",
-          writer_ids: currentUser ? [currentUser.id] : [],
+          writer_ids: isAdmin ? [] : currentUser ? [currentUser.id] : [],
           date_published: new Date().toISOString().split("T")[0],
         };
         setExistingImageUrl(null);
@@ -86,7 +94,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       setImage(null);
       setInitialData(JSON.stringify(startData));
     }
-  }, [publication, currentUser, isOpen]);
+  }, [publicationToEdit, currentUser, isOpen, isAdmin]);
 
   const hasUnsavedChanges = () => {
     if (image !== null) return true;
@@ -96,7 +104,6 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
   const handleCloseAttempt = () => {
     if (loading) return;
-
     if (hasUnsavedChanges()) {
       setShowCloseConfirm(true);
     } else {
@@ -111,23 +118,12 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    if (formData.writer_ids.length === 0) {
+    if (formData.writer_ids.length === 0)
       newErrors.writer_ids = "Please select at least one writer.";
-    }
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Headline is required.";
-    }
-
-    if (!formData.body.trim()) {
-      newErrors.body = "Article content is required.";
-    }
-
-    if (!formData.date_published) {
+    if (!formData.title.trim()) newErrors.title = "Headline is required.";
+    if (!formData.body.trim()) newErrors.body = "Article content is required.";
+    if (!formData.date_published)
       newErrors.date_published = "Date is required.";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -142,46 +138,73 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
+
     try {
-      await onSubmit({ ...formData, image });
+      const submissionData = new FormData();
+      submissionData.append("title", formData.title);
+      submissionData.append("body", formData.body);
+      submissionData.append("category", formData.category);
+      submissionData.append("date_published", formData.date_published);
+      if (formData.byline) submissionData.append("byline", formData.byline);
+      if (formData.photo_credits)
+        submissionData.append("photo_credits", formData.photo_credits);
+
+      formData.writer_ids.forEach((id) =>
+        submissionData.append("writer_ids[]", String(id)),
+      );
+
+      if (image) {
+        submissionData.append("image", image);
+      }
+
+      if (mode === "edit" && publicationToEdit) {
+        submissionData.append("_method", "PUT");
+        await AxiosInstance.post(
+          `/publications/${publicationToEdit.publication_id}`,
+          submissionData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
+      } else {
+        await AxiosInstance.post("/publications", submissionData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
       setInitialData(JSON.stringify(formData));
+      onSuccess();
       onClose();
     } catch (error) {
       console.error("Error submitting publication:", error);
+      alert("Failed to save publication. Please check your inputs.");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
+      {/* ✅ Z-INDEX FIX: Changed z-50 to z-[100] to sit above navbar */}
       <div
-        className="user-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        className="user-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            handleCloseAttempt();
-          }
+          if (e.target === e.currentTarget) handleCloseAttempt();
         }}
       >
-        <div className="user-modal-container relative bg-white rounded-lg shadow-xl w-full md:w-auto md:min-w-[800px] lg:min-w-[1000px] max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="user-modal-container relative bg-white rounded-lg shadow-2xl w-full md:w-auto md:min-w-[800px] lg:min-w-[1000px] max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
           {loading && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
               <p className="text-lg font-semibold text-gray-700">
                 Publishing article...
-              </p>
-              <p className="text-sm text-gray-500">
-                Please wait while we process your request.
               </p>
             </div>
           )}
@@ -212,7 +235,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
             </button>
 
             <h2 className="text-3xl font-extrabold mb-8 border-b border-gray-300 pb-4 text-gray-900">
-              {mode === "edit" ? "Edit Article" : "Add Article"}
+              {mode === "edit" ? "Edit Article" : "Write New Article"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -220,25 +243,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <h3 className="text-green-700 font-semibold mb-3 text-lg">
                   Details
                 </h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
                   <div className="col-span-1">
                     <label className="block text-xs font-semibold text-gray-500 mb-1">
-                      WRITER(S) <span className="text-red-500">*</span>
+                      WRITER(S)
                     </label>
-                    {currentUser ? (
-                      <input
-                        disabled
-                        value={currentUser.name}
-                        className="w-full h-[50px] p-3 rounded-md border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                      />
-                    ) : (
+
+                    {isAdmin ? (
                       <div
-                        className={`${
-                          errors.writer_ids
-                            ? "border border-red-500 rounded-md"
-                            : ""
-                        } ${loading ? "opacity-60 pointer-events-none" : ""}`}
+                        className={`${errors.writer_ids ? "border border-red-500 rounded-md" : ""}`}
                       >
                         <WriterSelect
                           selectedIds={formData.writer_ids}
@@ -246,10 +259,18 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                             setFormData({ ...formData, writer_ids: newIds });
                             clearError("writer_ids");
                           }}
-                          initialUsers={publication?.writers}
+                          initialUsers={publicationToEdit?.writers}
                         />
                       </div>
+                    ) : (
+                      <input
+                        type="text"
+                        disabled
+                        value={currentUser?.name || "Unknown"}
+                        className="w-full h-[50px] p-3 rounded-md border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed font-medium"
+                      />
                     )}
+
                     {errors.writer_ids && (
                       <p className="text-red-500 text-xs mt-1">
                         {errors.writer_ids}
@@ -267,9 +288,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white ${
-                        loading ? "bg-gray-100 cursor-not-allowed" : ""
-                      }`}
+                      className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
                     >
                       <option value="university">University</option>
                       <option value="local">Local</option>
@@ -284,7 +303,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
                   <div className="col-span-1">
                     <label className="block text-xs font-semibold text-gray-500 mb-1">
-                      DATE PUBLISHED <span className="text-red-500">*</span>
+                      DATE <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -297,12 +316,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                         });
                         clearError("date_published");
                       }}
-                      className={`w-full h-[50px] p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 
-                      ${
-                        errors.date_published
-                          ? "border-red-500"
-                          : "border-gray-700"
-                      } ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                      className={`w-full h-[50px] p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 ${errors.date_published ? "border-red-500" : "border-gray-700"}`}
                     />
                     {errors.date_published && (
                       <p className="text-red-500 text-xs mt-1">
@@ -326,9 +340,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                           photo_credits: e.target.value,
                         })
                       }
-                      className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 ${
-                        loading ? "bg-gray-100 cursor-not-allowed" : ""
-                      }`}
+                      className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
                     />
                   </div>
                 </div>
@@ -345,9 +357,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     onChange={(e) =>
                       setFormData({ ...formData, byline: e.target.value })
                     }
-                    className={`w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 ${
-                      loading ? "bg-gray-100 cursor-not-allowed" : ""
-                    }`}
+                    className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
                   />
                 </div>
               </div>
@@ -366,10 +376,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     setFormData({ ...formData, title: e.target.value });
                     clearError("title");
                   }}
-                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 mb-1 text-lg font-medium
-                  ${errors.title ? "border-red-500" : "border-gray-700"} ${
-                    loading ? "bg-gray-100 cursor-not-allowed" : ""
-                  }`}
+                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 mb-1 text-lg font-medium ${errors.title ? "border-red-500" : "border-gray-700"}`}
                 />
                 {errors.title && (
                   <p className="text-red-500 text-xs mb-3">{errors.title}</p>
@@ -383,10 +390,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     setFormData({ ...formData, body: e.target.value });
                     clearError("body");
                   }}
-                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 h-64 resize-none leading-relaxed
-                     ${errors.body ? "border-red-500" : "border-gray-700"} ${
-                    loading ? "bg-gray-100 cursor-not-allowed" : ""
-                  }`}
+                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 h-64 resize-none leading-relaxed ${errors.body ? "border-red-500" : "border-gray-700"}`}
                 />
                 {errors.body && (
                   <p className="text-red-500 text-xs mt-1">{errors.body}</p>
@@ -395,11 +399,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
               <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4 pt-6 border-t border-gray-200">
                 <label
-                  className={`cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto transition-colors ${
-                    loading
-                      ? "opacity-50 cursor-not-allowed pointer-events-none"
-                      : "hover:bg-gray-900"
-                  }`}
+                  className={`cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto transition-colors ${loading ? "opacity-50" : "hover:bg-gray-900"}`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -428,41 +428,10 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`bg-green-700 text-white px-8 py-3 rounded-full font-bold shadow-md w-full md:w-auto flex items-center justify-center space-x-2
-                  ${
-                    loading
-                      ? "opacity-70 cursor-wait"
-                      : "hover:bg-green-800 disabled:opacity-50"
-                  }`}
+                  className={`bg-green-700 text-white px-8 py-3 rounded-full font-bold shadow-md w-full md:w-auto flex items-center justify-center space-x-2 ${loading ? "opacity-70 cursor-wait" : "hover:bg-green-800"}`}
                 >
-                  {loading && (
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                  )}
                   <span>
-                    {loading
-                      ? "Publishing..."
-                      : mode === "edit"
-                      ? "Update Article"
-                      : "Post Article +"}
+                    {mode === "edit" ? "Update Article" : "Submit Article"}
                   </span>
                 </button>
               </div>

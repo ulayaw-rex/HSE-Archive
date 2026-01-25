@@ -8,7 +8,19 @@ use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
-    
+
+    private $selectColumns = [
+        'publication_id',
+        'title',
+        'category',
+        'date_published',
+        'created_at',
+        'image_path',
+        'thumbnail_path',
+        'status', 
+        'views' 
+    ];
+
     private function formatPublication($publication)
     {
         $publication->image = $publication->image_path 
@@ -19,6 +31,9 @@ class HomeController extends Controller
             ? asset('storage/' . $publication->thumbnail_path) 
             : $publication->image;
 
+        unset($publication->image_path);
+        unset($publication->thumbnail_path);
+
         return $publication;
     }
 
@@ -26,32 +41,49 @@ class HomeController extends Controller
     {
         $data = Cache::remember('homepage_content', 3600, function () {
             
-            $featured = Publication::with('writers')
+            $featured = Publication::with(['writers' => function($q) {
+                    $q->select('user_id', 'name'); 
+                }])
+                ->select($this->selectColumns)
                 ->where('status', 'approved')
                 ->orderBy('date_published', 'desc')
                 ->limit(3)
                 ->get()
-                ->map(function ($pub) {
-                    return $this->formatPublication($pub);
-                });
+                ->map(fn($pub) => $this->formatPublication($pub));
 
             $categories = [
                 'university', 'local', 'national', 'entertainment',
                 'sci-tech', 'sports', 'opinion', 'literary'
             ];
 
-            $categoryData = [];
+            $unionQuery = null;
 
             foreach ($categories as $category) {
-                $categoryData[$category] = Publication::with('writers')
+                $query = Publication::select($this->selectColumns)
                     ->where('category', $category)
                     ->where('status', 'approved')
                     ->orderBy('date_published', 'desc')
-                    ->limit(4)
-                    ->get()
-                    ->map(function ($pub) {
-                        return $this->formatPublication($pub);
-                    });
+                    ->limit(4);
+
+                if (!$unionQuery) {
+                    $unionQuery = $query;
+                } else {
+                    $unionQuery->union($query);
+                }
+            }
+
+            $allCategoryArticles = $unionQuery
+                ? $unionQuery->with(['writers' => function($q) {
+                    $q->select('user_id', 'name');
+                  }])->get()
+                : collect([]);
+
+            $categoryData = [];
+            foreach ($categories as $category) {
+                $categoryData[$category] = $allCategoryArticles
+                    ->where('category', $category)
+                    ->values() 
+                    ->map(fn($pub) => $this->formatPublication($pub));
             }
 
             return [
@@ -63,14 +95,16 @@ class HomeController extends Controller
         return response()->json($data);
     }
 
-   
     public function getNewsHubData()
     {
         $data = Cache::remember('news_hub_data', 3600, function () {
             
             $newsCategories = ['News', 'University', 'Local', 'National', 'International'];
             
-            $featured = Publication::with('writers')
+            $featured = Publication::with(['writers' => function($q) {
+                    $q->select('user_id', 'name');
+                }])
+                ->select($this->selectColumns)
                 ->whereIn('category', $newsCategories)
                 ->where('status', 'approved')
                 ->orderBy('date_published', 'desc')
@@ -81,20 +115,39 @@ class HomeController extends Controller
             }
 
             $sections = ['university', 'local', 'national', 'international'];
-            $categoryData = [];
+            
+            $unionQuery = null;
 
             foreach ($sections as $section) {
                 $dbCategory = ucfirst($section); 
 
-                $categoryData[$section] = Publication::with('writers')
+                $query = Publication::select($this->selectColumns)
                     ->where('category', $dbCategory)
                     ->where('status', 'approved')
                     ->orderBy('date_published', 'desc')
-                    ->limit(4)
-                    ->get()
-                    ->map(function ($pub) {
-                        return $this->formatPublication($pub);
-                    });
+                    ->limit(4);
+
+                if (!$unionQuery) {
+                    $unionQuery = $query;
+                } else {
+                    $unionQuery->union($query);
+                }
+            }
+
+            $allSectionArticles = $unionQuery
+                ? $unionQuery->with(['writers' => function($q) {
+                    $q->select('user_id', 'name');
+                  }])->get()
+                : collect([]);
+
+            $categoryData = [];
+            foreach ($sections as $section) {
+                $dbCategory = ucfirst($section);
+                
+                $categoryData[$section] = $allSectionArticles
+                    ->where('category', $dbCategory)
+                    ->values()
+                    ->map(fn($pub) => $this->formatPublication($pub));
             }
 
             return [

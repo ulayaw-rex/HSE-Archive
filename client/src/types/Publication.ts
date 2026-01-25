@@ -2,6 +2,7 @@ import type { User } from "./User";
 
 export interface Publication {
   publication_id: number;
+  user_id: number;
   title: string;
   byline: string;
   body: string;
@@ -11,7 +12,15 @@ export interface Publication {
   date_published: string | null;
   created_at: string;
   updated_at: string;
-  status?: "pending" | "approved" | "rejected";
+  status:
+    | "draft"
+    | "submitted"
+    | "reviewed"
+    | "approved"
+    | "published"
+    | "returned"
+    | "rejected"
+    | "pending";
   writers?: User[];
   thumbnail?: string;
 }

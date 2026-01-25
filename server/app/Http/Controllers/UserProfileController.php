@@ -6,62 +6,101 @@ use App\Models\User;
 use App\Models\Publication;
 use App\Models\PrintMedia; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserProfileController extends Controller
 {
+    private function formatPublication($publication)
+    {
+        $publication->image = $publication->image_path 
+            ? asset('storage/' . $publication->image_path) 
+            : null;
+
+        $publication->thumbnail = $publication->thumbnail_path 
+            ? asset('storage/' . $publication->thumbnail_path) 
+            : $publication->image; 
+
+        return $publication;
+    }
+
+    private function formatPrintMedia($media)
+    {
+        return [
+            'print_media_id'    => $media->print_media_id,
+            'title'             => $media->title,
+            'type'              => $media->type,
+            'date_published'    => $media->date_published,
+            'file_url'          => $media->file_path ? asset('storage/' . $media->file_path) : null,
+            'thumbnail_url'     => $media->thumbnail_path ? asset('storage/' . $media->thumbnail_path) : null,
+            'original_filename' => $media->original_filename,
+            'created_at'        => $media->created_at,
+        ];
+    }
+
     public function show(Request $request, $id = null)
     {
+        // 1. Identify Viewer (Safe Auth Check)
+        $currentUser = Auth::guard('sanctum')->user();
+
+        // 2. Identify Target
         if ($id) {
-            $user = User::findOrFail($id);
+            $user = User::find($id);
         } else {
-            $user = $request->user();
+            $user = $currentUser;
         }
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $currentUser = $request->user('sanctum');
+        // 3. Permissions
         $isOwner = $currentUser && $currentUser->id === $user->id;
+        $isAdmin = $currentUser && $currentUser->role === 'admin';
+        
+        $isManagement = false;
+        if ($currentUser && !empty($currentUser->position)) {
+             $pos = strtolower($currentUser->position);
+             if (str_contains($pos, 'editor') || str_contains($pos, 'director')) {
+                 $isManagement = true;
+             }
+        }
 
-        $query = Publication::whereHas('writers', function ($q) use ($user) {
-            $q->where('users.id', $user->id);
-        })
-        ->with('writers')
-        ->orderBy('created_at', 'desc');
+        // 4. Fetch Publications (Without Scopes)
+        $query = Publication::withoutGlobalScopes()
+            ->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('writers', function ($subQ) use ($user) {
+                      $subQ->where('users.id', $user->id);
+                  });
+            })
+            ->with('writers');
 
-        if (!$isOwner) {
-            $query->where('status', 'approved');
-        } 
+        // Visibility Logic
+        if (!$isOwner && !$isAdmin && !$isManagement) {
+            $query->where('status', 'published');
+        } else {
+            $query->orderByRaw("FIELD(status, 'submitted', 'reviewed', 'draft', 'returned', 'approved', 'published') ASC");
+        }
+        
+        $query->orderBy('created_at', 'desc');
 
-        $articles = $query->get()->map(function ($publication) {
-            $publication->image = $publication->image_path 
-                ? asset('storage/' . $publication->image_path) 
-                : null;
-            return $publication;
-        });
+        $articles = $query->get()->map(fn($pub) => $this->formatPublication($pub));
 
-        $printMediaQuery = PrintMedia::whereHas('owners', function ($q) use ($user) {
-            $q->where('users.id', $user->id);
-        })
-        ->with('owners') 
-        ->orderBy('created_at', 'desc');
+        // 5. Fetch Print Media
+        $printMediaQuery = PrintMedia::where(function($q) use ($user) {
+            $q->where('user_id', $user->id)
+              ->orWhereHas('owners', function ($subQ) use ($user) {
+                  $subQ->where('users.id', $user->id);
+              });
+        })->with('owners')->orderBy('created_at', 'desc');
 
+        $printMedia = $printMediaQuery->get()->map(fn($m) => $this->formatPrintMedia($m));
 
-        $printMedia = $printMediaQuery->get();
-
+        // 6. Return Combined Data
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'avatar' => $user->avatar,
-                'course' => $user->course,    
-                'position' => $user->position 
-            ],
+            'user' => $user,
             'articles' => $articles,
             'print_media' => $printMedia 
-        ]);
+        ])->header('X-Debug-Auth', $currentUser ? "User: {$currentUser->id}" : "Guest");
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import { Link } from "react-router-dom";
 import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
@@ -8,7 +8,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import type { Publication } from "../../types/Publication";
 import "../../App.css";
 import { useDataCache } from "../../context/DataContext";
-import { usePolling } from "../../hooks/usePolling";
+import axios from "axios";
 
 const categories = [
   "university",
@@ -50,48 +50,59 @@ const HomePage: React.FC = () => {
   const { cache, updateCache } = useDataCache();
 
   const [featuredArticles, setFeaturedArticles] = useState<Publication[]>(
-    cache.home?.featured || []
+    cache.home?.featured || [],
   );
   const [categoryArticles, setCategoryArticles] = useState<
     Record<string, Publication[]>
   >(cache.home?.categories || {});
 
-  const [loading, setLoading] = useState(!cache.home);
+  const [loading, setLoading] = useState(
+    !cache.home?.featured || cache.home?.featured.length === 0,
+  );
 
-  const fetchPublicationsData = useCallback(async () => {
-    try {
-      const response = await AxiosInstance.get("/home-data");
-
-      const { featured, categories } = response.data;
-
-      setFeaturedArticles(featured);
-      setCategoryArticles(categories);
-
-      updateCache("home", {
-        featured: featured,
-        categories: categories,
-      });
-    } catch (err) {
-      console.error("Failed to fetch homepage data", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [updateCache]);
-
-  usePolling(fetchPublicationsData, 60000);
+  const updateCacheRef = useRef(updateCache);
+  updateCacheRef.current = updateCache;
 
   useEffect(() => {
-    fetchPublicationsData();
+    const controller = new AbortController();
 
-    const handlePublicationCreated = () => {
-      fetchPublicationsData();
+    const loadData = async () => {
+      try {
+        const response = await AxiosInstance.get("/home-data", {
+          signal: controller.signal,
+        });
+
+        const { featured, categories } = response.data;
+
+        setFeaturedArticles(featured);
+        setCategoryArticles(categories);
+        setLoading(false);
+
+        updateCacheRef.current("home", {
+          featured: featured,
+          categories: categories,
+        });
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          console.error("Failed to fetch homepage data", err);
+          setLoading(false);
+        }
+      }
     };
 
+    loadData();
+
+    const intervalId = setInterval(loadData, 60000);
+
+    const handlePublicationCreated = () => loadData();
     window.addEventListener("publicationCreated", handlePublicationCreated);
+
     return () => {
+      controller.abort();
+      clearInterval(intervalId);
       window.removeEventListener(
         "publicationCreated",
-        handlePublicationCreated
+        handlePublicationCreated,
       );
     };
   }, []);
@@ -118,7 +129,7 @@ const HomePage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-8 w-2 rounded-full ${getCategoryColor(
-                      category
+                      category,
                     )}`}
                   ></div>
 
@@ -150,11 +161,11 @@ const HomePage: React.FC = () => {
                       />
                     ) : (
                       <GuestPublicationCard key={index} publication={article} />
-                    )
+                    ),
                 )}
               </div>
             </section>
-          ) : null
+          ) : null,
         )}
       </div>
     </div>

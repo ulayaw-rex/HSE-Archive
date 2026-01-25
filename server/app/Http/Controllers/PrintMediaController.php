@@ -57,22 +57,42 @@ class PrintMediaController extends Controller
     }
 
     public function index()
-{
-    $media = PrintMedia::with(['user', 'owners']) 
-        ->orderBy('date_published', 'desc')
-        ->paginate(9);
+    {
+        $media = PrintMedia::with(['user', 'owners']) 
+            ->orderBy('date_published', 'desc')
+            ->paginate(9);
 
-    $media->through(function ($item) {
-        return $this->transformMedia($item);
-    });
+        $media->through(function ($item) {
+            return $this->transformMedia($item);
+        });
 
-    return response()->json($media);
-}
+        return response()->json($media);
+    }
 
     public function show($id)
     {
         $media = PrintMedia::with(['user', 'owners'])->findOrFail($id);
         return response()->json($this->transformMedia($media));
+    }
+
+    // ✅ ADDED THIS METHOD TO FIX THE 404 ERROR
+    public function getByUser($userId)
+    {
+        // Fetch media uploaded by this user OR where they are an owner
+        $media = PrintMedia::with(['user', 'owners'])
+            ->where('user_id', $userId)
+            ->orWhereHas('owners', function($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Transform data to match the format expected by frontend
+        $transformed = $media->map(function ($item) {
+            return $this->transformMedia($item);
+        });
+
+        return response()->json($transformed);
     }
 
     public function store(Request $request)
@@ -216,7 +236,6 @@ class PrintMediaController extends Controller
 
         return response()->json(['message' => 'Deleted successfully']);
     }
-
 
     public function serveFile(string $path)
     {

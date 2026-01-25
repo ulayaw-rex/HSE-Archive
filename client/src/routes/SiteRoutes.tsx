@@ -48,7 +48,7 @@ const SiteRoutes = (
     <Route path="/login" element={<Login />} />
 
     {/* Public Author Profile */}
-    <Route path="/profile/:id" element={<UserProfile />} />
+    <Route path="/profile/:userId" element={<UserProfile />} />
   </>
 );
 

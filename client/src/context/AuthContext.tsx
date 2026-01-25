@@ -6,13 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import axios from "../AxiosInstance";
-
-interface User {
-  id: number;
-  name: string;
-  email?: string;
-  role?: string;
-}
+import type { User } from "../types/User";
 
 interface AuthContextType {
   user: User | null;

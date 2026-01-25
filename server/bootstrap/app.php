@@ -11,19 +11,22 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->api([
-            \App\Http\Middleware\Cors::class,
-        ]);
+    ->withMiddleware(function (Middleware $middleware) {
+        
+        $middleware->statefulApi();
+
+
         $middleware->validateCsrfTokens(except: [
-            'api/logout', // <--- This matches your route in api.php
-            'logout'
+            'api/logout', 
+            'logout',
+            'stripe/*',
         ]);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
         
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

@@ -17,12 +17,12 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
   if (!isOpen || !publication) return null;
 
   const displayDate = new Date(
-    publication.date_published || publication.created_at
+    publication.date_published || publication.created_at,
   );
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn"
+      className="fixed inset-0 z-999 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

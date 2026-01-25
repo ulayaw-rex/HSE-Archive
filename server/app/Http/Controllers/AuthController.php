@@ -62,6 +62,8 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'position' => $user->position, // ✅ ADDED THIS
+                'course' => $user->course,     // ✅ ADDED THIS
                 'status' => $user->status, 
             ],
             'redirect' => $redirect,
@@ -69,37 +71,38 @@ class AuthController extends Controller
     }
 
 
-public function register(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email:dns|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
-        'course' => 'required|string',
-        'position' => 'required|string',
-        'role' => 'required|in:hillsider,alumni', 
-    ]);
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email:dns|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'course' => 'required|string',
+            'position' => 'required|string',
+            'role' => 'required|in:hillsider,alumni', 
+        ]);
 
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        
-        'role' => $request->role, 
-        'course' => $request->course,
-        'position' => $request->position,
-        
-        'status' => 'pending' 
-    ]);
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            
+            'role' => $request->role, 
+            'course' => $request->course,
+            'position' => $request->position,
+            
+            'status' => 'pending' 
+        ]);
 
-    return response()->json([
-        'message' => 'Registration successful! Please wait for admin approval.'
-    ], 201);
-}
+        return response()->json([
+            'message' => 'Registration successful! Please wait for admin approval.'
+        ], 201);
+    }
 
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
+        
         return response()->json([
             'isLoggedIn' => true,
             'user' => [
@@ -107,6 +110,9 @@ public function register(Request $request)
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'position' => $user->position, // ✅ CRITICAL FIX: Added this
+                'course' => $user->course,     // ✅ Added this
+                'status' => $user->status,     // ✅ Added this
             ],
         ]);
     }
@@ -130,5 +136,3 @@ public function register(Request $request)
         }
     }
 }
-
-
