@@ -2,17 +2,10 @@ import React, { useState, useEffect } from "react";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import PublicationForm from "../../components/features/Publications/PublicationForm";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import PublicationViewModal from "../../components/features/Admin/PublicationViewModal";
 import { toast } from "react-toastify";
-import type {
-  Publication,
-  CreatePublicationData,
-} from "../../types/Publication";
+import type { Publication } from "../../types/Publication";
 import AxiosInstance from "../../AxiosInstance";
-
-interface ExtendedCreatePublicationData extends CreatePublicationData {
-  writer_ids: number[];
-  date_published: string;
-}
 
 interface PaginationMeta {
   current_page: number;
@@ -34,6 +27,10 @@ const PublicationsPage: React.FC = () => {
     useState<Publication | null>(null);
   const [publicationToDelete, setPublicationToDelete] =
     useState<Publication | null>(null);
+  const [viewingArticle, setViewingArticle] = useState<Publication | null>(
+    null,
+  );
+
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -67,81 +64,11 @@ const PublicationsPage: React.FC = () => {
     }
   };
 
-  const handleCreate = async (data: ExtendedCreatePublicationData) => {
-    try {
-      const formData = new FormData();
-      formData.append("title", data.title);
-      formData.append("body", data.body);
-      formData.append("category", data.category);
-      formData.append("byline", data.byline);
-      if (data.date_published)
-        formData.append("date_published", data.date_published);
-      if (data.photo_credits)
-        formData.append("photo_credits", data.photo_credits);
-      if (data.image instanceof File) formData.append("image", data.image);
-      if (data.writer_ids && data.writer_ids.length > 0) {
-        data.writer_ids.forEach((id) =>
-          formData.append("writer_ids[]", id.toString())
-        );
-      }
-
-      await AxiosInstance.post("/publications", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setIsFormOpen(false);
-      toast.success("Publication created successfully");
-
-      fetchPublications(1);
-
-      window.dispatchEvent(new Event("publicationCreated"));
-    } catch (error: any) {
-      console.error("Create error:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to create publication"
-      );
-    }
-  };
-
-  const handleUpdate = async (data: ExtendedCreatePublicationData) => {
-    if (!publicationToEdit) return;
-    try {
-      const formData = new FormData();
-      formData.append("title", data.title);
-      formData.append("body", data.body);
-      formData.append("category", data.category);
-      formData.append("byline", data.byline);
-      if (data.date_published)
-        formData.append("date_published", data.date_published);
-      if (data.photo_credits)
-        formData.append("photo_credits", data.photo_credits);
-      if (data.image instanceof File) formData.append("image", data.image);
-      if (data.writer_ids && data.writer_ids.length > 0) {
-        data.writer_ids.forEach((id) =>
-          formData.append("writer_ids[]", id.toString())
-        );
-      }
-      formData.append("_method", "PUT");
-
-      const response = await AxiosInstance.post(
-        `/publications/${publicationToEdit.publication_id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      setPublications(
-        publications.map((pub) =>
-          pub.publication_id === publicationToEdit.publication_id
-            ? response.data
-            : pub
-        )
-      );
-      setIsFormOpen(false);
-      setPublicationToEdit(null);
-      toast.success("Publication updated successfully");
-    } catch (error: any) {
-      toast.error("Failed to update publication");
-    }
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setPublicationToEdit(null);
+    fetchPublications(pagination.current_page);
+    toast.success("Publication saved successfully");
   };
 
   const handleEdit = (publication: Publication) => {
@@ -154,13 +81,13 @@ const PublicationsPage: React.FC = () => {
     setIsDeleting(true);
     try {
       await AxiosInstance.delete(
-        `/publications/${publicationToDelete.publication_id}`
+        `/publications/${publicationToDelete.publication_id}`,
       );
 
       setPublications(
         publications.filter(
-          (p) => p.publication_id !== publicationToDelete.publication_id
-        )
+          (p) => p.publication_id !== publicationToDelete.publication_id,
+        ),
       );
 
       if (publications.length === 1 && pagination.current_page > 1) {
@@ -213,8 +140,12 @@ const PublicationsPage: React.FC = () => {
                   onEdit={handleEdit}
                   onDelete={(id) =>
                     setPublicationToDelete(
-                      publications.find((p) => p.publication_id === id) || null
+                      publications.find((p) => p.publication_id === id) || null,
                     )
+                  }
+                  onClick={() => setViewingArticle(publication)}
+                  onStatusChange={() =>
+                    fetchPublications(pagination.current_page)
                   }
                 />
               ))}
@@ -264,11 +195,8 @@ const PublicationsPage: React.FC = () => {
             setIsFormOpen(false);
             setPublicationToEdit(null);
           }}
-          onSubmit={
-            publicationToEdit ? (handleUpdate as any) : (handleCreate as any)
-          }
-          publication={publicationToEdit}
-          mode={publicationToEdit ? "edit" : "add"}
+          onSuccess={handleFormSuccess}
+          publicationToEdit={publicationToEdit}
         />
 
         <ConfirmationModal
@@ -280,7 +208,16 @@ const PublicationsPage: React.FC = () => {
           message={`Are you sure you want to delete "${publicationToDelete?.title}"?`}
           confirmLabel="Delete"
           cancelLabel="Cancel"
+          isDangerous={true}
         />
+
+        {viewingArticle && (
+          <PublicationViewModal
+            isOpen={!!viewingArticle}
+            onClose={() => setViewingArticle(null)}
+            publication={viewingArticle}
+          />
+        )}
       </div>
     </div>
   );

@@ -17,19 +17,17 @@ import {
   FaUserSlash,
   FaBookOpen,
   FaFileDownload,
-  FaUserGraduate, // ✅ Added missing import for Alumni Icon
+  FaUserGraduate,
 } from "react-icons/fa";
 import type { User } from "../../types/User";
 import type { PrintMedia } from "../../types/PrintMedia";
 
-// ✅ FIX: Added 'avatar' to the interface
 interface UserProfileData extends User {
   position?: string;
   course?: string;
   avatar?: string;
 }
 
-// Helper for Print Media Colors
 const getCategoryColor = (type: string) => {
   const lowerType = type.toLowerCase();
   switch (lowerType) {
@@ -61,14 +59,12 @@ const UserProfile: React.FC = () => {
     "portfolio" | "workbench" | "queue"
   >("portfolio");
 
-  // --- MODAL STATE ---
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPub, setEditingPub] = useState<any | null>(null);
   const [selectedPrintMedia, setSelectedPrintMedia] =
     useState<PrintMedia | null>(null);
   const [viewingArticle, setViewingArticle] = useState<any | null>(null);
 
-  // --- PERMISSION CHECKS ---
   const isOwnProfile =
     currentUser &&
     targetUserId &&
@@ -76,23 +72,18 @@ const UserProfile: React.FC = () => {
   const isAlumni = profileUser?.role === "alumni";
 
   const userPosition = (currentUser?.position || "").toLowerCase();
+
   const isAdmin = currentUser?.role === "admin";
+  const isEIC = userPosition.includes("editor-in-chief");
+  const isAssociate = userPosition.includes("associate editor");
+
   const isManagement =
-    currentUser &&
-    (isAdmin ||
-      userPosition.includes("editor") ||
-      userPosition.includes("director"));
+    isAdmin || isEIC || isAssociate || userPosition.includes("director");
 
-  const isSeniorManagement =
-    isAdmin ||
-    userPosition.includes("editor-in-chief") ||
-    userPosition.includes("director");
-
-  // --- DATA FETCHING ---
   const fetchProfileData = async () => {
     if (!targetUserId) return;
     try {
-      setLoading(true);
+      if (!profileUser) setLoading(true);
 
       const userRes = await AxiosInstance.get(`/users/${targetUserId}`);
       setProfileUser(userRes.data);
@@ -119,7 +110,6 @@ const UserProfile: React.FC = () => {
     fetchProfileData();
   }, [targetUserId]);
 
-  // --- FILTERING LOGIC ---
   const { portfolio, workbench, reviewQueue } = useMemo(() => {
     if (!profileUser) return { portfolio: [], workbench: [], reviewQueue: [] };
 
@@ -136,12 +126,17 @@ const UserProfile: React.FC = () => {
     );
 
     let rq: any[] = [];
+
     if (isManagement) {
-      if (isSeniorManagement) {
+      if (isAdmin) {
         rq = publications.filter((p) =>
           ["submitted", "reviewed", "approved"].includes(p.status),
         );
-      } else {
+      } else if (isEIC) {
+        rq = publications.filter((p) =>
+          ["reviewed", "approved"].includes(p.status),
+        );
+      } else if (isAssociate) {
         rq = publications.filter((p) => p.status === "submitted");
       }
     }
@@ -152,10 +147,11 @@ const UserProfile: React.FC = () => {
     profileUser,
     currentUser,
     isManagement,
-    isSeniorManagement,
+    isAdmin,
+    isEIC,
+    isAssociate,
   ]);
 
-  // --- HANDLERS ---
   const handleCreateClick = () => {
     setEditingPub(null);
     setIsFormOpen(true);
@@ -220,7 +216,6 @@ const UserProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className="container mx-auto px-4 pt-10">
-        {/* HEADER SECTION */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8 flex flex-col md:flex-row items-center md:items-end gap-6 relative z-10">
           <div className="relative flex-shrink-0">
             <div
@@ -272,12 +267,9 @@ const UserProfile: React.FC = () => {
           )}
         </div>
 
-        {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT: TABS & ARTICLES */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-lg shadow-sm min-h-[500px]">
-              {/* TABS */}
               <div className="flex border-b border-gray-200 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab("portfolio")}
@@ -323,7 +315,6 @@ const UserProfile: React.FC = () => {
                 )}
               </div>
 
-              {/* CONTENT AREA */}
               <div className="p-6">
                 {activeTab === "portfolio" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -334,7 +325,11 @@ const UserProfile: React.FC = () => {
                           onClick={() => setViewingArticle(pub)}
                           className="cursor-pointer"
                         >
-                          <PublicationCard publication={pub} readOnly={true} />
+                          <PublicationCard
+                            publication={pub}
+                            readOnly={true}
+                            onStatusChange={fetchProfileData}
+                          />
                         </div>
                       ))
                     ) : (
@@ -355,6 +350,7 @@ const UserProfile: React.FC = () => {
                           publication={pub}
                           onEdit={handleEditClick}
                           onDelete={handleDeleteClick}
+                          onStatusChange={fetchProfileData}
                         />
                       ))
                     ) : (
@@ -381,6 +377,7 @@ const UserProfile: React.FC = () => {
                           key={pub.publication_id}
                           publication={pub}
                           isManagementView={true}
+                          onStatusChange={fetchProfileData}
                         />
                       ))}
                     </div>
@@ -390,7 +387,6 @@ const UserProfile: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT: PRINT MEDIA COLLECTION */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-6">
               <div
@@ -473,7 +469,6 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
 
-        {/* --- MODALS --- */}
         <PublicationForm
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
