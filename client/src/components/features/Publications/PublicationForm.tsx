@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// ✅ RESTORED IMPORT for Admins
 import WriterSelect from "./WriterSelect";
 import ConfirmationModal from "../../common/ConfirmationModal";
 import AxiosInstance from "../../../AxiosInstance";
@@ -54,7 +53,6 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       let startData: ExtendedCreatePublicationData;
 
       if (publicationToEdit) {
-        // EDIT MODE
         const existingDate = publicationToEdit.date_published
           ? new Date(publicationToEdit.date_published)
               .toISOString()
@@ -77,7 +75,6 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         };
         setExistingImageUrl(publicationToEdit.image || null);
       } else {
-        // ADD MODE
         startData = {
           title: "",
           byline: isAdmin ? "" : currentUser ? currentUser.name : "",

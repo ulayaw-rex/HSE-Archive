@@ -204,7 +204,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30"></div>
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-transparent to-black/30"></div>
 
           <div className="absolute inset-0 p-4 flex flex-col justify-between">
             <div className="flex flex-wrap gap-2 items-start">

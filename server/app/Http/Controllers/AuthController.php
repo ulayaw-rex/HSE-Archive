@@ -62,8 +62,8 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
-                'position' => $user->position, // ✅ ADDED THIS
-                'course' => $user->course,     // ✅ ADDED THIS
+                'position' => $user->position,
+                'course' => $user->course,     
                 'status' => $user->status, 
             ],
             'redirect' => $redirect,
@@ -110,9 +110,9 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
-                'position' => $user->position, // ✅ CRITICAL FIX: Added this
-                'course' => $user->course,     // ✅ Added this
-                'status' => $user->status,     // ✅ Added this
+                'position' => $user->position, 
+                'course' => $user->course,    
+                'status' => $user->status,    
             ],
         ]);
     }

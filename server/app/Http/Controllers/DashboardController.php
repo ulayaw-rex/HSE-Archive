@@ -109,7 +109,11 @@ class DashboardController extends Controller
 
         $pendingUsers = User::where('status', 'pending')->latest()->get(); 
         $pendingReviews = Publication::where('status', 'pending')->latest()->get();
-        $creditRequests = CreditRequest::with('user:id,name,email')->latest()->get();
+        
+        $creditRequests = CreditRequest::with(['user:id,name,email', 'requestable'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
 
         return response()->json([
             'stats' => array_merge($cachedStats, [

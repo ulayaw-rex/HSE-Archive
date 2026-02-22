@@ -30,6 +30,8 @@ class UserProfileController extends Controller
             'title'             => $media->title,
             'type'              => $media->type,
             'date_published'    => $media->date_published,
+            'file_path'         => $media->file_path, 
+            'thumbnail_path'    => $media->thumbnail_path,
             'file_url'          => $media->file_path ? asset('storage/' . $media->file_path) : null,
             'thumbnail_url'     => $media->thumbnail_path ? asset('storage/' . $media->thumbnail_path) : null,
             'original_filename' => $media->original_filename,
@@ -39,33 +41,22 @@ class UserProfileController extends Controller
 
     public function show(Request $request, $id = null)
     {
-        // 1. Identify Viewer (Safe Auth Check)
         $currentUser = Auth::guard('sanctum')->user();
-
-        // 2. Identify Target
-        if ($id) {
-            $user = User::find($id);
-        } else {
-            $user = $currentUser;
-        }
+        $user = $id ? User::find($id) : $currentUser;
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // 3. Permissions
         $isOwner = $currentUser && $currentUser->id === $user->id;
         $isAdmin = $currentUser && $currentUser->role === 'admin';
         
-        $isManagement = false;
-        if ($currentUser && !empty($currentUser->position)) {
-             $pos = strtolower($currentUser->position);
-             if (str_contains($pos, 'editor') || str_contains($pos, 'director')) {
-                 $isManagement = true;
-             }
-        }
+        $pos = strtolower($currentUser->position ?? '');
+        $isEIC = str_contains($pos, 'chief');
+        $isAssociate = str_contains($pos, 'associate');
+        $isDirector = str_contains($pos, 'director');
+        $isManagement = $isAdmin || $isEIC || $isAssociate || $isDirector;
 
-        // 4. Fetch Publications (Without Scopes)
         $query = Publication::withoutGlobalScopes()
             ->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
@@ -75,32 +66,41 @@ class UserProfileController extends Controller
             })
             ->with('writers');
 
-        // Visibility Logic
         if (!$isOwner && !$isAdmin && !$isManagement) {
             $query->where('status', 'published');
         } else {
             $query->orderByRaw("FIELD(status, 'submitted', 'reviewed', 'draft', 'returned', 'approved', 'published') ASC");
         }
         
-        $query->orderBy('created_at', 'desc');
+        $articles = $query->orderBy('created_at', 'desc')->get()->map(fn($pub) => $this->formatPublication($pub));
 
-        $articles = $query->get()->map(fn($pub) => $this->formatPublication($pub));
-
-        // 5. Fetch Print Media
-        $printMediaQuery = PrintMedia::where(function($q) use ($user) {
+        $printMedia = PrintMedia::where(function($q) use ($user) {
             $q->where('user_id', $user->id)
               ->orWhereHas('owners', function ($subQ) use ($user) {
                   $subQ->where('users.id', $user->id);
               });
-        })->with('owners')->orderBy('created_at', 'desc');
+        })->with('owners')->orderBy('created_at', 'desc')->get()->map(fn($m) => $this->formatPrintMedia($m));
 
-        $printMedia = $printMediaQuery->get()->map(fn($m) => $this->formatPrintMedia($m));
+        $reviewQueue = [];
+        if ($isOwner && $isManagement) {
+            $rqQuery = Publication::withoutGlobalScopes()->with('writers');
+            
+            if ($isAdmin || $isDirector) {
+                $rqQuery->whereIn('status', ['submitted', 'reviewed', 'approved']);
+            } elseif ($isEIC) {
+                $rqQuery->whereIn('status', ['reviewed', 'approved']);
+            } elseif ($isAssociate) {
+                $rqQuery->where('status', 'submitted');
+            }
 
-        // 6. Return Combined Data
+            $reviewQueue = $rqQuery->orderBy('created_at', 'asc')->get()->map(fn($pub) => $this->formatPublication($pub));
+        }
+
         return response()->json([
             'user' => $user,
             'articles' => $articles,
-            'print_media' => $printMedia 
+            'print_media' => $printMedia,
+            'review_queue' => $reviewQueue 
         ])->header('X-Debug-Auth', $currentUser ? "User: {$currentUser->id}" : "Guest");
     }
 }

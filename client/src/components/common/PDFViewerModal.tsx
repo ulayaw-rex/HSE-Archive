@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Dialog } from "@headlessui/react";
 import { Document, Page, pdfjs } from "react-pdf";
 import type { PrintMedia } from "../../types/PrintMedia";
@@ -13,10 +13,7 @@ import {
 } from "react-icons/fa";
 import LoadingSpinner from "./LoadingSpinner";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export interface PDFViewerModalProps {
   isOpen: boolean;
@@ -30,16 +27,19 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
   printMedia,
 }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
-
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
   const [isBookMode, setIsBookMode] = useState(false);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setPageNumber(1);
       setScale(1.0);
       setIsBookMode(false);
+
+      setTimeout(() => scrollContainerRef.current?.focus(), 100);
     }
   }, [isOpen, printMedia]);
 
@@ -47,12 +47,15 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
     setNumPages(numPages);
   }
 
-  const changePage = (offset: number) => {
-    setPageNumber((prevPageNumber) => {
-      const newPage = prevPageNumber + (isBookMode ? offset * 2 : offset);
-      return Math.min(Math.max(1, newPage), numPages || 1);
-    });
-  };
+  const changePage = useCallback(
+    (offset: number) => {
+      setPageNumber((prevPageNumber) => {
+        const newPage = prevPageNumber + (isBookMode ? offset * 2 : offset);
+        return Math.min(Math.max(1, newPage), numPages || 1);
+      });
+    },
+    [isBookMode, numPages],
+  );
 
   const toggleBookMode = () => {
     setIsBookMode(!isBookMode);
@@ -60,12 +63,40 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
     setPageNumber(1);
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isBookMode) {
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          changePage(-1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          changePage(1);
+        }
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        scrollContainerRef.current?.scrollBy({ top: -100, behavior: "auto" });
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        scrollContainerRef.current?.scrollBy({ top: 100, behavior: "auto" });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isBookMode, changePage]);
+
   if (!printMedia) return null;
 
   const fullPdfUrl = `/api/print-media/file/${printMedia.file_path}`;
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-9999">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
       <div
         className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm"
         aria-hidden="true"
@@ -82,7 +113,7 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
                 {isBookMode
                   ? `Pages ${pageNumber}-${Math.min(
                       pageNumber + 1,
-                      numPages || 0
+                      numPages || 0,
                     )} of ${numPages || "--"}`
                   : `Page ${pageNumber} of ${numPages || "--"}`}
               </span>
@@ -133,7 +164,11 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto flex justify-center bg-gray-200/50 p-4 sm:p-8 custom-scrollbar relative">
+          <div
+            ref={scrollContainerRef}
+            tabIndex={0}
+            className="flex-1 overflow-auto flex justify-center bg-gray-200/50 p-4 sm:p-8 custom-scrollbar relative outline-none"
+          >
             <Document
               file={fullPdfUrl}
               onLoadSuccess={onDocumentLoadSuccess}

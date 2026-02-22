@@ -83,7 +83,8 @@ class CreditRequestController extends Controller
         $request = CreditRequest::with('requestable')->findOrFail($id);
 
         if (!$request->requestable) {
-            return response()->json(['message' => 'The requested item no longer exists.'], 404);
+            $request->delete(); 
+            return response()->json(['message' => 'The requested item no longer exists. Orphaned request cleared.']);
         }
 
         if ($request->requestable_type === Publication::class || $request->requestable instanceof Publication) {
@@ -102,7 +103,13 @@ class CreditRequestController extends Controller
 
     public function reject($id)
     {
-        $request = CreditRequest::findOrFail($id);
+        $request = CreditRequest::with('requestable')->findOrFail($id);
+        
+        if (!$request->requestable) {
+            $request->delete();
+            return response()->json(['message' => 'The requested item no longer exists. Orphaned request cleared.']);
+        }
+
         $request->update(['status' => 'rejected']);
 
         return response()->json(['message' => 'Request rejected.']);

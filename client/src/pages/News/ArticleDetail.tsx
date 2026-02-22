@@ -6,6 +6,9 @@ import {
   FaCheckCircle,
   FaInfoCircle,
   FaExclamationCircle,
+  FaMinus,
+  FaPlus,
+  FaUndo,
 } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -59,6 +62,8 @@ const ArticleDetail: React.FC = () => {
 
   const [requestingCredit, setRequestingCredit] = useState(false);
 
+  const [textSize, setTextSize] = useState<number>(18);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [idOrSlug]);
@@ -72,7 +77,7 @@ const ArticleDetail: React.FC = () => {
         const [pubResponse, commentsResponse] = await Promise.all([
           AxiosInstance.get<Publication>(`/publications/${idOrSlug}`),
           AxiosInstance.get<Comment[]>(
-            `/publications/${idOrSlug}/comments`
+            `/publications/${idOrSlug}/comments`,
           ).catch(() => ({ data: [] })),
         ]);
         setPublication(pubResponse.data);
@@ -103,14 +108,12 @@ const ArticleDetail: React.FC = () => {
     try {
       setRequestingCredit(true);
       await AxiosInstance.post(
-        `/publications/${publication.publication_id}/request-credit`
+        `/publications/${publication.publication_id}/request-credit`,
       );
-
       setIsClaimModalOpen(false);
       setShowSuccessModal(true);
     } catch (error: any) {
       setIsClaimModalOpen(false);
-
       if (error.response?.status === 409) {
         setShowAlreadySubmittedModal(true);
       } else if (error.response?.status === 422) {
@@ -122,6 +125,10 @@ const ArticleDetail: React.FC = () => {
       setRequestingCredit(false);
     }
   };
+
+  const increaseTextSize = () => setTextSize((prev) => Math.min(prev + 2, 36));
+  const decreaseTextSize = () => setTextSize((prev) => Math.max(prev - 2, 12));
+  const resetTextSize = () => setTextSize(18);
 
   if (loading)
     return (
@@ -298,7 +305,7 @@ const ArticleDetail: React.FC = () => {
                   publication.date_published ||
                     publication.created_at ||
                     (publication as any).updated_at ||
-                    Date.now()
+                    Date.now(),
                 ).toLocaleDateString(undefined, {
                   year: "numeric",
                   month: "long",
@@ -345,7 +352,7 @@ const ArticleDetail: React.FC = () => {
           </div>
 
           {publication.image && (
-            <div className="relative mb-4">
+            <div className="relative mb-6">
               <img
                 src={publication.image}
                 alt={publication.title}
@@ -360,17 +367,62 @@ const ArticleDetail: React.FC = () => {
             </div>
           )}
 
-          <article className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+          <div className="flex items-center mb-8 bg-white border border-gray-200 rounded-full shadow-sm w-max overflow-hidden transition-all hover:shadow-md">
+            <div className="px-4 py-2.5 bg-gray-50 border-r border-gray-200 flex items-center justify-center">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest select-none">
+                Text Size
+              </span>
+            </div>
+
+            <button
+              onClick={decreaseTextSize}
+              disabled={textSize <= 12}
+              className="px-4 py-2.5 text-gray-600 hover:text-green-600 hover:bg-green-50 active:bg-green-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all outline-none"
+              title="Decrease text size"
+            >
+              <FaMinus size={12} />
+            </button>
+
+            <div className="w-px h-5 bg-gray-200"></div>
+
+            <button
+              onClick={resetTextSize}
+              className="px-4 py-2.5 text-gray-500 hover:text-gray-800 hover:bg-gray-50 active:bg-gray-100 text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 outline-none select-none"
+              title="Reset to default"
+            >
+              <FaUndo size={10} /> Reset
+            </button>
+
+            <div className="w-px h-5 bg-gray-200"></div>
+
+            <button
+              onClick={increaseTextSize}
+              disabled={textSize >= 36}
+              className="px-4 py-2.5 text-gray-600 hover:text-green-600 hover:bg-green-50 active:bg-green-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all outline-none"
+              title="Increase text size"
+            >
+              <FaPlus size={12} />
+            </button>
+          </div>
+
+          <article
+            className="prose max-w-none text-gray-800 leading-relaxed transition-all duration-300 ease-in-out"
+            style={{ fontSize: `${textSize}px` }}
+          >
             {(publication.body ?? "").split("\n").map((para, idx) => (
-              <p key={idx}>{para}</p>
+              <p key={idx} className="min-h-[1em] mb-4">
+                {para}
+              </p>
             ))}
           </article>
 
-          <Comments
-            publicationId={publication.publication_id}
-            comments={comments}
-            setComments={setComments}
-          />
+          <div className="mt-12">
+            <Comments
+              publicationId={publication.publication_id}
+              comments={comments}
+              setComments={setComments}
+            />
+          </div>
         </div>
       </div>
     </div>

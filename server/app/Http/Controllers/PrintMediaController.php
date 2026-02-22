@@ -75,10 +75,8 @@ class PrintMediaController extends Controller
         return response()->json($this->transformMedia($media));
     }
 
-    // ✅ ADDED THIS METHOD TO FIX THE 404 ERROR
     public function getByUser($userId)
     {
-        // Fetch media uploaded by this user OR where they are an owner
         $media = PrintMedia::with(['user', 'owners'])
             ->where('user_id', $userId)
             ->orWhereHas('owners', function($q) use ($userId) {
@@ -87,7 +85,6 @@ class PrintMediaController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Transform data to match the format expected by frontend
         $transformed = $media->map(function ($item) {
             return $this->transformMedia($item);
         });

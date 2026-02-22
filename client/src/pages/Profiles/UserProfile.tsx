@@ -53,6 +53,7 @@ const UserProfile: React.FC = () => {
   const [profileUser, setProfileUser] = useState<UserProfileData | null>(null);
   const [publications, setPublications] = useState<any[]>([]);
   const [printMedia, setPrintMedia] = useState<PrintMedia[]>([]);
+  const [reviewQueue, setReviewQueue] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState<
@@ -72,85 +73,52 @@ const UserProfile: React.FC = () => {
   const isAlumni = profileUser?.role === "alumni";
 
   const userPosition = (currentUser?.position || "").toLowerCase();
-
   const isAdmin = currentUser?.role === "admin";
   const isEIC = userPosition.includes("editor-in-chief");
   const isAssociate = userPosition.includes("associate editor");
-
   const isManagement =
     isAdmin || isEIC || isAssociate || userPosition.includes("director");
 
-  const fetchProfileData = async () => {
+  const canDownload = isOwnProfile || isAdmin;
+
+  const fetchProfileData = async (isPolling = false) => {
     if (!targetUserId) return;
     try {
-      if (!profileUser) setLoading(true);
+      if (!isPolling && !profileUser) setLoading(true);
 
-      const userRes = await AxiosInstance.get(`/users/${targetUserId}`);
-      setProfileUser(userRes.data);
+      const res = await AxiosInstance.get(`/users/${targetUserId}/profile`);
 
-      const pubRes = await AxiosInstance.get("/publications?per_page=100");
-      setPublications(pubRes.data.data || []);
-
-      try {
-        const printRes = await AxiosInstance.get(
-          `/print-media/user/${targetUserId}`,
-        );
-        setPrintMedia(printRes.data || []);
-      } catch (e) {
-        setPrintMedia([]);
-      }
+      setProfileUser(res.data.user);
+      setPublications(res.data.articles || []);
+      setPrintMedia(res.data.print_media || []);
+      setReviewQueue(res.data.review_queue || []);
     } catch (error) {
       console.error("Failed to load profile", error);
     } finally {
-      setLoading(false);
+      if (!isPolling) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchProfileData();
+
+    const intervalId = setInterval(() => {
+      fetchProfileData(true);
+    }, 10000);
+
+    return () => clearInterval(intervalId);
   }, [targetUserId]);
 
-  const { portfolio, workbench, reviewQueue } = useMemo(() => {
-    if (!profileUser) return { portfolio: [], workbench: [], reviewQueue: [] };
-
-    const pf = publications.filter(
-      (p) =>
-        p.status === "published" &&
-        Number(p.user_id) === Number(profileUser.id),
+  const { portfolio, workbench } = useMemo(() => {
+    if (!publications) return { portfolio: [], workbench: [] };
+    const pf = publications.filter((p) => p.status === "published");
+    const wb = publications.filter((p) =>
+      ["draft", "submitted", "returned", "reviewed", "approved"].includes(
+        p.status,
+      ),
     );
-
-    const wb = publications.filter(
-      (p) =>
-        Number(p.user_id) === Number(currentUser?.id) &&
-        ["draft", "submitted", "returned", "reviewed"].includes(p.status),
-    );
-
-    let rq: any[] = [];
-
-    if (isManagement) {
-      if (isAdmin) {
-        rq = publications.filter((p) =>
-          ["submitted", "reviewed", "approved"].includes(p.status),
-        );
-      } else if (isEIC) {
-        rq = publications.filter((p) =>
-          ["reviewed", "approved"].includes(p.status),
-        );
-      } else if (isAssociate) {
-        rq = publications.filter((p) => p.status === "submitted");
-      }
-    }
-
-    return { portfolio: pf, workbench: wb, reviewQueue: rq };
-  }, [
-    publications,
-    profileUser,
-    currentUser,
-    isManagement,
-    isAdmin,
-    isEIC,
-    isAssociate,
-  ]);
+    return { portfolio: pf, workbench: wb };
+  }, [publications]);
 
   const handleCreateClick = () => {
     setEditingPub(null);
@@ -179,7 +147,7 @@ const UserProfile: React.FC = () => {
   const isPdf = (filePath?: string) => filePath?.toLowerCase().endsWith(".pdf");
 
   const handleMediaClick = (item: PrintMedia) => {
-    if (isPdf(item.file_path)) {
+    if (!canDownload || isPdf(item.file_path)) {
       setSelectedPrintMedia(item);
     } else {
       const url = `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/print-media/${item.print_media_id}/download`;
@@ -273,40 +241,26 @@ const UserProfile: React.FC = () => {
               <div className="flex border-b border-gray-200 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab("portfolio")}
-                  className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${
-                    activeTab === "portfolio"
-                      ? "border-b-4 border-green-600 text-green-700 bg-green-50"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "portfolio" ? "border-b-4 border-green-600 text-green-700 bg-green-50" : "text-gray-500 hover:text-gray-700"}`}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <FaNewspaper /> Portfolio ({portfolio.length})
                   </div>
                 </button>
-
                 {isOwnProfile && (
                   <button
                     onClick={() => setActiveTab("workbench")}
-                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${
-                      activeTab === "workbench"
-                        ? "border-b-4 border-blue-600 text-blue-700 bg-blue-50"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
+                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "workbench" ? "border-b-4 border-blue-600 text-blue-700 bg-blue-50" : "text-gray-500 hover:text-gray-700"}`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <FaClock /> Workbench ({workbench.length})
                     </div>
                   </button>
                 )}
-
                 {isOwnProfile && isManagement && (
                   <button
                     onClick={() => setActiveTab("queue")}
-                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${
-                      activeTab === "queue"
-                        ? "border-b-4 border-red-600 text-red-700 bg-red-50"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
+                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "queue" ? "border-b-4 border-red-600 text-red-700 bg-red-50" : "text-gray-500 hover:text-gray-700"}`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <FaCheckDouble /> Review ({reviewQueue.length})
@@ -351,6 +305,7 @@ const UserProfile: React.FC = () => {
                           onEdit={handleEditClick}
                           onDelete={handleDeleteClick}
                           onStatusChange={fetchProfileData}
+                          onClick={() => setViewingArticle(pub)}
                         />
                       ))
                     ) : (
@@ -364,7 +319,7 @@ const UserProfile: React.FC = () => {
 
                 {activeTab === "queue" && (
                   <div className="space-y-6">
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 flex">
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 flex items-center rounded-lg">
                       <FaExclamationCircle className="h-5 w-5 text-yellow-400 mr-3" />
                       <p className="text-sm text-yellow-700">
                         You have <strong>{reviewQueue.length}</strong> articles
@@ -378,6 +333,7 @@ const UserProfile: React.FC = () => {
                           publication={pub}
                           isManagementView={true}
                           onStatusChange={fetchProfileData}
+                          onClick={() => setViewingArticle(pub)}
                         />
                       ))}
                     </div>
@@ -396,7 +352,6 @@ const UserProfile: React.FC = () => {
                   <FaBookOpen /> Collection
                 </h3>
               </div>
-
               <div className="p-4 min-h-[300px] flex flex-col items-center justify-start text-center">
                 {printMedia.length > 0 ? (
                   <div className="grid grid-cols-2 gap-4 w-full">
@@ -406,15 +361,15 @@ const UserProfile: React.FC = () => {
                       const thumbnailUrl = item.thumbnail_path
                         ? `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/storage/${item.thumbnail_path}`
                         : null;
+                      const showAsRead = !canDownload || fileIsPdf;
 
                       return (
                         <div
                           key={idx}
                           onClick={() => handleMediaClick(item)}
-                          className="group relative block bg-gray-900 rounded-r-md shadow-md hover:shadow-2xl hover:scale-105 transition-all duration-300 overflow-hidden aspect-[3/4] cursor-pointer"
+                          className="group relative block bg-gray-900 rounded-r-md shadow-md transition-all duration-300 overflow-hidden aspect-[3/4] cursor-pointer hover:shadow-2xl hover:scale-105"
                         >
                           <div className="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-r from-white/30 to-transparent z-10 h-full"></div>
-
                           {thumbnailUrl ? (
                             <img
                               src={thumbnailUrl}
@@ -431,7 +386,6 @@ const UserProfile: React.FC = () => {
                               </span>
                             </div>
                           )}
-
                           <div className="absolute top-1 left-2 z-20">
                             <span
                               className={`${badgeColor} text-white text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shadow-sm`}
@@ -439,17 +393,16 @@ const UserProfile: React.FC = () => {
                               {item.type}
                             </span>
                           </div>
-
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-20">
                             <div className="bg-white text-gray-800 p-2 rounded-full shadow-lg mb-2">
-                              {fileIsPdf ? (
+                              {showAsRead ? (
                                 <FaBookOpen size={14} />
                               ) : (
                                 <FaFileDownload size={14} />
                               )}
                             </div>
                             <span className="text-white text-[10px] font-bold uppercase tracking-wider border border-white px-2 py-1 rounded-sm">
-                              {fileIsPdf ? "Read" : "Download"}
+                              {showAsRead ? "Read" : "Download"}
                             </span>
                           </div>
                         </div>
@@ -475,7 +428,6 @@ const UserProfile: React.FC = () => {
           onSuccess={handleFormSuccess}
           publicationToEdit={editingPub}
         />
-
         {viewingArticle && (
           <PublicationViewModal
             isOpen={!!viewingArticle}
@@ -483,7 +435,6 @@ const UserProfile: React.FC = () => {
             publication={viewingArticle}
           />
         )}
-
         {selectedPrintMedia && (
           <PDFViewerModal
             isOpen={true}

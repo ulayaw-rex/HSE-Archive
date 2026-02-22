@@ -98,7 +98,7 @@ class SiteSettingController extends Controller
     {
         $setting = SiteSetting::where('key', 'team_intro_text')->first();
         return response()->json([
-            'text' => $setting ? $setting->value : "The brilliant minds and passionate voices behind The Hillside Echo." // Default text
+            'text' => $setting ? $setting->value : "The brilliant minds and passionate voices behind The Hillside Echo." 
         ]);
     }
 
