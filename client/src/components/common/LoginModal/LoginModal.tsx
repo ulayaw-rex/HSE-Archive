@@ -4,7 +4,7 @@ import AxiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import LoginArt from "../../../assets/Login.png";
 import { useAuth } from "../../../context/AuthContext";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -75,7 +75,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         `${
           import.meta.env.VITE_API_URL || "http://localhost:8000"
         }/sanctum/csrf-cookie`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
@@ -92,7 +92,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         {
           withCredentials: true,
           headers: xsrfToken ? { "X-XSRF-TOKEN": xsrfToken } : undefined,
-        }
+        },
       );
 
       await checkAuth();
@@ -124,11 +124,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       {isOpen && (
         <div className="modal-container">
           <div className="modal-overlay" onClick={onClose} />
+          {/* Added 'relative' here so the absolute button stays inside */}
           <div
-            className={`modal-content login-modal__container ${
+            className={`modal-content login-modal__container relative ${
               isOpen ? "open" : ""
             }`}
           >
+            {/* THE NEW CLOSE BUTTON */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 focus:outline-none z-50 md:hidden"
+              aria-label="Close modal"
+            >
+              <FaTimes size={24} />
+            </button>
+
             <div className="login-modal">
               <div className="login-modal__header pb-15">
                 <img

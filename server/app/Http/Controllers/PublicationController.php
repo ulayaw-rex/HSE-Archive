@@ -163,7 +163,7 @@ class PublicationController extends Controller
             'byline' => $finalByline,
             'status' => 'submitted', 
             'views' => 0,
-            'date_published' => null, 
+            'date_published' => $request->date_published, 
         ];
 
         if ($request->hasFile('image')) {
@@ -307,7 +307,7 @@ class PublicationController extends Controller
             }
 
             $publication->status = 'published';
-            $publication->date_published = now();
+            $publication->date_published = $publication->date_published ?? now();
             $publication->save();
             
             Cache::forget('news_hub_data');

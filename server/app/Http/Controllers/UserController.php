@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use App\Notifications\AccountApproved;
 use App\Notifications\AccountDeclined;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -118,60 +119,45 @@ class UserController extends Controller
         }
     }
 
-    public function update(Request $request, User $user): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'email' => [
-                'sometimes',
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique('users')->ignore($user->id),
-            ],
-            'password' => [
-                'sometimes',
-                'required',
-                'string',
-                PasswordRule::min(8)->mixedCase()->numbers()->symbols(),
-            ],
-            'role' => ['sometimes', 'required', 'string'],
-            'department' => 'nullable|string|max:255',
-            'course' => 'nullable|string|max:255',   
-            'position' => 'nullable|string|max:255', 
-            'year_graduated' => 'nullable|string|max:4',
-        ]);
+    public function update(Request $request, $id): JsonResponse
+{
+    $user = User::findOrFail($id);
 
-        $updateData = [];
+    $validated = $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'email' => [
+            'sometimes',
+            'required',
+            'string',
+            'email',
+            'max:255',
+            Rule::unique('users')->ignore($user->id),
+        ],
+        'password' => [
+            'nullable', 
+            'string',
+            Password::min(8)->mixedCase()->numbers()->symbols(),
+        ],
+        'role' => 'sometimes|required|string',
+        'department' => 'nullable|string|max:255',
+        'course' => 'nullable|string|max:255',   
+        'position' => 'nullable|string|max:255', 
+        'year_graduated' => 'nullable|string|max:4',
+    ]);
 
-        if (isset($validated['name'])) $updateData['name'] = $validated['name'];
-        if (isset($validated['email'])) $updateData['email'] = $validated['email'];
-        if (isset($validated['role'])) $updateData['role'] = $validated['role'];
-        if (isset($validated['password'])) $updateData['password'] = Hash::make($validated['password']);
-        
-        if (array_key_exists('department', $validated)) $updateData['department'] = $validated['department'];
-        if (array_key_exists('course', $validated)) $updateData['course'] = $validated['course'];
-        if (array_key_exists('position', $validated)) $updateData['position'] = $validated['position'];
-        if (array_key_exists('year_graduated', $validated)) $updateData['year_graduated'] = $validated['year_graduated'];
+    $updateData = collect($validated)->except('password')->toArray();
 
-        $user->update($updateData);
-
-        return response()->json([
-            'message' => 'User updated successfully',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'department' => $user->department,
-                'course' => $user->course,      
-                'position' => $user->position,   
-                'year_graduated' => $user->year_graduated,
-                'created_at' => $user->created_at,
-            ]
-        ]);
+    if ($request->filled('password')) {
+        $updateData['password'] = Hash::make($request->password);
     }
+
+    $user->update($updateData);
+
+    return response()->json([
+        'message' => 'User updated successfully',
+        'user' => $user->fresh() 
+    ]);
+}
 
     public function approveUser($id): JsonResponse
     {

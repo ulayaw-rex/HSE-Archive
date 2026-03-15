@@ -8,7 +8,7 @@ interface PublicationCardProps {
   publication: Publication;
   onEdit?: (publication: Publication) => void;
   onDelete?: (id: number) => void;
-  onStatusChange?: () => void;
+  onStatusChange?: (updatedPublication?: Publication) => void;
   readOnly?: boolean;
   isManagementView?: boolean;
   onClick?: () => void;
@@ -70,7 +70,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     setLoading(true);
 
     try {
-      await AxiosInstance.post(
+      const response = await AxiosInstance.post(
         `/publications/${publication.publication_id}/status`,
         { action: pendingAction },
       );
@@ -78,8 +78,9 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
       setConfirmModalOpen(false);
       setPendingAction(null);
 
+      // THE FIX: Pass the updated data back up to the parent
       if (onStatusChange) {
-        onStatusChange();
+        onStatusChange(response.data.data);
       }
     } catch (error: any) {
       console.error("Action failed", error);

@@ -70,7 +70,7 @@ const PrintMediaPage: React.FC = () => {
   const [printMediaList, setPrintMediaList] = useState<ExtendedPrintMedia[]>(
     Array.isArray(cache.printMedia)
       ? (cache.printMedia as ExtendedPrintMedia[])
-      : []
+      : [],
   );
 
   const [loading, setLoading] = useState(!cache.printMedia);
@@ -79,10 +79,10 @@ const PrintMediaPage: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMedia, setSelectedMedia] = useState<ExtendedPrintMedia | null>(
-    null
+    null,
   );
   const [claimTarget, setClaimTarget] = useState<ExtendedPrintMedia | null>(
-    null
+    null,
   );
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [requestingCredit, setRequestingCredit] = useState(false);
@@ -139,7 +139,7 @@ const PrintMediaPage: React.FC = () => {
     try {
       setRequestingCredit(true);
       await AxiosInstance.post(
-        `/print-media/${claimTarget.print_media_id}/request-credit`
+        `/print-media/${claimTarget.print_media_id}/request-credit`,
       );
       setPendingRequestIds((prev) => [...prev, claimTarget.print_media_id]);
       setIsClaimModalOpen(false);
@@ -188,7 +188,7 @@ const PrintMediaPage: React.FC = () => {
 
   const handleDownload = async (
     e: React.MouseEvent,
-    item: ExtendedPrintMedia
+    item: ExtendedPrintMedia,
   ) => {
     e.stopPropagation();
 
@@ -243,7 +243,7 @@ const PrintMediaPage: React.FC = () => {
         const dateStr =
           item.date_published || item.created_at || new Date().toISOString();
         return new Date(dateStr).getFullYear().toString();
-      })
+      }),
     );
     return ["All", ...Array.from(years).sort((a, b) => b.localeCompare(a))];
   }, [printMediaList]);
@@ -263,7 +263,7 @@ const PrintMediaPage: React.FC = () => {
         (item.description &&
           item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
         owners.some((owner) =>
-          owner.name.toLowerCase().includes(searchQuery.toLowerCase())
+          owner.name.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
       const matchesType =
@@ -281,7 +281,7 @@ const PrintMediaPage: React.FC = () => {
   const pageCount = Math.ceil(filteredMedia.length / ITEMS_PER_PAGE);
   const currentItems = filteredMedia.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   return (
@@ -290,7 +290,7 @@ const PrintMediaPage: React.FC = () => {
         isOpen={isClaimModalOpen}
         onClose={() => !requestingCredit && setIsClaimModalOpen(false)}
         onConfirm={submitClaimRequest}
-        title="Claim Ownership"
+        title="Claim Authorship"
         message={`Are you sure you want to be added as an author/owner of "${claimTarget?.title}"?`}
         confirmLabel="Submit Request"
         cancelLabel="Cancel"
@@ -310,10 +310,10 @@ const PrintMediaPage: React.FC = () => {
                 statusModal.type === "success"
                   ? "bg-green-100"
                   : statusModal.type === "error"
-                  ? "bg-red-100"
-                  : statusModal.type === "warning"
-                  ? "bg-orange-100"
-                  : "bg-blue-100"
+                    ? "bg-red-100"
+                    : statusModal.type === "warning"
+                      ? "bg-orange-100"
+                      : "bg-blue-100"
               }`}
             >
               {statusModal.type === "success" && (
@@ -341,10 +341,10 @@ const PrintMediaPage: React.FC = () => {
                 statusModal.type === "success"
                   ? "bg-green-600 hover:bg-green-700"
                   : statusModal.type === "error"
-                  ? "bg-red-600 hover:bg-red-700"
-                  : statusModal.type === "warning"
-                  ? "bg-orange-500 hover:bg-orange-600"
-                  : "bg-blue-600 hover:bg-blue-700"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : statusModal.type === "warning"
+                      ? "bg-orange-500 hover:bg-orange-600"
+                      : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
               {statusModal.type === "error" ? "Close" : "Got it"}
@@ -460,7 +460,7 @@ const PrintMediaPage: React.FC = () => {
                     ? `/api/print-media/file/${item.thumbnail_path}`
                     : null;
                   const displayDate = new Date(
-                    item.date_published || item.created_at
+                    item.date_published || item.created_at,
                   );
                   const badgeColorClass = getCategoryColor(item.type);
                   const owners = getOwners(item);
@@ -542,10 +542,10 @@ const PrintMediaPage: React.FC = () => {
                           {user && !isOwner && !isPending && (
                             <button
                               onClick={(e) => handleClaimClick(e, item)}
-                              className="bg-white text-gray-700 p-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-colors"
-                              title="Claim Ownership"
+                              className="bg-blue-600 text-white p-3 rounded-full shadow-[0_4px_10px_rgba(37,99,235,0.4)] hover:bg-blue-700 hover:scale-110 hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center"
+                              title="Claim Authorship"
                             >
-                              <FaUserPlus size={14} />
+                              <FaUserPlus size={16} />
                             </button>
                           )}
                         </div>
@@ -603,8 +603,8 @@ const PrintMediaPage: React.FC = () => {
                             {isDownloading
                               ? "DOWNLOADING..."
                               : fileIsPdf
-                              ? "READ NOW →"
-                              : "DOWNLOAD ↓"}
+                                ? "READ NOW →"
+                                : "DOWNLOAD ↓"}
                           </span>
                         </div>
                       </div>

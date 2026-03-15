@@ -105,6 +105,21 @@ const PublicationsPage: React.FC = () => {
     }
   };
 
+  const handleStatusChange = (updatedArticle?: Publication) => {
+    if (updatedArticle) {
+      setPublications((prevPubs) =>
+        prevPubs.map((pub) =>
+          pub.publication_id === updatedArticle.publication_id
+            ? updatedArticle
+            : pub,
+        ),
+      );
+      toast.success("Status updated successfully");
+    } else {
+      fetchPublications(pagination.current_page);
+    }
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-content">
@@ -144,9 +159,7 @@ const PublicationsPage: React.FC = () => {
                     )
                   }
                   onClick={() => setViewingArticle(publication)}
-                  onStatusChange={() =>
-                    fetchPublications(pagination.current_page)
-                  }
+                  onStatusChange={handleStatusChange}
                 />
               ))}
             </div>

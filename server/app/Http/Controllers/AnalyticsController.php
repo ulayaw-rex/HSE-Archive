@@ -20,7 +20,7 @@ class AnalyticsController extends Controller
 
         $stats = Publication::with('writers')
             ->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'published'])
             ->orderBy('views', 'desc')
             ->paginate(10);
 
@@ -47,12 +47,12 @@ class AnalyticsController extends Controller
         $endDate = $request->input('end_date') . ' 23:59:59';
 
         $stats = User::withCount(['publications' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('date_published', [$startDate, $endDate])
-                      ->where('status', 'approved');
+                $query->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
+                      ->whereIn('status', ['approved', 'published']);
             }])
             ->whereHas('publications', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('date_published', [$startDate, $endDate])
-                      ->where('status', 'approved');
+                $query->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
+                      ->whereIn('status', ['approved', 'published']);
             })
             ->orderBy('publications_count', 'desc')
             ->paginate(10); 
@@ -83,6 +83,8 @@ class AnalyticsController extends Controller
         $period = CarbonPeriod::create($startDate, $interval, $endDate);
         
         $data = [];
+        $categories = [];
+
         foreach ($period as $date) {
             $key = $date->format($format);
             $data[$key] = ['date' => $key];
@@ -96,23 +98,21 @@ class AnalyticsController extends Controller
                 COUNT(*) as count
             ", [$sqlFormat])
             ->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'published'])
             ->groupBy('date', 'category')
             ->orderBy('date', 'asc')
             ->get();
-
-        $categories = [];
 
         foreach ($raw as $entry) {
             $date = $entry->date;
             $cat = ucfirst($entry->category);
             
-            if (isset($data[$date])) {
-                $data[$date][$cat] = $entry->count;
-            }
-            
             if (!in_array($cat, $categories)) {
                 $categories[] = $cat;
+            }
+
+            if (isset($data[$date])) {
+                $data[$date][$cat] = $entry->count;
             }
         }
 
@@ -149,7 +149,7 @@ class AnalyticsController extends Controller
     private function exportArticles($startDate, $endDate, $format) {
         $data = Publication::with('writers')
             ->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'published'])
             ->get();
 
         if ($format === 'pdf') {
@@ -173,12 +173,12 @@ class AnalyticsController extends Controller
 
     private function exportStaff($startDate, $endDate, $format) {
         $data = User::withCount(['publications' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('date_published', [$startDate, $endDate])
-                      ->where('status', 'approved');
+                $query->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
+                      ->whereIn('status', ['approved', 'published']);
             }])
             ->whereHas('publications', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('date_published', [$startDate, $endDate])
-                      ->where('status', 'approved');
+                $query->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
+                      ->whereIn('status', ['approved', 'published']);
             })
             ->orderBy('publications_count', 'desc')
             ->get();

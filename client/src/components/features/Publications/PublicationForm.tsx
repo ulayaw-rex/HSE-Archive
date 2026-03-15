@@ -20,6 +20,12 @@ interface PublicationFormProps {
   publicationToEdit?: Publication | null;
 }
 
+const getLocalDateString = (dateInput?: string | Date) => {
+  const d = dateInput ? new Date(dateInput) : new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().split("T")[0];
+};
+
 const PublicationForm: React.FC<PublicationFormProps> = ({
   isOpen,
   onClose,
@@ -37,7 +43,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     category: "university",
     photo_credits: "",
     writer_ids: [],
-    date_published: new Date().toISOString().split("T")[0],
+    date_published: getLocalDateString(),
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -48,55 +54,50 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   const [initialData, setInitialData] = useState<string>("");
 
   useEffect(() => {
-    if (isOpen) {
-      setErrors({});
-      let startData: ExtendedCreatePublicationData;
+    if (!isOpen) return;
 
-      if (publicationToEdit) {
-        const existingDate = publicationToEdit.date_published
-          ? new Date(publicationToEdit.date_published)
-              .toISOString()
-              .split("T")[0]
-          : new Date(publicationToEdit.created_at).toISOString().split("T")[0];
+    setErrors({});
+    let startData: ExtendedCreatePublicationData;
 
-        startData = {
-          title: publicationToEdit.title,
-          byline: publicationToEdit.byline || "",
-          body: publicationToEdit.body,
-          category: publicationToEdit.category,
-          photo_credits: publicationToEdit.photo_credits || "",
-          writer_ids:
-            publicationToEdit.writers && publicationToEdit.writers.length > 0
-              ? publicationToEdit.writers.map((w: any) => w.id)
-              : currentUser
-                ? [currentUser.id]
-                : [],
-          date_published: existingDate,
-        };
-        setExistingImageUrl(publicationToEdit.image || null);
-      } else {
-        startData = {
-          title: "",
-          byline: isAdmin ? "" : currentUser ? currentUser.name : "",
-          body: "",
-          category: "university",
-          photo_credits: "",
-          writer_ids: isAdmin ? [] : currentUser ? [currentUser.id] : [],
-          date_published: new Date().toISOString().split("T")[0],
-        };
-        setExistingImageUrl(null);
-      }
+    if (publicationToEdit) {
+      const targetDate =
+        publicationToEdit.date_published || publicationToEdit.created_at;
 
-      setFormData(startData);
-      setImage(null);
-      setInitialData(JSON.stringify(startData));
+      startData = {
+        title: publicationToEdit.title,
+        byline: publicationToEdit.byline || "",
+        body: publicationToEdit.body,
+        category: publicationToEdit.category,
+        photo_credits: publicationToEdit.photo_credits || "",
+        writer_ids: publicationToEdit.writers?.length
+          ? publicationToEdit.writers.map((w: any) => w.id)
+          : currentUser
+            ? [currentUser.id]
+            : [],
+        date_published: getLocalDateString(targetDate),
+      };
+      setExistingImageUrl(publicationToEdit.image || null);
+    } else {
+      startData = {
+        title: "",
+        byline: isAdmin ? "" : currentUser?.name || "",
+        body: "",
+        category: "university",
+        photo_credits: "",
+        writer_ids: isAdmin ? [] : currentUser ? [currentUser.id] : [],
+        date_published: getLocalDateString(),
+      };
+      setExistingImageUrl(null);
     }
+
+    setFormData(startData);
+    setImage(null);
+    setInitialData(JSON.stringify(startData));
   }, [publicationToEdit, currentUser, isOpen, isAdmin]);
 
   const hasUnsavedChanges = () => {
     if (image !== null) return true;
-    const currentDataString = JSON.stringify(formData);
-    return currentDataString !== initialData;
+    return JSON.stringify(formData) !== initialData;
   };
 
   const handleCloseAttempt = () => {
@@ -121,6 +122,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
     if (!formData.body.trim()) newErrors.body = "Article content is required.";
     if (!formData.date_published)
       newErrors.date_published = "Date is required.";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -147,6 +149,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       submissionData.append("body", formData.body);
       submissionData.append("category", formData.category);
       submissionData.append("date_published", formData.date_published);
+
       if (formData.byline) submissionData.append("byline", formData.byline);
       if (formData.photo_credits)
         submissionData.append("photo_credits", formData.photo_credits);
@@ -155,18 +158,14 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
         submissionData.append("writer_ids[]", String(id)),
       );
 
-      if (image) {
-        submissionData.append("image", image);
-      }
+      if (image) submissionData.append("image", image);
 
       if (mode === "edit" && publicationToEdit) {
         submissionData.append("_method", "PUT");
         await AxiosInstance.post(
           `/publications/${publicationToEdit.publication_id}`,
           submissionData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
+          { headers: { "Content-Type": "multipart/form-data" } },
         );
       } else {
         await AxiosInstance.post("/publications", submissionData, {
@@ -189,7 +188,6 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
   return (
     <>
-      {/* ✅ Z-INDEX FIX: Changed z-50 to z-[100] to sit above navbar */}
       <div
         className="user-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={(e) => {

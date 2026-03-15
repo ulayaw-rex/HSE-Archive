@@ -84,7 +84,7 @@ const getTrendColor = (category: string, index: number) => {
 
 const Analytics: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"articles" | "staff" | "audit">(
-    "articles"
+    "articles",
   );
 
   const [articleStats, setArticleStats] = useState<ArticleStat[]>([]);
@@ -98,15 +98,15 @@ const Analytics: React.FC = () => {
     total: 0,
   });
 
-  const [viewMode, setViewMode] = useState<"weekly" | "monthly">("weekly");
+  // THE FIX: Added "all-time" and made it the default
+  const [viewMode, setViewMode] = useState<"weekly" | "monthly" | "all-time">(
+    "all-time",
+  );
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
 
-  const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 6);
-    return d.toISOString().split("T")[0];
-  });
+  // THE FIX: Default start date to the year 2000 to catch all archive entries
+  const [startDate, setStartDate] = useState("2000-01-01");
 
   const [endDate, setEndDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
@@ -177,7 +177,7 @@ const Analytics: React.FC = () => {
         if (!silent) setLoading(false);
       }
     },
-    [activeTab, startDate, endDate, viewMode]
+    [activeTab, startDate, endDate, viewMode],
   );
 
   useEffect(() => {
@@ -207,10 +207,15 @@ const Analytics: React.FC = () => {
     };
   }, [fetchMainData, pagination.current_page]);
 
-  const handleViewModeChange = (mode: "weekly" | "monthly") => {
+  // THE FIX: Updated view mode logic to handle the new 'all-time' option
+  const handleViewModeChange = (mode: "weekly" | "monthly" | "all-time") => {
     setViewMode(mode);
     const today = new Date();
-    if (mode === "monthly") {
+
+    if (mode === "all-time") {
+      setStartDate("2000-01-01");
+      setEndDate(today.toISOString().split("T")[0]);
+    } else if (mode === "monthly") {
       const year = today.getFullYear();
       const month = String(today.getMonth() + 1).padStart(2, "0");
       const lastDay = new Date(year, today.getMonth() + 1, 0).getDate();
@@ -243,7 +248,7 @@ const Analytics: React.FC = () => {
       link.href = url;
       link.setAttribute(
         "download",
-        `${activeTab}_report.${format === "excel" ? "csv" : "pdf"}`
+        `${activeTab}_report.${format === "excel" ? "csv" : "pdf"}`,
       );
       document.body.appendChild(link);
       link.click();
@@ -375,7 +380,10 @@ const Analytics: React.FC = () => {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setViewMode("weekly");
+                }}
                 className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
               />
             </div>
@@ -386,7 +394,10 @@ const Analytics: React.FC = () => {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setViewMode("weekly");
+                }}
                 className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
               />
             </div>
@@ -407,14 +418,14 @@ const Analytics: React.FC = () => {
                   </h3>
                   <div className="bg-gray-100 p-1 rounded-lg flex text-xs font-medium">
                     <button
-                      onClick={() => handleViewModeChange("weekly")}
+                      onClick={() => handleViewModeChange("all-time")}
                       className={`px-3 py-1 rounded transition-all ${
-                        viewMode === "weekly"
+                        viewMode === "all-time"
                           ? "bg-green-100 text-green-800 shadow-sm"
                           : "text-gray-500 hover:text-gray-700"
                       }`}
                     >
-                      Weekly
+                      All Time
                     </button>
                     <button
                       onClick={() => handleViewModeChange("monthly")}
@@ -425,6 +436,16 @@ const Analytics: React.FC = () => {
                       }`}
                     >
                       Monthly
+                    </button>
+                    <button
+                      onClick={() => handleViewModeChange("weekly")}
+                      className={`px-3 py-1 rounded transition-all ${
+                        viewMode === "weekly"
+                          ? "bg-green-100 text-green-800 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Weekly
                     </button>
                   </div>
                 </div>
@@ -463,6 +484,8 @@ const Analytics: React.FC = () => {
                           new Date(str).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
+                            year:
+                              viewMode === "all-time" ? "numeric" : undefined,
                           })
                         }
                         minTickGap={30}
@@ -620,7 +643,7 @@ const Analytics: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {new Date(
-                              stat.date_published || stat.created_at
+                              stat.date_published || stat.created_at,
                             ).toLocaleDateString()}
                           </td>
                         </tr>
@@ -680,7 +703,7 @@ const Analytics: React.FC = () => {
                                   style={{
                                     width: `${Math.min(
                                       stat.article_count * 10,
-                                      100
+                                      100,
                                     )}%`,
                                   }}
                                 ></div>

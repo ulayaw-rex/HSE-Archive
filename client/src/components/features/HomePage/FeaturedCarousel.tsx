@@ -10,7 +10,7 @@ const PrevArrow = (props: any) => {
   const { onClick } = props;
   return (
     <div
-      className="absolute left-0 top-0 bottom-0 w-[10%] z-20 flex items-center justify-start pl-4 cursor-pointer group/arrow hover:bg-gradient-to-r hover:from-black/40 hover:to-transparent transition-all duration-500"
+      className="absolute left-0 top-0 bottom-0 w-[10%] z-10 flex items-center justify-start pl-4 cursor-pointer group/arrow hover:bg-gradient-to-r hover:from-black/40 hover:to-transparent transition-all duration-500"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -28,7 +28,7 @@ const NextArrow = (props: any) => {
   const { onClick } = props;
   return (
     <div
-      className="absolute right-0 top-0 bottom-0 w-[10%] z-20 flex items-center justify-end pr-4 cursor-pointer group/arrow hover:bg-gradient-to-l hover:from-black/40 hover:to-transparent transition-all duration-500"
+      className="absolute right-0 top-0 bottom-0 w-[10%] z-10 flex items-center justify-end pr-4 cursor-pointer group/arrow hover:bg-gradient-to-l hover:from-black/40 hover:to-transparent transition-all duration-500"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -141,7 +141,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
       <Slider {...settings}>
         {articles.map((article, index) => {
           const displayDate = new Date(
-            article.date_published || article.created_at
+            article.date_published || article.created_at,
           );
           const categoryTextColor = getCategoryTextColor(article.category);
           const writerNames = getArticleWriters(article);
@@ -166,8 +166,8 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                 <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40"></div>
               </div>
 
-              <div className="absolute inset-0 z-10 flex items-end pb-24 pointer-events-none">
-                <div className="w-full mx-auto px-6 md:px-12 relative z-20">
+              <div className="absolute inset-0 z-30 flex items-end pb-24 pointer-events-none">
+                <div className="w-full mx-auto px-6 md:px-12 relative z-30">
                   <div className="w-full pointer-events-auto">
                     <div className="mb-4 animate-reveal-1">
                       <div className="flex items-center gap-3">
@@ -212,7 +212,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
 
                       <Link
                         to={`/article/${article.publication_id}`}
-                        className="ml-auto px-6 py-2 bg-white text-black hover:bg-green-600 hover:text-white text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
+                        className="ml-auto mr-16 md:mr-[7%] px-6 py-2 bg-white text-black hover:bg-green-600 hover:text-white text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
                       >
                         Read Story
                       </Link>
