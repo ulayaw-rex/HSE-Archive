@@ -70,8 +70,8 @@ AxiosInstance.interceptors.response.use(
       const isAuthCheck = error.config?.url?.endsWith("/me");
 
       if (!isAuthRoute && !isAuthCheck) {
-        toast.info("Your session has expired. Please log in again.");
-        window.location.href = "/login";
+        toast.info("Your session has expired.");
+        window.location.href = "/";
       }
     } else if (status === 419) {
       csrfInitialized = false;
