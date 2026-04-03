@@ -27,7 +27,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fadeIn">
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={isLoading ? undefined : onClose}
