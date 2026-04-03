@@ -1,34 +1,13 @@
-import React, { useState } from "react";
-import DashboardStatsCards, {
-  type DashboardStats,
-} from "../../components/features/Admin/DashboardStats";
+import React from "react";
+import DashboardStatsCards from "../../components/features/Admin/DashboardStats";
 import AxiosInstance from "../../AxiosInstance";
 import { DashboardCharts } from "../../components/features/Admin/DashboardCharts";
 import { MostViewedChart } from "../../components/features/Admin/MostViewedCharts";
 import { RecentActivity } from "../../components/features/Admin/RecentActivity";
 import PendingReviewsWidget from "../../components/features/Admin/PendingReviewsWidget";
-import type { Publication } from "../../types/Publication";
 import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
 import CreditRequestsWidget from "../../components/features/Admin/CreditRequestsWidget";
 import { useQuery } from "@tanstack/react-query";
-
-interface PendingUser {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  course: string;
-  position: string;
-  created_at: string;
-}
-
-interface CreditRequest {
-  id: number;
-  user: { id: number; name: string; email: string };
-  requestable_type: string;
-  requestable: { id: number; title: string } | null;
-  created_at: string;
-}
 
 const AdminPage: React.FC = () => {
   const fetchDashboardData = async () => {

@@ -72,7 +72,7 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number) => [`${value} Views`, ""]}
+              formatter={(value: number | undefined) => [`${value || 0} Views`, ""]}
               contentStyle={{
                 borderRadius: "8px",
                 border: "none",

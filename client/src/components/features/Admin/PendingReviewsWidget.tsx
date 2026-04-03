@@ -24,7 +24,7 @@ const PendingReviewsWidget: React.FC<PendingReviewsWidgetProps> = ({
     null
   );
 
-  const pendingItems = publications.filter((p) => p.status === "pending");
+  const pendingItems = publications.filter((p) => p.status === "submitted");
 
   const handleConfirmApprove = async () => {
     if (!articleToApprove) return;
