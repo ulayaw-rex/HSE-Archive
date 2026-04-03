@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { FaGraduationCap, FaUserTie, FaCalendarAlt } from "react-icons/fa";
 import { useDataCache } from "../../context/DataContext";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { AboutSkeleton } from "../../components/common/Skeleton";
 
 interface Member {
   id: number;
@@ -151,11 +151,7 @@ const About: React.FC = () => {
   );
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner />
-      </div>
-    );
+    return <AboutSkeleton />;
   }
 
   return (

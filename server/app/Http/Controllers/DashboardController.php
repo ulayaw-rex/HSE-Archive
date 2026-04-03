@@ -58,74 +58,86 @@ class DashboardController extends Controller
             ];
         });
 
-        
-        $totalArticles = Publication::count();
-        $popular = Publication::orderBy('views', 'desc')->first();
-        $mostPopularArticle = $popular ? [
-            'title' => $popular->title,
-            'views' => $popular->views,
-            'date' => $popular->created_at->format('M d, Y') 
-        ] : null;
+        $cachedLists = Cache::remember('admin_dashboard_lists', 60, function () {
+            $totalArticles = Publication::count();
+            $popular = Publication::orderBy('views', 'desc')->first();
+            $mostPopularArticle = $popular ? [
+                'title' => $popular->title,
+                'views' => $popular->views,
+                'date' => $popular->created_at->format('M d, Y') 
+            ] : null;
 
-        $articles = Publication::select('publication_id', 'title', 'created_at')
-            ->latest()->take(5)->get()
-            ->map(fn($item) => [
-                'id' => 'art-' . $item->publication_id,
-                'type' => 'article',
-                'message' => 'New article: ' . Str::limit($item->title, 25),
-                'time' => $item->created_at->diffForHumans(),
-                'timestamp' => $item->created_at
-            ]);
+            $articles = Publication::select('publication_id', 'title', 'created_at')
+                ->latest()->take(5)->get()
+                ->map(fn($item) => [
+                    'id' => 'art-' . $item->publication_id,
+                    'type' => 'article',
+                    'message' => 'New article: ' . Str::limit($item->title, 25),
+                    'time' => $item->created_at->diffForHumans(),
+                    'timestamp' => $item->created_at
+                ]);
 
-        $printMedia = PrintMedia::select('print_media_id', 'title', 'created_at')
-            ->latest()->take(5)->get()
-            ->map(fn($item) => [
-                'id' => 'pm-' . $item->print_media_id,
-                'type' => 'printmedia', 
-                'message' => 'New print issue: ' . Str::limit($item->title, 25),
-                'time' => $item->created_at->diffForHumans(),
-                'timestamp' => $item->created_at
-            ]);
-        
-        $recentUploads = $articles->merge($printMedia)->sortByDesc('timestamp')->values()->take(6);
+            $printMedia = PrintMedia::select('print_media_id', 'title', 'created_at')
+                ->latest()->take(5)->get()
+                ->map(fn($item) => [
+                    'id' => 'pm-' . $item->print_media_id,
+                    'type' => 'printmedia', 
+                    'message' => 'New print issue: ' . Str::limit($item->title, 25),
+                    'time' => $item->created_at->diffForHumans(),
+                    'timestamp' => $item->created_at
+                ]);
+            
+            $recentUploads = $articles->merge($printMedia)->sortByDesc('timestamp')->values()->take(6);
 
-        $recentComments = Comment::with('user:id,name')->latest()->take(6)->get()
-            ->map(fn($item) => [
-                'id' => 'com-' . $item->id,
-                'type' => 'comment',
-                'message' => ($item->user ? $item->user->name : 'Unknown') . ' commented',
-                'subtext' => Str::limit($item->body, 30), 
-                'time' => $item->created_at->diffForHumans(),
-            ]);
+            $recentComments = Comment::with('user:id,name')->latest()->take(6)->get()
+                ->map(fn($item) => [
+                    'id' => 'com-' . $item->id,
+                    'type' => 'comment',
+                    'message' => ($item->user ? $item->user->name : 'Unknown') . ' commented',
+                    'subtext' => Str::limit($item->body, 30), 
+                    'time' => $item->created_at->diffForHumans(),
+                ]);
 
-        $recentUsers = User::select('id', 'name', 'email', 'created_at')->latest()->take(6)->get()
-            ->map(fn($item) => [
-                'id' => 'usr-' . $item->id,
-                'type' => 'user',
-                'message' => 'New user registered',
-                'subtext' => $item->name,
-                'time' => $item->created_at->diffForHumans(),
-            ]);
+            $recentUsers = User::select('id', 'name', 'email', 'created_at')->latest()->take(6)->get()
+                ->map(fn($item) => [
+                    'id' => 'usr-' . $item->id,
+                    'type' => 'user',
+                    'message' => 'New user registered',
+                    'subtext' => $item->name,
+                    'time' => $item->created_at->diffForHumans(),
+                ]);
 
-        $pendingUsers = User::where('status', 'pending')->latest()->get(); 
-        $pendingReviews = Publication::where('status', 'pending')->latest()->get();
-        
-        $creditRequests = CreditRequest::with(['user:id,name,email', 'requestable'])
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
+            $pendingUsers = User::where('status', 'pending')->latest()->get(); 
+            $pendingReviews = Publication::where('status', 'pending')->latest()->get();
+            
+            $creditRequests = CreditRequest::with(['user:id,name,email', 'requestable'])
+                ->where('status', 'pending')
+                ->latest()
+                ->get();
 
-        return response()->json([
-            'stats' => array_merge($cachedStats, [
+            return [
                 'totalArticles' => $totalArticles,
                 'mostPopularArticle' => $mostPopularArticle,
                 'activityUploads' => $recentUploads,
                 'activityComments' => $recentComments,
                 'activityUsers' => $recentUsers,
+                'pendingUsers' => $pendingUsers,
+                'pendingReviews' => $pendingReviews,
+                'creditRequests' => $creditRequests,
+            ];
+        });
+
+        return response()->json([
+            'stats' => array_merge($cachedStats, [
+                'totalArticles' => $cachedLists['totalArticles'],
+                'mostPopularArticle' => $cachedLists['mostPopularArticle'],
+                'activityUploads' => $cachedLists['activityUploads'],
+                'activityComments' => $cachedLists['activityComments'],
+                'activityUsers' => $cachedLists['activityUsers'],
             ]),
-            'pendingUsers' => $pendingUsers,
-            'pendingReviews' => $pendingReviews,
-            'creditRequests' => $creditRequests,
+            'pendingUsers' => $cachedLists['pendingUsers'],
+            'pendingReviews' => $cachedLists['pendingReviews'],
+            'creditRequests' => $cachedLists['creditRequests'],
         ]);
     }
 }

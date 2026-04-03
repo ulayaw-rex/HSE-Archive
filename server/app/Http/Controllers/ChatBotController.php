@@ -17,7 +17,7 @@ class ChatBotController extends Controller
 
         $userMessage = $request->input('message');
         $history = $request->input('history', []); 
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = config('services.gemini.api_key');
 
         $systemInstruction = <<<EOT
             You are the AI assistant for 'The Hillside Echo', the official student publication of Filamer Christian University.
@@ -58,7 +58,7 @@ class ChatBotController extends Controller
             'parts' => [['text' => $userMessage]]
         ];
 
-        $model = 'gemini-flash-latest'; 
+        $model = config('services.gemini.model', 'gemini-flash-latest');
         $client = new Client();
 
         try {
@@ -76,7 +76,6 @@ class ChatBotController extends Controller
                         'maxOutputTokens' => 1000,
                     ]
                 ],
-                'verify' => false, 
             ]);
 
             $body = json_decode($response->getBody()->getContents(), true);

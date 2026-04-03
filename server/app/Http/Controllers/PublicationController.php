@@ -8,25 +8,15 @@ use App\Models\User;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Laravel\Facades\Image; 
+use App\Http\Controllers\Traits\FormatsPublications;
+use App\Http\Requests\StorePublicationRequest;
 
 class PublicationController extends Controller
 {
-    private function formatPublication($publication)
-    {
-        $publication->image = $publication->image_path 
-            ? asset('storage/' . $publication->image_path) 
-            : null;
-
-        $publication->thumbnail = $publication->thumbnail_path 
-            ? asset('storage/' . $publication->thumbnail_path) 
-            : $publication->image; 
-
-        return $publication;
-    }
+    use FormatsPublications;
 
 
     public function index(Request $request)
@@ -36,18 +26,11 @@ class PublicationController extends Controller
         $query = Publication::withoutGlobalScopes(); 
 
         if ($user) {
-            $isAdmin = $user->role === 'admin';
-            $pos = strtolower($user->position ?? '');
-            
-            $isEIC = str_contains($pos, 'chief');
-            $isAssociate = str_contains($pos, 'associate');
-            $isDirector = str_contains($pos, 'director');
-
-            if ($isAdmin || $isDirector) {
+            if ($user->isAdmin() || $user->isDirector()) {
                 $query->orderByRaw("FIELD(status, 'submitted', 'reviewed', 'approved', 'draft', 'returned', 'published') ASC");
                 $query->orderBy('created_at', 'desc');
             
-            } elseif ($isEIC) {
+            } elseif ($user->isEditorInChief()) {
                 $query->where(function($q) use ($user) {
                     $q->whereIn('status', ['reviewed', 'approved', 'published'])
                       ->orWhere('user_id', $user->id); 
@@ -55,7 +38,7 @@ class PublicationController extends Controller
                 $query->orderByRaw("FIELD(status, 'reviewed', 'approved', 'submitted', 'draft', 'returned', 'published') ASC");
                 $query->orderBy('created_at', 'desc');
 
-            } elseif ($isAssociate) {
+            } elseif ($user->isAssociateEditor()) {
                 $query->where(function($q) use ($user) {
                     $q->whereIn('status', ['submitted', 'reviewed', 'published'])
                       ->orWhere('user_id', $user->id);
@@ -85,23 +68,15 @@ class PublicationController extends Controller
             return $this->formatPublication($publication);
         });
 
-        return response()->json($publications)
-            ->header('X-Debug-Auth', $user ? "User: {$user->id}" : "Guest");
+        return response()->json($publications);
     }
 
     public function show(Publication $publication, Request $request)
     {
         $user = Auth::guard('sanctum')->user();
         
-        $isAdmin = $user && $user->role === 'admin';
-        $isManagement = false;
-        
-        if ($user && !empty($user->position)) {
-             $pos = strtolower($user->position);
-             if (str_contains($pos, 'editor') || str_contains($pos, 'director')) {
-                 $isManagement = true;
-             }
-        }
+        $isAdmin = $user && $user->isAdmin();
+        $isManagement = $user && $user->isEditorial();
 
         $isWriter = $user && ($publication->user_id === $user->id || $publication->writers->contains($user->id));
 
@@ -128,25 +103,9 @@ class PublicationController extends Controller
         return response()->json($this->formatPublication($publication));
     }
 
-    public function store(Request $request)
+    public function store(StorePublicationRequest $request)
     {
-        $currentUser = Auth::guard('sanctum')->user();
-        if (!$currentUser) return response()->json(['message' => 'Unauthorized'], 401);
-
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string',
-            'body' => 'required|string',
-            'category' => 'required|string',
-            'writer_ids' => 'required|array',
-            'writer_ids.*' => 'exists:users,id',
-            'image' => 'nullable|image|max:51200', 
-            'byline' => 'nullable|string',
-            'date_published' => 'nullable|date',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        $currentUser = $request->user();
 
         $finalByline = $request->byline;
         if (empty($finalByline)) {
@@ -161,7 +120,7 @@ class PublicationController extends Controller
             'category' => $request->category,
             'photo_credits' => $request->photo_credits,
             'byline' => $finalByline,
-            'status' => 'submitted', 
+            'status' => $request->boolean('save_as_draft') ? 'draft' : 'submitted',
             'views' => 0,
             'date_published' => $request->date_published, 
         ];
@@ -197,15 +156,8 @@ class PublicationController extends Controller
         if (!$user) return response()->json(['message' => 'Unauthorized'], 401);
         
         $isAuthor = $user->id === $publication->user_id;
-        $isAdmin = $user->role === 'admin';
-        
-        $isManagement = false;
-        if (!empty($user->position)) {
-             $pos = strtolower($user->position);
-             if (str_contains($pos, 'editor') || str_contains($pos, 'director')) {
-                 $isManagement = true;
-             }
-        }
+        $isAdmin = $user->isAdmin();
+        $isManagement = $user->isEditorial();
 
         $lockedStatuses = ['reviewed', 'approved', 'published'];
         if ($isAuthor && in_array($publication->status, $lockedStatuses) && !$isManagement && !$isAdmin) {
@@ -260,9 +212,6 @@ class PublicationController extends Controller
         $user = Auth::guard('sanctum')->user();
         $publication = Publication::withoutGlobalScopes()->findOrFail($id); 
         $action = $request->input('action'); 
-        $userPos = strtolower($user->position ?? '');
-        $isAdmin = $user->role === 'admin';
-
         if ($action === 'submit') {
             $publication->status = 'submitted';
             $publication->save();
@@ -270,7 +219,7 @@ class PublicationController extends Controller
         }
 
         if ($action === 'review') {
-            if (!$isAdmin && !str_contains($userPos, 'associate') && !str_contains($userPos, 'chief')) {
+            if (!$user->isAdmin() && !$user->isAssociateEditor() && !$user->isEditorInChief()) {
                 return response()->json(['error' => 'Unauthorized. Only Associate Editors can review.'], 403);
             }
             
@@ -282,11 +231,11 @@ class PublicationController extends Controller
         }
 
         if ($action === 'approve') {
-            if (!$isAdmin && !str_contains($userPos, 'chief')) {
+            if (!$user->isAdmin() && !$user->isEditorInChief()) {
                 return response()->json(['error' => 'Unauthorized. Only the EIC can approve.'], 403);
             }
 
-            if ($publication->status !== 'reviewed' && !$isAdmin) {
+            if ($publication->status !== 'reviewed' && !$user->isAdmin()) {
                 return response()->json(['error' => 'Article must be reviewed by an Associate Editor first.'], 422);
             }
 
@@ -298,11 +247,11 @@ class PublicationController extends Controller
         }
 
         if ($action === 'publish') {
-            if (!$isAdmin && !str_contains($userPos, 'chief')) {
+            if (!$user->isAdmin() && !$user->isEditorInChief()) {
                 return response()->json(['error' => 'Unauthorized.'], 403);
             }
 
-            if ($publication->status !== 'approved' && !$isAdmin) {
+            if ($publication->status !== 'approved' && !$user->isAdmin()) {
                 return response()->json(['error' => 'Article must be approved first.'], 422);
             }
 
@@ -317,9 +266,7 @@ class PublicationController extends Controller
         }
 
         if ($action === 'return') {
-            $isManagement = $isAdmin || str_contains($userPos, 'editor') || str_contains($userPos, 'director');
-            
-            if (!$isManagement) {
+            if (!$user->isEditorial()) {
                  return response()->json(['error' => 'Unauthorized'], 403);
             }
             

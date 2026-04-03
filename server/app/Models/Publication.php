@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany; 
 
 class Publication extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'publications';
 
@@ -28,8 +29,13 @@ class Publication extends Model
         'category',
         'photo_credits',
         'image_path',
+        'thumbnail_path',
         'status',
         'date_published',
+        'reviewed_by',
+        'approved_by',
+        'reviewed_at',
+        'approved_at',
     ];
 
     public function comments(): HasMany

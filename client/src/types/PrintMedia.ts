@@ -1,3 +1,8 @@
+export interface MediaOwner {
+  id: number;
+  name: string;
+}
+
 export interface PrintMedia {
   print_media_id: number;
   title: string;
@@ -8,6 +13,7 @@ export interface PrintMedia {
   user_id?: number;
   owner_name?: string | null;
   has_pending_request?: boolean;
+  owners?: MediaOwner[];
   file_path: string;
   file_url: string | null;
   thumbnail_path?: string;

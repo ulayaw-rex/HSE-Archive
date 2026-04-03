@@ -18,9 +18,7 @@ export interface Publication {
     | "reviewed"
     | "approved"
     | "published"
-    | "returned"
-    | "rejected"
-    | "pending";
+    | "returned";
   writers?: User[];
   thumbnail?: string;
 }

@@ -16,6 +16,7 @@ import AxiosInstance from "./AxiosInstance";
 import ScrollToTop from "./components/common/ScrollToTop";
 import Chatbot from "./components/common/Chatbot";
 import NotFoundPage from "./components/common/NotFound";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import { adminSidebarItems } from "./pages/Admin/SidebarItems";
@@ -23,6 +24,7 @@ import SiteRoutes from "./routes/SiteRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import Maintenance from "./pages/Maintenance";
 import LoginPage from "./pages/Maintenance/LoginPage";
+import VerifyEmailPage from "./pages/Maintenance/VerifyEmailPage";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -91,6 +93,7 @@ const AppContent = () => {
     <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         <Route element={<SiteLayout />}>
           {SiteRoutes}
@@ -131,16 +134,33 @@ const AppContent = () => {
   );
 };
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, 
+      refetchInterval: 30000,
+    },
+  },
+});
+
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <AuthProvider>
-        <DataProvider>
-          <AppContent />
-        </DataProvider>
-      </AuthProvider>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ErrorBoundary>
+          <ScrollToTop />
+          <AuthProvider>
+            <DataProvider>
+              <AppContent />
+            </DataProvider>
+          </AuthProvider>
+        </ErrorBoundary>
+      </Router>
+    </QueryClientProvider>
   );
 }
 

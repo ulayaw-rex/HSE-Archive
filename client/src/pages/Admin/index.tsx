@@ -10,7 +10,7 @@ import PendingReviewsWidget from "../../components/features/Admin/PendingReviews
 import type { Publication } from "../../types/Publication";
 import PendingUsersWidget from "../../components/features/Admin/PendingUsersWidget";
 import CreditRequestsWidget from "../../components/features/Admin/CreditRequestsWidget";
-import { usePolling } from "../../hooks/usePolling";
+import { useQuery } from "@tanstack/react-query";
 
 interface PendingUser {
   id: number;
@@ -31,39 +31,26 @@ interface CreditRequest {
 }
 
 const AdminPage: React.FC = () => {
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
-    null
-  );
-
-  const [pendingReviews, setPendingReviews] = useState<Publication[]>([]);
-  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
-  const [creditRequests, setCreditRequests] = useState<CreditRequest[]>([]);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadAllData = async () => {
-    try {
-      if (!dashboardStats) setLoading(true);
-      setError(null);
-
-      const res = await AxiosInstance.get("/admin/dashboard");
-
-      setDashboardStats(res.data.stats);
-      setPendingUsers(res.data.pendingUsers);
-      setPendingReviews(res.data.pendingReviews);
-      setCreditRequests(res.data.creditRequests);
-    } catch (err) {
-      console.error("Error fetching dashboard:", err);
-      if (!dashboardStats) {
-        setError("Failed to fetch dashboard data.");
-      }
-    } finally {
-      setLoading(false);
-    }
+  const fetchDashboardData = async () => {
+    const res = await AxiosInstance.get("/admin/dashboard");
+    return res.data;
   };
 
-  usePolling(loadAllData, 10000);
+  const { data, isLoading: loading, error: queryError, refetch } = useQuery({
+    queryKey: ["adminDashboard"],
+    queryFn: fetchDashboardData,
+  });
+
+  const dashboardStats = data?.stats;
+  const pendingUsers = data?.pendingUsers || [];
+  const pendingReviews = data?.pendingReviews || [];
+  const creditRequests = data?.creditRequests || [];
+
+  const error = queryError ? "Failed to fetch dashboard data." : null;
+
+  const loadAllData = () => {
+    refetch();
+  };
 
   const AdminSkeleton = () => (
     <div className="animate-pulse space-y-10">
@@ -81,10 +68,12 @@ const AdminPage: React.FC = () => {
     <div className="admin-container bg-gray-50 min-h-screen">
       <div className="admin-content p-6 max-w-7xl mx-auto">
         <div className="admin-header mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1">
-            Overview of system performance and pending tasks.
-          </p>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-500 mt-1">
+              Overview of system performance and pending tasks.
+            </p>
+          </div>
         </div>
 
         {loading && !dashboardStats ? (

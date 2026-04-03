@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\CommentHistory; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreCommentRequest;
 
 class CommentController extends Controller
 {
@@ -20,12 +21,8 @@ class CommentController extends Controller
         return response()->json($comments);
     }
 
-    public function store(Request $request, Publication $publication)
+    public function store(StoreCommentRequest $request, Publication $publication)
     {
-        $request->validate([
-            'body' => 'required|string|max:5000',
-        ]);
-
         $comment = $publication->comments()->create([
             'body' => $request->body,
             'user_id' => Auth::id(),
@@ -36,26 +33,18 @@ class CommentController extends Controller
         return response()->json($comment, 201);
     }
 
-    public function update(Request $request, Comment $comment)
+    public function update(StoreCommentRequest $request, Comment $comment)
     {
-        $user = $request->user();
-        
-        if ($user->id !== $comment->user_id && $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $comment);
 
-        $validated = $request->validate([
-            'body' => 'required|string|max:5000',
-        ]);
-
-        if ($comment->body !== $validated['body']) {
+        if ($comment->body !== $request->validated()['body']) {
             
             CommentHistory::create([
                 'comment_id' => $comment->id,
                 'body' => $comment->body 
             ]);
 
-            $comment->body = $validated['body'];
+            $comment->body = $request->validated()['body'];
             $comment->is_edited = true;
             $comment->save();
         }
@@ -65,11 +54,7 @@ class CommentController extends Controller
 
     public function destroy(Request $request, Comment $comment)
     {
-        $user = $request->user();
-        
-        if ($user->id !== $comment->user_id && $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('delete', $comment);
 
         $comment->delete();
 

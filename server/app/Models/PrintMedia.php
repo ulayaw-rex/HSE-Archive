@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PrintMedia extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'print_media';
     protected $primaryKey = 'print_media_id';
@@ -20,16 +21,13 @@ class PrintMedia extends Model
         'type',
         'description',
         'byline',
-        'date',
         'file_path',
         'original_filename',
         'thumbnail_path',
-        'image_path',
         'date_published'
     ];
 
     protected $casts = [
-        'date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

@@ -1,14 +1,7 @@
 import { Route } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage";
-import SportsPage from "../pages/Sports";
+import DynamicCategoryPage from "../pages/News/DynamicCategoryPage";
 import NewsPage from "../pages/News";
-import UniversityNewsPage from "../pages/News/University";
-import LocalNewsPage from "../pages/News/Local";
-import NationalNewsPage from "../pages/News/National";
-import EntertainmentNewsPage from "../pages/News/Entertainment";
-import SciTechNewsPage from "../pages/News/SciTech";
-import OpinionsPage from "../pages/Opinions";
-import LiteraryPage from "../pages/Literary";
 import PrintMediaPage from "../pages/PrintMedia";
 import AboutPage from "../pages/About";
 import ArticleDetail from "../pages/News/ArticleDetail";
@@ -22,21 +15,14 @@ const SiteRoutes = (
     {/* Home */}
     <Route path="/" element={<HomePage />} />
 
-    {/* News Categories */}
-    <Route path="/news" element={<NewsPage />} />
-    <Route path="/news/university" element={<UniversityNewsPage />} />
-    <Route path="/news/local" element={<LocalNewsPage />} />
-    <Route path="/news/national" element={<NationalNewsPage />} />
-    <Route path="/news/entertainment" element={<EntertainmentNewsPage />} />
-    <Route path="/news/sci-tech" element={<SciTechNewsPage />} />
+    {/* Dynamic Categories */}
+    <Route path="/category/:category" element={<DynamicCategoryPage />} />
 
     {/* Single Article View (Public Read) */}
     <Route path="/news/:idOrSlug" element={<ArticleDetail />} />
 
-    {/* Main Sections */}
-    <Route path="/sports" element={<SportsPage />} />
-    <Route path="/opinion" element={<OpinionsPage />} />
-    <Route path="/literary" element={<LiteraryPage />} />
+    {/* Main Sections (Still migrating to React Query) */}
+    <Route path="/news" element={<NewsPage />} />
     <Route path="/print-media" element={<PrintMediaPage />} />
     <Route path="/about" element={<AboutPage />} />
 

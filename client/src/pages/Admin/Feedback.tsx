@@ -206,7 +206,7 @@ const Feedback: React.FC = () => {
     if (isManualRefresh) setLoading(true);
     try {
       const res = await AxiosInstance.get("/admin/contact-submissions");
-      setMessages(res.data);
+      setMessages(Array.isArray(res.data) ? res.data : (res.data.data || []));
       if (isManualRefresh) toast.success("Inbox updated");
     } catch (error) {
       toast.error("Failed to load messages", { toastId: "fetchError" });

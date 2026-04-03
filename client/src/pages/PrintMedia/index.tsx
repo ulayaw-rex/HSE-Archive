@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import AxiosInstance from "../../AxiosInstance";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { PrintMediaSkeleton } from "../../components/common/Skeleton";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import {
@@ -17,7 +17,7 @@ import {
   FaTimesCircle,
   FaSpinner,
 } from "react-icons/fa";
-import type { PrintMedia } from "../../types/PrintMedia";
+import type { PrintMedia, MediaOwner } from "../../types/PrintMedia";
 import { useDataCache } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
 import "../../App.css";
@@ -25,16 +25,7 @@ import "../../App.css";
 import { useNavigate } from "react-router-dom";
 import { usePolling } from "../../hooks/usePolling";
 
-interface MediaOwner {
-  id: number;
-  name: string;
-}
 
-interface ExtendedPrintMedia extends PrintMedia {
-  owners?: MediaOwner[];
-  has_pending_request?: boolean;
-  owner_name?: string;
-}
 
 interface StatusModalState {
   isOpen: boolean;
@@ -67,9 +58,9 @@ const PrintMediaPage: React.FC = () => {
   const navigate = useNavigate();
   const { cache, updateCache } = useDataCache();
 
-  const [printMediaList, setPrintMediaList] = useState<ExtendedPrintMedia[]>(
+  const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>(
     Array.isArray(cache.printMedia)
-      ? (cache.printMedia as ExtendedPrintMedia[])
+      ? (cache.printMedia as PrintMedia[])
       : [],
   );
 
@@ -78,10 +69,10 @@ const PrintMediaPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedMedia, setSelectedMedia] = useState<ExtendedPrintMedia | null>(
+  const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(
     null,
   );
-  const [claimTarget, setClaimTarget] = useState<ExtendedPrintMedia | null>(
+  const [claimTarget, setClaimTarget] = useState<PrintMedia | null>(
     null,
   );
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
@@ -103,7 +94,7 @@ const PrintMediaPage: React.FC = () => {
 
       const response = await AxiosInstance.get("/print-media?per_page=100");
 
-      let dataToSet: ExtendedPrintMedia[] = [];
+      let dataToSet: PrintMedia[] = [];
 
       if (response.data && Array.isArray(response.data.data)) {
         dataToSet = response.data.data;
@@ -127,7 +118,7 @@ const PrintMediaPage: React.FC = () => {
     setStatusModal((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const handleClaimClick = (e: React.MouseEvent, item: ExtendedPrintMedia) => {
+  const handleClaimClick = (e: React.MouseEvent, item: PrintMedia) => {
     e.stopPropagation();
     setClaimTarget(item);
     setIsClaimModalOpen(true);
@@ -188,7 +179,7 @@ const PrintMediaPage: React.FC = () => {
 
   const handleDownload = async (
     e: React.MouseEvent,
-    item: ExtendedPrintMedia,
+    item: PrintMedia,
   ) => {
     e.stopPropagation();
 
@@ -215,7 +206,7 @@ const PrintMediaPage: React.FC = () => {
     navigate(`/profile/${userId}`);
   };
 
-  const handleCardClick = (e: React.MouseEvent, item: ExtendedPrintMedia) => {
+  const handleCardClick = (e: React.MouseEvent, item: PrintMedia) => {
     if ((e.target as HTMLElement).closest("button")) return;
     if ((e.target as HTMLElement).closest(".user-link")) return;
     if ((e.target as HTMLElement).closest(".owner-chip")) return;
@@ -227,7 +218,7 @@ const PrintMediaPage: React.FC = () => {
     }
   };
 
-  const getOwners = (item: ExtendedPrintMedia): MediaOwner[] => {
+  const getOwners = (item: PrintMedia): MediaOwner[] => {
     if (item.owners && Array.isArray(item.owners) && item.owners.length > 0) {
       return item.owners;
     }
@@ -428,8 +419,15 @@ const PrintMediaPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <LoadingSpinner />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-8">
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
+            <PrintMediaSkeleton />
           </div>
         ) : (
           <>

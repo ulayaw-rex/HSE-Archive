@@ -7,21 +7,11 @@ use App\Models\Publication;
 use App\Models\PrintMedia; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Traits\FormatsPublications;
 
 class UserProfileController extends Controller
 {
-    private function formatPublication($publication)
-    {
-        $publication->image = $publication->image_path 
-            ? asset('storage/' . $publication->image_path) 
-            : null;
-
-        $publication->thumbnail = $publication->thumbnail_path 
-            ? asset('storage/' . $publication->thumbnail_path) 
-            : $publication->image; 
-
-        return $publication;
-    }
+    use FormatsPublications;
 
     private function formatPrintMedia($media)
     {
@@ -49,13 +39,12 @@ class UserProfileController extends Controller
         }
 
         $isOwner = $currentUser && $currentUser->id === $user->id;
-        $isAdmin = $currentUser && $currentUser->role === 'admin';
+        $isAdmin = $currentUser && $currentUser->isAdmin();
         
-        $pos = strtolower($currentUser->position ?? '');
-        $isEIC = str_contains($pos, 'chief');
-        $isAssociate = str_contains($pos, 'associate');
-        $isDirector = str_contains($pos, 'director');
-        $isManagement = $isAdmin || $isEIC || $isAssociate || $isDirector;
+        $isEIC = $currentUser && $currentUser->isEditorInChief();
+        $isAssociate = $currentUser && $currentUser->isAssociateEditor();
+        $isDirector = $currentUser && $currentUser->isDirector();
+        $isManagement = $currentUser && $currentUser->isManagement();
 
         $query = Publication::withoutGlobalScopes()
             ->where(function($q) use ($user) {
@@ -101,6 +90,6 @@ class UserProfileController extends Controller
             'articles' => $articles,
             'print_media' => $printMedia,
             'review_queue' => $reviewQueue 
-        ])->header('X-Debug-Auth', $currentUser ? "User: {$currentUser->id}" : "Guest");
+        ]);
     }
 }

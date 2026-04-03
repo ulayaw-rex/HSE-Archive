@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -19,6 +21,11 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+            \App\Models\AuditLog::create([
+                'action' => 'Failed Login Attempt',
+                'details' => "Email: {$credentials['email']}",
+                'ip_address' => $request->ip(),
+            ]);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -94,6 +101,8 @@ class AuthController extends Controller
             'status' => 'pending' 
         ]);
 
+        event(new Registered($user));
+
         return response()->json([
             'message' => 'Registration successful! Please wait for admin approval.'
         ], 201);
@@ -113,8 +122,43 @@ class AuthController extends Controller
                 'position' => $user->position, 
                 'course' => $user->course,    
                 'status' => $user->status,    
+                'email_verified_at' => $user->email_verified_at,
             ],
         ]);
+    }
+
+    public function resendVerificationEmail(Request $request): JsonResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Already verified']);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification link sent']);
+    }
+
+    public function verifyEmail(Request $request, $id, $hash): JsonResponse
+    {
+        if (!$request->hasValidSignature()) {
+            return response()->json(['message' => 'Invalid or expired verification URL.'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            return response()->json(['message' => 'Invalid hash'], 400);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Already verified'], 200);
+        }
+
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
+
+        return response()->json(['message' => 'Successfully verified email'], 200);
     }
 
     public function logout(Request $request): JsonResponse

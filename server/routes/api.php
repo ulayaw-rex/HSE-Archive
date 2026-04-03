@@ -15,21 +15,29 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PasswordResetController;
 
 /*
 | PUBLIC ROUTES (No Login Required)
 */
 
 //  Authentication 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:3,1');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:5,1');
+
+// Email Verification
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
 //  Homepage & News 
 Route::get('/home-data', [HomeController::class, 'index']);
 Route::get('/publications/news-hub', [HomeController::class, 'getNewsHubData']);
 
 //  Publications (Read Access) 
-Route::get('/publications/search', [PublicationController::class, 'search']);
+Route::get('/publications/search', [PublicationController::class, 'search'])->middleware('throttle:30,1');
 Route::get('/publications/recent', [PublicationController::class, 'recent']);
 Route::get('/publications/category/{category}', [PublicationController::class, 'getByCategory']);
 Route::get('/publications', [PublicationController::class, 'index']); 
@@ -49,7 +57,7 @@ Route::get('/print-media/file/{path}', [PrintMediaController::class, 'serveFile'
 Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystemStatus']);
 Route::get('/site-settings/team-photo', [SiteSettingController::class, 'getTeamPhoto']);
 Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamIntro']);
-Route::post('/chat', [ChatBotController::class, 'chat']);
+Route::post('/chat', [ChatBotController::class, 'chat'])->middleware('throttle:10,1');
 Route::post('/contact-us', [ContactController::class, 'submit'])->middleware('throttle:2,1');
 
 
@@ -63,6 +71,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/users/search', [UserController::class, 'search']);
     Route::put('/users/{id}', [UserController::class, 'update']); 
+    Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 
     //  Publication Actions 
     Route::post('/publications', [PublicationController::class, 'store']);
@@ -78,7 +89,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //  Comments 
     Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
-    Route::post('/publications/{publication}/comments', [CommentController::class, 'store']);
+    Route::post('/publications/{publication}/comments', [CommentController::class, 'store'])->middleware('throttle:10,1');
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
     Route::get('/comments/{id}/history', [CommentController::class, 'history']);

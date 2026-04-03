@@ -236,6 +236,21 @@ class PrintMediaController extends Controller
 
     public function serveFile(string $path)
     {
+        // Restrict to expected storage directories only
+        $allowedPrefixes = ['print_media/', 'publications_images/', 'thumbnails/'];
+        $isAllowed = false;
+        foreach ($allowedPrefixes as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                $isAllowed = true;
+                break;
+            }
+        }
+
+        // Block directory traversal attacks
+        if (!$isAllowed || str_contains($path, '..')) {
+            abort(Response::HTTP_FORBIDDEN, 'Access denied.');
+        }
+
         if (!Storage::disk('public')->exists($path)) {
             abort(Response::HTTP_NOT_FOUND);
         }

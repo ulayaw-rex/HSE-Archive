@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import { Link } from "react-router-dom";
 import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { Skeleton, ArticleSkeleton, FeaturedSkeleton } from "../../components/common/Skeleton";
 import type { Publication } from "../../types/Publication";
 import "../../App.css";
-import { useDataCache } from "../../context/DataContext";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 const categories = [
   "university",
@@ -47,70 +46,43 @@ const getCategoryColor = (category: string) => {
 
 const HomePage: React.FC = () => {
   const [userRole] = useState<"guest" | "admin">("guest");
-  const { cache, updateCache } = useDataCache();
+  const fetchHomeData = async () => {
+    const response = await AxiosInstance.get("/home-data");
+    return response.data;
+  };
 
-  const [featuredArticles, setFeaturedArticles] = useState<Publication[]>(
-    cache.home?.featured || [],
-  );
-  const [categoryArticles, setCategoryArticles] = useState<
-    Record<string, Publication[]>
-  >(cache.home?.categories || {});
+  const { data, isLoading: loading, refetch } = useQuery({
+    queryKey: ["homeData"],
+    queryFn: fetchHomeData,
+  });
 
-  const [loading, setLoading] = useState(
-    !cache.home?.featured || cache.home?.featured.length === 0,
-  );
-
-  const updateCacheRef = useRef(updateCache);
-  updateCacheRef.current = updateCache;
+  const featuredArticles = data?.featured || [];
+  const categoryArticles = data?.categories || {};
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      try {
-        const response = await AxiosInstance.get("/home-data", {
-          signal: controller.signal,
-        });
-
-        const { featured, categories } = response.data;
-
-        setFeaturedArticles(featured);
-        setCategoryArticles(categories);
-        setLoading(false);
-
-        updateCacheRef.current("home", {
-          featured: featured,
-          categories: categories,
-        });
-      } catch (err) {
-        if (!axios.isCancel(err)) {
-          console.error("Failed to fetch homepage data", err);
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
-
-    const intervalId = setInterval(loadData, 60000);
-
-    const handlePublicationCreated = () => loadData();
+    const handlePublicationCreated = () => refetch();
     window.addEventListener("publicationCreated", handlePublicationCreated);
-
     return () => {
-      controller.abort();
-      clearInterval(intervalId);
-      window.removeEventListener(
-        "publicationCreated",
-        handlePublicationCreated,
-      );
+      window.removeEventListener("publicationCreated", handlePublicationCreated);
     };
-  }, []);
+  }, [refetch]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <LoadingSpinner />
+      <div className="min-h-screen bg-white pb-12">
+        <FeaturedSkeleton />
+        <div className="w-[90%] mx-auto px-4 mt-12 space-y-12">
+          {categories.slice(0, 3).map((category) => (
+            <section key={category} className="space-y-6">
+              <div className="flex items-center justify-between border-b-2 border-gray-100 pb-4">
+                 <Skeleton className="w-48 h-8 bg-gray-200" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                 {[1, 2, 3, 4].map(key => <ArticleSkeleton key={key} />)}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
     );
   }

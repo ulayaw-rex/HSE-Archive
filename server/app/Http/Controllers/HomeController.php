@@ -5,18 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Publication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Traits\FormatsPublications;
 
 class HomeController extends Controller
 {
+    use FormatsPublications;
+
     private $selectColumns = [
         'publication_id', 'title', 'category', 'date_published', 
         'created_at', 'image_path', 'thumbnail_path', 'status', 'views'
     ];
 
-    private function formatPublication($publication)
+    private function formatPublicationForHome($publication)
     {
-        $publication->image = $publication->image_path ? asset('storage/' . $publication->image_path) : null;
-        $publication->thumbnail = $publication->thumbnail_path ? asset('storage/' . $publication->thumbnail_path) : $publication->image;
+        $this->formatPublication($publication);
         unset($publication->image_path, $publication->thumbnail_path);
         return $publication;
     }

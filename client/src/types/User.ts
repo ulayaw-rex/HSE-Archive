@@ -6,7 +6,9 @@ export interface User {
   created_at: string;
   course?: string;
   position?: string;
-  status?: "pending" | "approved" | "rejected";
+  department?: string;
+  year_graduated?: string;
+  status?: "pending" | "approved";
 }
 
 export interface CreateUserData {
@@ -16,6 +18,8 @@ export interface CreateUserData {
   role: "hillsider" | "alumni" | "admin";
   course?: string;
   position?: string;
+  department?: string;
+  year_graduated?: string;
 }
 
 export interface UpdateUserData {
@@ -25,4 +29,6 @@ export interface UpdateUserData {
   role?: "hillsider" | "alumni" | "admin";
   course?: string;
   position?: string;
+  department?: string;
+  year_graduated?: string;
 }

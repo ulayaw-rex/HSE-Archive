@@ -121,7 +121,16 @@ class UserController extends Controller
 
     public function update(Request $request, $id): JsonResponse
 {
+    $currentUser = $request->user();
     $user = User::findOrFail($id);
+
+    // Authorization: only the user themselves or an admin can update
+    $isOwner = $currentUser->id === $user->id;
+    $isAdmin = $currentUser->role === 'admin';
+
+    if (!$isOwner && !$isAdmin) {
+        return response()->json(['message' => 'You are not authorized to update this user.'], 403);
+    }
 
     $validated = $request->validate([
         'name' => 'sometimes|required|string|max:255',
@@ -146,6 +155,11 @@ class UserController extends Controller
     ]);
 
     $updateData = collect($validated)->except('password')->toArray();
+
+    // Non-admins cannot change privileged fields
+    if (!$isAdmin) {
+        unset($updateData['role'], $updateData['status'], $updateData['position']);
+    }
 
     if ($request->filled('password')) {
         $updateData['password'] = Hash::make($request->password);

@@ -11,7 +11,8 @@ import {
   FaUndo,
 } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "../../components/common/Skeleton";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import type { Publication } from "../../types/Publication";
 import { useAuth } from "../../context/AuthContext";
@@ -48,54 +49,56 @@ const ArticleDetail: React.FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
   const { user } = useAuth();
 
-  const [publication, setPublication] = useState<Publication | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const fetchArticleData = async () => {
+    if (!idOrSlug) throw new Error("No article ID");
+    const [pubResponse, commentsResponse] = await Promise.all([
+      AxiosInstance.get<Publication>(`/publications/${idOrSlug}`),
+      AxiosInstance.get<Comment[]>(`/publications/${idOrSlug}/comments`).catch(
+        () => ({ data: [] })
+      ),
+    ]);
+    return {
+      publication: pubResponse.data,
+      commentsData: Array.isArray(commentsResponse.data) ? commentsResponse.data : [],
+    };
+  };
 
+  const { data, isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["article", idOrSlug],
+    queryFn: fetchArticleData,
+    enabled: !!idOrSlug,
+    retry: false,
+  });
+
+  const publication = data?.publication || null;
+  const [comments, setComments] = useState<Comment[]>([]);
+  
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showAlreadySubmittedModal, setShowAlreadySubmittedModal] =
-    useState(false);
+  const [showAlreadySubmittedModal, setShowAlreadySubmittedModal] = useState(false);
   const [showAlreadyWriterModal, setShowAlreadyWriterModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
-
   const [requestingCredit, setRequestingCredit] = useState(false);
-
   const [textSize, setTextSize] = useState<number>(18);
+  
+  // Hydrate comments when data arrives so they can be mutated locally 
+  // without mutating the query cache directly.
+  useEffect(() => {
+    if (data?.commentsData) {
+      setComments(data.commentsData);
+    }
+  }, [data?.commentsData]);
 
+  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [idOrSlug]);
 
-  useEffect(() => {
-    if (!idOrSlug) return;
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [pubResponse, commentsResponse] = await Promise.all([
-          AxiosInstance.get<Publication>(`/publications/${idOrSlug}`),
-          AxiosInstance.get<Comment[]>(
-            `/publications/${idOrSlug}/comments`,
-          ).catch(() => ({ data: [] })),
-        ]);
-        setPublication(pubResponse.data);
-        if (Array.isArray(commentsResponse.data)) {
-          setComments(commentsResponse.data);
-        }
-      } catch (err: any) {
-        if (err.response && err.response.status === 403) {
-          setError("Access Denied: This article is pending approval.");
-        } else {
-          setError("Failed to load article.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [idOrSlug]);
+  const error = queryError 
+    ? ((queryError as any).response?.status === 403 
+        ? "Access Denied: This article is pending approval." 
+        : "Failed to load article.")
+    : null;
 
   const handleClaimClick = () => {
     if (!publication || !user) return;
@@ -132,8 +135,17 @@ const ArticleDetail: React.FC = () => {
 
   if (loading)
     return (
-      <div className="p-8 text-center h-screen flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="max-w-5xl mx-auto px-4 py-16 flex flex-col items-start gap-8">
+        <Skeleton className="w-24 h-6 rounded-full" />
+        <Skeleton className="w-3/4 h-12" />
+        <Skeleton className="w-48 h-4" />
+        <Skeleton className="w-full h-96 object-cover my-6" />
+        <div className="w-full space-y-4">
+          <Skeleton className="w-full h-4" />
+          <Skeleton className="w-full h-4" />
+          <Skeleton className="w-5/6 h-4" />
+          <Skeleton className="w-3/4 h-4" />
+        </div>
       </div>
     );
   if (error)
@@ -272,7 +284,7 @@ const ArticleDetail: React.FC = () => {
         </div>
       )}
 
-      {publication.status === "pending" && (
+      {publication.status === "submitted" && (
         <div
           className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"
           role="alert"

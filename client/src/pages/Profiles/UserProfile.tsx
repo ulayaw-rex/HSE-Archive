@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { UserProfileSkeleton } from "../../components/common/Skeleton";
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import PublicationForm from "../../components/features/Publications/PublicationForm";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
@@ -156,13 +156,7 @@ const UserProfile: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-24 pb-12 flex flex-col items-center justify-start">
-        <div className="scale-150 mb-8">
-          <LoadingSpinner />
-        </div>
-      </div>
-    );
+    return <UserProfileSkeleton />;
   }
 
   if (!profileUser) {
@@ -282,7 +276,7 @@ const UserProfile: React.FC = () => {
                           <PublicationCard
                             publication={pub}
                             readOnly={true}
-                            onStatusChange={fetchProfileData}
+                            onStatusChange={() => fetchProfileData()}
                           />
                         </div>
                       ))
@@ -304,7 +298,7 @@ const UserProfile: React.FC = () => {
                           publication={pub}
                           onEdit={handleEditClick}
                           onDelete={handleDeleteClick}
-                          onStatusChange={fetchProfileData}
+                          onStatusChange={() => fetchProfileData()}
                           onClick={() => setViewingArticle(pub)}
                         />
                       ))
@@ -332,7 +326,7 @@ const UserProfile: React.FC = () => {
                           key={pub.publication_id}
                           publication={pub}
                           isManagementView={true}
-                          onStatusChange={fetchProfileData}
+                          onStatusChange={() => fetchProfileData()}
                           onClick={() => setViewingArticle(pub)}
                         />
                       ))}

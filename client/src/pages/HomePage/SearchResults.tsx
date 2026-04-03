@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
+import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { FaFilter, FaArrowRight } from "react-icons/fa";
 import type { Publication } from "../../types/Publication";
@@ -19,10 +20,6 @@ const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q");
 
-  const [results, setResults] = useState<Publication[]>([]);
-  const [suggestedArticles, setSuggestedArticles] = useState<Publication[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, _] = useState<"newest" | "oldest">("newest");
 
@@ -30,28 +27,25 @@ const SearchResults: React.FC = () => {
     window.scrollTo(0, 0);
   }, [query]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (query) {
-          const searchRes = await AxiosInstance.get(
-            `/publications/search?q=${query}`
-          );
-          setResults(searchRes.data);
-        }
+  const { data: results = [], isLoading: isLoadingSearch } = useQuery({
+    queryKey: ["search", query],
+    queryFn: async () => {
+      if (!query) return [];
+      const res = await AxiosInstance.get(`/publications/search?q=${query}`);
+      return res.data;
+    },
+    enabled: !!query,
+  });
 
-        const recentRes = await AxiosInstance.get("/publications/recent");
-        setSuggestedArticles(recentRes.data);
-      } catch (error) {
-        console.error("Data fetch failed", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: suggestedArticles = [], isLoading: isLoadingRecent } = useQuery({
+    queryKey: ["recentPublications"],
+    queryFn: async () => {
+      const res = await AxiosInstance.get("/publications/recent");
+      return res.data;
+    },
+  });
 
-    fetchData();
-  }, [query]);
+  const loading = (!!query && isLoadingSearch) || isLoadingRecent;
 
   const filteredAndSortedResults = useMemo(() => {
     let processed = [...results];
@@ -141,7 +135,7 @@ const SearchResults: React.FC = () => {
                   interested in
                 </h2>
                 <div className="grid gap-6">
-                  {suggestedArticles.map((article) => (
+                  {suggestedArticles.map((article: Publication) => (
                     <Link
                       to={`/news/${article.publication_id}`}
                       key={article.publication_id}
@@ -178,7 +172,7 @@ const SearchResults: React.FC = () => {
           </div>
         ) : (
           <div className="grid gap-6">
-            {filteredAndSortedResults.map((article) => (
+            {filteredAndSortedResults.map((article: Publication) => (
               <Link
                 to={`/news/${article.publication_id}`}
                 key={article.publication_id}

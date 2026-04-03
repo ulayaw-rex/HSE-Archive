@@ -1,11 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { useDataCache } from "../../context/DataContext";
-import { usePolling } from "../../hooks/usePolling";
+import { useQuery } from "@tanstack/react-query";
 
 const categories = ["university", "local", "national", "international"];
 
@@ -34,53 +33,18 @@ const getCategoryTextColor = (category: string) => {
 };
 
 const NewsPage: React.FC = () => {
-  const { cache, updateCache } = useDataCache();
+  const fetchNewsHub = async () => {
+    const response = await AxiosInstance.get("/publications/news-hub");
+    return response.data;
+  };
 
-  const [featuredArticle, setFeaturedArticle] = useState<Publication | null>(
-    cache.newsHub?.featured || null
-  );
-  const [categoryArticles, setCategoryArticles] = useState<
-    Record<string, Publication[]>
-  >(cache.newsHub?.categories || {});
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["newsHub"],
+    queryFn: fetchNewsHub,
+  });
 
-  const [loading, setLoading] = useState(!cache.newsHub);
-
-  const fetchAllData = useCallback(async () => {
-    try {
-      if (!featuredArticle) setLoading(true);
-
-      const response = await AxiosInstance.get("/publications/news-hub");
-      const { featured, categories: newCategoryData } = response.data;
-
-      setFeaturedArticle(featured);
-      setCategoryArticles(newCategoryData);
-
-      updateCache("newsHub", {
-        featured: featured,
-        categories: newCategoryData,
-      });
-    } catch (error) {
-      console.error("Failed to fetch news data", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [updateCache, featuredArticle]);
-
-  usePolling(fetchAllData, 60000);
-
-  useEffect(() => {
-    if (!cache.newsHub) {
-      fetchAllData();
-    }
-
-    const handlePublicationCreated = () => fetchAllData();
-    window.addEventListener("publicationCreated", handlePublicationCreated);
-    return () =>
-      window.removeEventListener(
-        "publicationCreated",
-        handlePublicationCreated
-      );
-  }, [fetchAllData, cache.newsHub]);
+  const featuredArticle = data?.featured || null;
+  const categoryArticles = data?.categories || {};
 
   if (loading && !featuredArticle) {
     return (
