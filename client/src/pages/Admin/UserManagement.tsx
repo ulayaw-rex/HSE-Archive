@@ -93,7 +93,6 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: number) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       await AxiosInstance.delete(`/users/${userId}`);
       if (users.length === 1 && pagination.current_page > 1) {
