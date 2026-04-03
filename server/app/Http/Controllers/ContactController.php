@@ -25,18 +25,14 @@ class ContactController extends Controller
             $data = [
                 'name'         => $senderName,
                 'email'        => $request->email,
-                'subject'      => $request->subject,
+                'subject'      => $request->subject ?? 'Website Contact',
                 'user_message' => $request->message, 
             ];
 
             $adminEmail = config('mail.from.address') ?? 'admin@localhost.com'; 
 
-            Mail::send('emails.contact', $data, function($message) use ($request, $senderName, $adminEmail) {
-                $message->to($adminEmail) 
-                        ->subject('New Inquiry: ' . ($request->subject ?? 'Website Contact'));
-                
-                $message->replyTo($request->email, $senderName); 
-            });
+            Mail::to($adminEmail)->queue(new \App\Mail\ContactInquiry($data));
+
         } catch (\Exception $e) {
             \Log::error("Contact Form Mail Error: " . $e->getMessage());
         }
@@ -75,15 +71,12 @@ class ContactController extends Controller
         ]);
 
         try {
-            Mail::send('emails.reply', ['replyMessage' => $request->message], function ($message) use ($submission, $request) {
-                $message->to($submission->email)
-                        ->subject($request->subject);
-            });
+            Mail::to($submission->email)->queue(new \App\Mail\ContactReply($request->message, $request->subject));
             
-            return response()->json(['message' => 'Reply sent successfully!']);
+            return response()->json(['message' => 'Reply queued successfully!']);
         } catch (\Exception $e) {
             \Log::error("Mail Error: " . $e->getMessage());
-            return response()->json(['message' => 'Failed to send email. Check logs.'], 500);
+            return response()->json(['message' => 'Failed to queue email.'], 500);
         }
     }
 
