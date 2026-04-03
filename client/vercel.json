@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/sanctum/csrf-cookie",
+      "destination": "https://hse-archive-production.up.railway.app/sanctum/csrf-cookie"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://hse-archive-production.up.railway.app/api/$1"
+    }
+  ]
+}

@@ -1,7 +1,11 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Use relative path in production for Vercel rewrites to proxy the request.
+// Otherwise in local dev, point to the local Laravel backend (or VITE_API_URL).
+const API_BASE_URL = import.meta.env.PROD 
+  ? "" 
+  : (import.meta.env.VITE_API_URL || "http://localhost:8000");
 
 const AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api`,
