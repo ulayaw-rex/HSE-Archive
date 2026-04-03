@@ -7,6 +7,7 @@ use App\Models\Publication;
 use App\Models\PrintMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CreditRequestController extends Controller
 {
@@ -36,6 +37,8 @@ class CreditRequestController extends Controller
             'status' => 'pending',
         ]);
 
+        Cache::forget('admin_dashboard_lists');
+
         return response()->json(['message' => 'Credit request submitted successfully.']);
     }
 
@@ -64,6 +67,8 @@ class CreditRequestController extends Controller
             'requestable_type' => PrintMedia::class,
             'status' => 'pending',
         ]);
+
+        Cache::forget('admin_dashboard_lists');
 
         return response()->json(['message' => 'Credit request submitted successfully.']);
     }
@@ -98,6 +103,8 @@ class CreditRequestController extends Controller
 
         $request->update(['status' => 'approved']);
 
+        Cache::forget('admin_dashboard_lists');
+
         return response()->json(['message' => 'Request approved successfully.']);
     }
 
@@ -111,6 +118,8 @@ class CreditRequestController extends Controller
         }
 
         $request->update(['status' => 'rejected']);
+
+        Cache::forget('admin_dashboard_lists');
 
         return response()->json(['message' => 'Request rejected.']);
     }

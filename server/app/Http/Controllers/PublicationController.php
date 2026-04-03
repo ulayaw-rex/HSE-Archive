@@ -145,6 +145,7 @@ class PublicationController extends Controller
         $publication = Publication::create($data);
         $publication->writers()->attach($request->writer_ids);
 
+        Cache::forget('admin_dashboard_lists');
         AuditLog::record('Created Publication', "Title: {$publication->title}");
 
         return response()->json($this->formatPublication($publication), 201);
@@ -203,6 +204,7 @@ class PublicationController extends Controller
         $publication->load('writers');
         Cache::forget('news_hub_data');
         Cache::forget('homepage_content');
+        Cache::forget('admin_dashboard_lists');
 
         return response()->json($this->formatPublication($publication));
     }
@@ -215,6 +217,7 @@ class PublicationController extends Controller
         if ($action === 'submit') {
             $publication->status = 'submitted';
             $publication->save();
+            Cache::forget('admin_dashboard_lists');
             return response()->json(['message' => 'Article submitted for review.', 'data' => $publication]);
         }
 
@@ -227,6 +230,7 @@ class PublicationController extends Controller
             $publication->reviewed_by = $user->id; 
             $publication->reviewed_at = now();      
             $publication->save();
+            Cache::forget('admin_dashboard_lists');
             return response()->json(['message' => 'Article reviewed. Sent to EIC.', 'data' => $publication]);
         }
 
@@ -243,6 +247,7 @@ class PublicationController extends Controller
             $publication->approved_by = $user->id; 
             $publication->approved_at = now();      
             $publication->save();
+            Cache::forget('admin_dashboard_lists');
             return response()->json(['message' => 'Article approved. Ready to Publish.', 'data' => $publication]);
         }
 
@@ -261,6 +266,7 @@ class PublicationController extends Controller
             
             Cache::forget('news_hub_data');
             Cache::forget('homepage_content');
+            Cache::forget('admin_dashboard_lists');
             
             return response()->json(['message' => 'Article is live on the website!', 'data' => $publication]);
         }
@@ -272,6 +278,7 @@ class PublicationController extends Controller
             
             $publication->status = 'returned';
             $publication->save();
+            Cache::forget('admin_dashboard_lists');
             return response()->json(['message' => 'Article returned for revision.', 'data' => $publication]);
         }
 
@@ -287,6 +294,7 @@ class PublicationController extends Controller
         
         Cache::forget('news_hub_data');
         Cache::forget('homepage_content');
+        Cache::forget('admin_dashboard_lists');
 
         AuditLog::record('Deleted Publication', "Deleted article: {$publication->title}");
         

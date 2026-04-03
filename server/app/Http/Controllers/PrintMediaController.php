@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Cache; 
 use Symfony\Component\HttpFoundation\Response;
 use Intervention\Image\Laravel\Facades\Image; 
 
@@ -142,6 +143,7 @@ class PrintMediaController extends Controller
             }
 
             $media = PrintMedia::create($data);
+            Cache::forget('admin_dashboard_lists');
 
             if ($user) {
                 $media->owners()->attach($user->id);
@@ -212,6 +214,7 @@ class PrintMediaController extends Controller
         }
 
         $printMedia->save();
+        Cache::forget('admin_dashboard_lists');
         $printMedia->load(['user', 'owners']);
 
         return response()->json([
@@ -228,6 +231,7 @@ class PrintMediaController extends Controller
         if ($media->thumbnail_path) Storage::disk('public')->delete($media->thumbnail_path);
 
         $media->delete();
+        Cache::forget('admin_dashboard_lists');
          
         AuditLog::record('Deleted Print Media', "Deleted: {$media->title}");
 

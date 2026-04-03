@@ -11,6 +11,7 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 use App\Notifications\AccountApproved;
 use App\Notifications\AccountDeclined;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
@@ -69,6 +70,8 @@ class UserController extends Controller
             'year_graduated' => $validated['year_graduated'] ?? null,
             'status' => 'approved' 
         ]);
+
+        Cache::forget('admin_dashboard_lists');
 
         return response()->json([
             'message' => 'User created successfully',
@@ -180,6 +183,8 @@ class UserController extends Controller
         $user->status = 'approved';
         $user->save();
 
+        Cache::forget('admin_dashboard_lists');
+
         try {
             $user->notify(new AccountApproved());
         } catch (\Exception $e) {
@@ -212,6 +217,7 @@ class UserController extends Controller
         }
         
         $user->delete();
+        Cache::forget('admin_dashboard_lists');
 
         return response()->json([
             'message' => 'User request declined and removed successfully'
