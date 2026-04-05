@@ -69,7 +69,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //  User Context 
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/users/search', [UserController::class, 'search']);
+    Route::get('/search/users', [UserController::class, 'search']);
     Route::put('/users/{id}', [UserController::class, 'update']); 
     Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
         ->middleware('throttle:6,1')

@@ -37,11 +37,11 @@ const WriterSelect: React.FC<WriterSelectProps> = ({
         setLoading(true);
         try {
           const response = await AxiosInstance.get(
-            `/users/search?query=${query}`
+            `/search/users?query=${query}`,
           );
 
           const filtered = response.data.filter(
-            (u: User) => !selectedIds.includes(u.id)
+            (u: User) => !selectedIds.includes(u.id),
           );
           setSuggestions(filtered);
           setIsOpen(true);
