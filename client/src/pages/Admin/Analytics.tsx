@@ -86,27 +86,24 @@ const Analytics: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"articles" | "staff" | "audit">(
     "articles",
   );
-
   const [articleStats, setArticleStats] = useState<ArticleStat[]>([]);
   const [staffStats, setStaffStats] = useState<StaffStat[]>([]);
   const [trendData, setTrendData] = useState<any[]>([]);
   const [trendCategories, setTrendCategories] = useState<string[]>([]);
-
   const [pagination, setPagination] = useState<PaginationMeta>({
     current_page: 1,
     last_page: 1,
     total: 0,
   });
 
-  // THE FIX: Added "all-time" and made it the default
-  const [viewMode, setViewMode] = useState<"weekly" | "monthly" | "all-time">(
-    "all-time",
-  );
+  const [viewMode, setViewMode] = useState<"weekly" | "monthly">("monthly");
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
 
-  // THE FIX: Default start date to the year 2000 to catch all archive entries
-  const [startDate, setStartDate] = useState("2000-01-01");
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+  });
 
   const [endDate, setEndDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
@@ -163,7 +160,6 @@ const Analytics: React.FC = () => {
   const fetchMainData = useCallback(
     async (silent = false, page = 1) => {
       if (!silent) setLoading(true);
-
       try {
         if (activeTab === "articles") {
           if (page === 1) await fetchTrendsOnly();
@@ -207,15 +203,10 @@ const Analytics: React.FC = () => {
     };
   }, [fetchMainData, pagination.current_page]);
 
-  // THE FIX: Updated view mode logic to handle the new 'all-time' option
-  const handleViewModeChange = (mode: "weekly" | "monthly" | "all-time") => {
+  const handleViewModeChange = (mode: "weekly" | "monthly") => {
     setViewMode(mode);
     const today = new Date();
-
-    if (mode === "all-time") {
-      setStartDate("2000-01-01");
-      setEndDate(today.toISOString().split("T")[0]);
-    } else if (mode === "monthly") {
+    if (mode === "monthly") {
       const year = today.getFullYear();
       const month = String(today.getMonth() + 1).padStart(2, "0");
       const lastDay = new Date(year, today.getMonth() + 1, 0).getDate();
@@ -232,7 +223,6 @@ const Analytics: React.FC = () => {
   const handleDownload = async (format: "pdf" | "excel") => {
     if (exporting) return;
     setExporting(true);
-
     try {
       const response = await AxiosInstance.get("/analytics/export", {
         params: {
@@ -294,7 +284,6 @@ const Analytics: React.FC = () => {
             </div>
             <div className="h-64 bg-gray-200 rounded w-full"></div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
               <div className="h-6 w-32 bg-gray-200 rounded mb-6"></div>
@@ -307,15 +296,12 @@ const Analytics: React.FC = () => {
           </div>
         </>
       )}
-
       <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
         <div className="h-12 bg-gray-100 border-b border-gray-200"></div>
         <div className="p-4 space-y-4">
-          <div className="h-10 bg-gray-50 rounded"></div>
-          <div className="h-10 bg-gray-50 rounded"></div>
-          <div className="h-10 bg-gray-50 rounded"></div>
-          <div className="h-10 bg-gray-50 rounded"></div>
-          <div className="h-10 bg-gray-50 rounded"></div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-10 bg-gray-50 rounded"></div>
+          ))}
         </div>
       </div>
     </div>
@@ -418,16 +404,6 @@ const Analytics: React.FC = () => {
                   </h3>
                   <div className="bg-gray-100 p-1 rounded-lg flex text-xs font-medium">
                     <button
-                      onClick={() => handleViewModeChange("all-time")}
-                      className={`px-3 py-1 rounded transition-all ${
-                        viewMode === "all-time"
-                          ? "bg-green-100 text-green-800 shadow-sm"
-                          : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      All Time
-                    </button>
-                    <button
                       onClick={() => handleViewModeChange("monthly")}
                       className={`px-3 py-1 rounded transition-all ${
                         viewMode === "monthly"
@@ -484,8 +460,6 @@ const Analytics: React.FC = () => {
                           new Date(str).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
-                            year:
-                              viewMode === "all-time" ? "numeric" : undefined,
                           })
                         }
                         minTickGap={30}
@@ -701,10 +675,7 @@ const Analytics: React.FC = () => {
                                 <div
                                   className="h-full bg-blue-600"
                                   style={{
-                                    width: `${Math.min(
-                                      stat.article_count * 10,
-                                      100,
-                                    )}%`,
+                                    width: `${Math.min(stat.article_count * 10, 100)}%`,
                                   }}
                                 ></div>
                               </div>
@@ -733,7 +704,6 @@ const Analytics: React.FC = () => {
                   >
                     Previous
                   </button>
-
                   <div className="text-sm">
                     <span className="font-bold text-green-700">
                       {pagination.current_page}
@@ -743,7 +713,6 @@ const Analytics: React.FC = () => {
                       {pagination.last_page}
                     </span>
                   </div>
-
                   <button
                     onClick={() =>
                       handlePageChange(pagination.current_page + 1)
