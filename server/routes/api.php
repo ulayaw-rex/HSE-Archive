@@ -60,6 +60,9 @@ Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamI
 Route::post('/chat', [ChatBotController::class, 'chat'])->middleware('throttle:10,1');
 Route::post('/contact-us', [ContactController::class, 'submit'])->middleware('throttle:2,1');
 
+//  Comments (Read Access – guests can view comments) 
+Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
+
 
 /*
 | PROTECTED ROUTES (Login Required)
@@ -87,8 +90,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/print-media/{id}/download', [PrintMediaController::class, 'download']);
     Route::get('/print-media/user/{id}', [PrintMediaController::class, 'getByUser']);
 
-    //  Comments 
-    Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);
+    //  Comments (Write Access) 
     Route::post('/publications/{publication}/comments', [CommentController::class, 'store'])->middleware('throttle:10,1');
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);

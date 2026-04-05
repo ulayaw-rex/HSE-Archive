@@ -303,8 +303,25 @@ class PublicationController extends Controller
 
     public function getByCategory($category)
     {
+        // Map URL slugs to DB category values
+        $categoryMap = [
+            'university'    => 'University',
+            'local'         => 'Local',
+            'national'      => 'National',
+            'international' => 'International',
+            'entertainment' => 'Entertainment',
+            'sci-tech'      => 'Sci-Tech',
+            'sports'        => 'Sports',
+            'opinion'       => 'Opinion',
+            'opinions'      => 'Opinion',   // navbar uses plural
+            'literary'      => 'Literary',
+        ];
+
+        $slug = strtolower($category);
+        $normalizedCategory = $categoryMap[$slug] ?? ucfirst($slug);
+
         $publications = Publication::withoutGlobalScopes()
-            ->where('category', $category)
+            ->where('category', $normalizedCategory)
             ->where('status', 'published') 
             ->with('writers')
             ->orderBy('date_published', 'desc')
