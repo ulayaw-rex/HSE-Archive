@@ -111,7 +111,7 @@ const HomePage: React.FC = () => {
                 </div>
 
                 <Link
-                  to={`/news/${category}`}
+                  to={`/category/${category}`}
                   className="group flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-green-700 transition-colors uppercase tracking-wider"
                 >
                   See More

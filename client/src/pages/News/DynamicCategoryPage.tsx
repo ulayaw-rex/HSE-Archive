@@ -57,7 +57,7 @@ const DynamicCategoryPage: React.FC = () => {
           {category?.replace("-", " ")}
         </h1>
         {publications.length === 0 ? (
-           <div className="py-12">
+           <div className="py-12 capitalize">
             <EmptyState 
               title={`No ${category} News`} 
               message="Check back later for updates." 

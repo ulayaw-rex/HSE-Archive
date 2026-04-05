@@ -10,7 +10,7 @@ const PrevArrow = (props: any) => {
   const { onClick } = props;
   return (
     <div
-      className="absolute left-0 top-0 bottom-0 w-[10%] z-10 flex items-center justify-start pl-4 cursor-pointer group/arrow hover:bg-gradient-to-r hover:from-black/40 hover:to-transparent transition-all duration-500"
+      className="absolute left-0 top-0 bottom-0 w-[10%] z-20 flex items-center justify-start pl-4 cursor-pointer group/arrow hover:bg-gradient-to-r hover:from-black/40 hover:to-transparent transition-all duration-500"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -28,7 +28,7 @@ const NextArrow = (props: any) => {
   const { onClick } = props;
   return (
     <div
-      className="absolute right-0 top-0 bottom-0 w-[10%] z-10 flex items-center justify-end pr-4 cursor-pointer group/arrow hover:bg-gradient-to-l hover:from-black/40 hover:to-transparent transition-all duration-500"
+      className="absolute right-0 top-0 bottom-0 w-[10%] z-20 flex items-center justify-end pr-4 cursor-pointer group/arrow hover:bg-gradient-to-l hover:from-black/40 hover:to-transparent transition-all duration-500"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -92,7 +92,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
     prevArrow: <PrevArrow />,
     nextArrow: <NextArrow />,
     appendDots: (dots: any) => (
-      <div style={{ bottom: "30px", zIndex: 30 }}>
+      <div style={{ bottom: "30px", zIndex: 40 }}>
         <ul className="m-0 p-0 flex justify-center gap-2"> {dots} </ul>
       </div>
     ),
@@ -106,6 +106,19 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
   return (
     <div className="mb-12 relative overflow-hidden shadow-2xl group bg-black">
       <style>{`
+        .slick-dots li {
+          width: auto !important;
+          height: auto !important;
+          margin: 0 !important;
+        }
+        .slick-dots li button {
+          width: auto !important;
+          height: auto !important;
+          padding: 0 !important;
+        }
+        .slick-dots li button:before {
+          display: none !important;
+        }
         .slick-dots li.slick-active div {
           background-color: #fff !important;
           width: 3rem !important;
@@ -166,8 +179,8 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                 <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40"></div>
               </div>
 
-              <div className="absolute inset-0 z-30 flex items-end pb-24 pointer-events-none">
-                <div className="w-full mx-auto px-6 md:px-12 relative z-30">
+              <div className="absolute inset-x-[10%] inset-y-0 z-10 flex items-end pb-24 pointer-events-none">
+                <div className="w-full mx-auto px-2 md:px-4 relative">
                   <div className="w-full pointer-events-auto">
                     <div className="mb-4 animate-reveal-1">
                       <div className="flex items-center gap-3">
@@ -182,7 +195,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
 
                     <div className="animate-reveal-2">
                       <Link
-                        to={`/article/${article.publication_id}`}
+                        to={`/news/${article.publication_id}`}
                         className="group/title block"
                       >
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 leading-[1.1] drop-shadow-2xl group-hover/title:text-green-400 transition-colors duration-300 w-full">
@@ -211,7 +224,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                       </span>
 
                       <Link
-                        to={`/article/${article.publication_id}`}
+                        to={`/news/${article.publication_id}`}
                         className="ml-auto mr-16 md:mr-[7%] px-6 py-2 bg-white text-black hover:bg-green-600 hover:text-white text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
                       >
                         Read Story

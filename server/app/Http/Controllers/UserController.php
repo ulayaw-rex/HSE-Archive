@@ -216,7 +216,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
         }
         
-        $user->delete();
+        $user->forceDelete();
         Cache::forget('admin_dashboard_lists');
 
         return response()->json([

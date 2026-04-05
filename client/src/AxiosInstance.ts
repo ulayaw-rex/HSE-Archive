@@ -2,11 +2,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.PROD
-  ? ""
-  : import.meta.env.VITE_API_URL || "http://localhost:8000";
+  ? "" 
+  : import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const AxiosInstance = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: import.meta.env.PROD ? "/api" : API_BASE_URL,
   withCredentials: true,
   headers: {
     "X-Requested-With": "XMLHttpRequest",
@@ -19,10 +19,9 @@ let csrfInitialized = false;
 async function ensureCsrf(): Promise<void> {
   if (csrfInitialized) return;
   try {
-    // Force the relative path in production so it ALWAYS hits the Vercel proxy
     const csrfPath = import.meta.env.PROD
       ? "/sanctum/csrf-cookie"
-      : `${API_BASE_URL}/sanctum/csrf-cookie`;
+      : API_BASE_URL.replace(/\/api\/?$/, "") + "/sanctum/csrf-cookie";
 
     await axios.get(csrfPath, {
       withCredentials: true,
@@ -57,7 +56,7 @@ AxiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 AxiosInstance.interceptors.response.use(
@@ -92,7 +91,7 @@ AxiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default AxiosInstance;

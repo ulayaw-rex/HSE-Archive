@@ -390,7 +390,7 @@ const RegistrationPage: React.FC = () => {
               <InputField
                 name="name"
                 type="text"
-                placeholder="Full Name"
+                placeholder="Full Name (First Name, Middle Initial, Last Name)"
                 value={formData.name}
                 onChange={handleChange}
                 error={errors.name}
@@ -507,10 +507,16 @@ const RegistrationPage: React.FC = () => {
                 <div className="animate-fadeIn mb-4">
                   <InputField
                     name="year_graduated"
-                    type="number"
+                    type="text" 
+                    inputMode="numeric" 
                     placeholder="Year Graduated (e.g. 2023)"
                     value={formData.year_graduated}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      if (val.length <= 4) {
+                        handleChange(e as any); 
+                      }
+                    }}
                     error={errors.year_graduated}
                   />
                 </div>

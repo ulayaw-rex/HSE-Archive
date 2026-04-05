@@ -32,6 +32,8 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
   const [isBookMode, setIsBookMode] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -42,6 +44,56 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
       setTimeout(() => scrollContainerRef.current?.focus(), 100);
     }
   }, [isOpen, printMedia]);
+
+  // Track which page is visible during Scroll View
+  useEffect(() => {
+    if (!isOpen || isBookMode || !numPages) return;
+
+    // Clean up previous observer
+    observerRef.current?.disconnect();
+
+    const visiblePages = new Map<number, number>();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const page = Number(
+            (entry.target as HTMLElement).dataset.pageNumber
+          );
+          if (entry.isIntersecting) {
+            visiblePages.set(page, entry.intersectionRatio);
+          } else {
+            visiblePages.delete(page);
+          }
+        });
+
+        // Pick the most-visible page (or the smallest page number if tied)
+        if (visiblePages.size > 0) {
+          let bestPage = 1;
+          let bestRatio = 0;
+          visiblePages.forEach((ratio, page) => {
+            if (ratio > bestRatio || (ratio === bestRatio && page < bestPage)) {
+              bestRatio = ratio;
+              bestPage = page;
+            }
+          });
+          setPageNumber(bestPage);
+        }
+      },
+      {
+        root: scrollContainerRef.current,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      }
+    );
+
+    pageRefs.current.forEach((el) => {
+      observerRef.current!.observe(el);
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [isOpen, isBookMode, numPages, scale]);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
@@ -218,6 +270,14 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
                   {Array.from(new Array(numPages || 0), (_, index) => (
                     <div
                       key={`page_${index + 1}`}
+                      data-page-number={index + 1}
+                      ref={(el) => {
+                        if (el) {
+                          pageRefs.current.set(index + 1, el);
+                        } else {
+                          pageRefs.current.delete(index + 1);
+                        }
+                      }}
                       className="shadow-md transition-transform hover:shadow-lg"
                     >
                       <Page

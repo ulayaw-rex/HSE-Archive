@@ -13,6 +13,7 @@ export const POSITION_OPTIONS = [
   "Sport Editor",
   "Editorial Assistant",
   "Contributor",
+  "Adviser"
 ];
 
 export const DEPARTMENTS_DATA: Record<string, string[]> = {

@@ -86,19 +86,21 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'course' => 'required|string',
             'position' => 'required|string',
-            'role' => 'required|in:hillsider,alumni', 
+            'department' => 'required|string',
+            'role' => 'required|in:hillsider,alumni',
+            'year_graduated' => 'nullable|required_if:role,alumni|string|max:4',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            
-            'role' => $request->role, 
+            'role' => $request->role,
             'course' => $request->course,
             'position' => $request->position,
-            
-            'status' => 'pending' 
+            'department' => $request->department,
+            'year_graduated' => $request->year_graduated,
+            'status' => 'pending'
         ]);
 
         event(new Registered($user));

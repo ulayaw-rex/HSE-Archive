@@ -4,12 +4,11 @@ import {
   Pie,
   Cell,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import type { MostViewedData } from "./DashboardStats";
 
-const COLORS = ["#14532d", "#166534", "#15803d", "#22c55e", "#dcfce7"];
+const COLORS = ["#14532d", "#166534", "#15803d", "#22c55e", "#86efac"];
 
 interface MostViewedChartProps {
   data: MostViewedData[];
@@ -40,6 +39,8 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
     );
   }
 
+  const totalViews = data.reduce((sum, item) => sum + (item.value || 0), 0);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative h-full">
       <div className="flex justify-between items-start mb-2">
@@ -51,15 +52,16 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
         </div>
       </div>
 
-      <div className="h-[300px] w-full mt-4">
+      {/* Chart */}
+      <div className="h-[200px] w-full mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data as any}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={100}
+              innerRadius={50}
+              outerRadius={85}
               paddingAngle={2}
               dataKey="value"
             >
@@ -79,15 +81,36 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
                 boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
               }}
             />
-            <Legend
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              iconType="circle"
-              wrapperStyle={{ fontSize: "12px", maxWidth: "40%" }}
-            />
           </PieChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Custom Legend */}
+      <div className="mt-4 space-y-2">
+        {data.map((item, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-2 group"
+            title={item.name}
+          >
+            <span
+              className="w-3 h-3 rounded-full shrink-0"
+              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+            />
+            <span className="text-sm text-gray-700 truncate flex-1 min-w-0">
+              {item.name}
+            </span>
+            <span className="text-xs font-bold text-gray-500 shrink-0 tabular-nums">
+              {item.value} views
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Total */}
+      <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</span>
+        <span className="text-sm font-bold text-gray-700 tabular-nums">{totalViews} views</span>
       </div>
     </div>
   );
