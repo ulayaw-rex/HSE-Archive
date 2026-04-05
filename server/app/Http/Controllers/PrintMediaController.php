@@ -241,7 +241,7 @@ class PrintMediaController extends Controller
     public function serveFile(string $path)
     {
         // Restrict to expected storage directories only
-        $allowedPrefixes = ['print_media/', 'publications_images/', 'thumbnails/'];
+        $allowedPrefixes = ['print_media_files/', 'print_media_thumbnails/', 'publications_images/', 'thumbnails/'];
         $isAllowed = false;
         foreach ($allowedPrefixes as $prefix) {
             if (str_starts_with($path, $prefix)) {
