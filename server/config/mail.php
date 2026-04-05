@@ -50,8 +50,7 @@ return [
         ],
 
         'brevo' => [
-            'transport' => 'symfony',
-            'dsn' => 'brevo+api://' . env('BREVO_KEY') . '@default',
+            'transport' => 'brevo',
         ],
 
         'ses' => [

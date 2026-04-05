@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Providers;
+
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Comment;
 use App\Policies\CommentPolicy;
+use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoApiTransport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
             );
 
             return $frontendUrl . '/verify-email?verify_url=' . urlencode($verifyUrl);
+        });
+
+        Mail::extend('brevo', function () {
+            return new BrevoApiTransport(env('BREVO_KEY'));
         });
     }
 }
