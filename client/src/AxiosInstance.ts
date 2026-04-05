@@ -1,19 +1,17 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// Use relative path in production for Vercel rewrites to proxy the request.
-// Otherwise in local dev, point to the local Laravel backend (or VITE_API_URL).
-const API_BASE_URL = import.meta.env.PROD 
-  ? "" 
-  : (import.meta.env.VITE_API_URL || "http://localhost:8000");
+const API_BASE_URL = import.meta.env.PROD
+  ? ""
+  : import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
   headers: {
-    'X-Requested-With': 'XMLHttpRequest', 
-    'Accept': 'application/json',
-  }
+    "X-Requested-With": "XMLHttpRequest",
+    Accept: "application/json",
+  },
 });
 
 let csrfInitialized = false;
@@ -21,7 +19,12 @@ let csrfInitialized = false;
 async function ensureCsrf(): Promise<void> {
   if (csrfInitialized) return;
   try {
-    await axios.get(`${API_BASE_URL}/sanctum/csrf-cookie`, {
+    // Force the relative path in production so it ALWAYS hits the Vercel proxy
+    const csrfPath = import.meta.env.PROD
+      ? "/sanctum/csrf-cookie"
+      : `${API_BASE_URL}/sanctum/csrf-cookie`;
+
+    await axios.get(csrfPath, {
       withCredentials: true,
     });
     csrfInitialized = true;
@@ -30,29 +33,32 @@ async function ensureCsrf(): Promise<void> {
   }
 }
 
-AxiosInstance.interceptors.request.use(async (config) => {
-  const mutatingMethods = ["post", "put", "patch", "delete"];
-  if (mutatingMethods.includes(config.method?.toLowerCase() ?? "")) {
-    await ensureCsrf();
-  }
+AxiosInstance.interceptors.request.use(
+  async (config) => {
+    const mutatingMethods = ["post", "put", "patch", "delete"];
+    if (mutatingMethods.includes(config.method?.toLowerCase() ?? "")) {
+      await ensureCsrf();
+    }
 
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("XSRF-TOKEN="))
-    ?.split("=")[1];
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("XSRF-TOKEN="))
+      ?.split("=")[1];
 
-  if (token) {
-    config.headers["X-XSRF-TOKEN"] = decodeURIComponent(token);
-  }
+    if (token) {
+      config.headers["X-XSRF-TOKEN"] = decodeURIComponent(token);
+    }
 
-  if (config.data instanceof FormData) {
-    config.headers["Content-Type"] = "multipart/form-data";
-  }
+    if (config.data instanceof FormData) {
+      config.headers["Content-Type"] = "multipart/form-data";
+    }
 
-  return config;
-}, (error) => {
+    return config;
+  },
+  (error) => {
     return Promise.reject(error);
-});
+  },
+);
 
 AxiosInstance.interceptors.response.use(
   (response) => response,
@@ -66,7 +72,8 @@ AxiosInstance.interceptors.response.use(
 
     if (status === 401) {
       const currentPath = window.location.pathname;
-      const isAuthRoute = currentPath === "/login" || currentPath === "/register";
+      const isAuthRoute =
+        currentPath === "/login" || currentPath === "/register";
       const isAuthCheck = error.config?.url?.endsWith("/me");
 
       if (!isAuthRoute && !isAuthCheck) {
@@ -85,7 +92,7 @@ AxiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default AxiosInstance;
