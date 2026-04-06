@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { LoginModal } from "../../common/LoginModal/LoginModal";
 import { useAuth } from "../../../context/AuthContext";
+import NotificationDropdown from "../../common/NotificationDropdown";
 
 type SubLink = {
   label: string;
@@ -148,6 +149,7 @@ const Header: React.FC = () => {
                   className="relative flex items-center gap-3"
                   ref={profileRef}
                 >
+                  <NotificationDropdown />
                   <span className="hidden md:block text-sm font-semibold text-white select-none">
                     {user.name}
                   </span>

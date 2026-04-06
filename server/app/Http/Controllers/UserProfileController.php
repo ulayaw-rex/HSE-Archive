@@ -46,7 +46,7 @@ class UserProfileController extends Controller
         $isDirector = $currentUser && $currentUser->isDirector();
         $isManagement = $currentUser && $currentUser->isManagement();
 
-        $query = Publication::withoutGlobalScopes()
+        $query = Publication::query()
             ->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhereHas('writers', function ($subQ) use ($user) {
@@ -58,7 +58,7 @@ class UserProfileController extends Controller
         if (!$isOwner && !$isAdmin && !$isManagement) {
             $query->where('status', 'published');
         } else {
-            $query->orderByRaw("FIELD(status, 'submitted', 'reviewed', 'draft', 'returned', 'approved', 'published') ASC");
+            $query->orderByRaw("FIELD(status, 'submitted', 'approved', 'reviewed', 'draft', 'returned', 'published') ASC");
         }
         
         $articles = $query->orderBy('created_at', 'desc')->get()->map(fn($pub) => $this->formatPublication($pub));
@@ -72,17 +72,20 @@ class UserProfileController extends Controller
 
         $reviewQueue = [];
         if ($isOwner && $isManagement) {
-            $rqQuery = Publication::withoutGlobalScopes()->with('writers');
+            $rqQuery = Publication::with('writers');
             
             if ($isAdmin || $isDirector) {
-                $rqQuery->whereIn('status', ['submitted', 'reviewed', 'approved']);
+                $rqQuery->whereIn('status', ['submitted', 'approved', 'reviewed']);
             } elseif ($isEIC) {
-                $rqQuery->whereIn('status', ['reviewed', 'approved']);
+                $rqQuery->whereIn('status', ['approved', 'reviewed']);
             } elseif ($isAssociate) {
                 $rqQuery->where('status', 'submitted');
             }
 
-            $reviewQueue = $rqQuery->orderBy('created_at', 'asc')->get()->map(fn($pub) => $this->formatPublication($pub));
+            $rqQuery->orderByRaw("FIELD(status, 'reviewed', 'approved', 'submitted') ASC")
+                    ->orderBy('created_at', 'asc');
+
+            $reviewQueue = $rqQuery->get()->map(fn($pub) => $this->formatPublication($pub));
         }
 
         return response()->json([

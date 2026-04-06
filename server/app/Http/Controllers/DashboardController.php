@@ -87,7 +87,7 @@ class DashboardController extends Controller
                     'timestamp' => $item->created_at
                 ]);
             
-            $recentUploads = $articles->merge($printMedia)->sortByDesc('timestamp')->values()->take(6);
+            $recentUploads = $articles->toBase()->concat($printMedia->toBase())->sortByDesc('timestamp')->values()->take(6);
 
             $recentComments = Comment::with('user:id,name')->latest()->take(6)->get()
                 ->map(fn($item) => [

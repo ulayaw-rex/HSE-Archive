@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
+import NotificationDropdown from "../components/common/NotificationDropdown";
 import "./AdminLayout.css";
 import type { SidebarItemType } from "../pages/Admin/SidebarItems";
 
@@ -9,9 +10,10 @@ export type AdminOutletContext = {
   decrementUnreadCount: () => void;
 };
 
-const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number }> = ({
+const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItemClick?: () => void }> = ({
   item,
   badgeCount,
+  onItemClick,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
@@ -60,6 +62,7 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number }> = ({
                 key={index}
                 to={child.to || "#"}
                 end={child.end}
+                onClick={onItemClick}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-colors 
                   ${
@@ -83,6 +86,7 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number }> = ({
     <NavLink
       to={item.to || "#"}
       end={item.end}
+      onClick={onItemClick}
       className={({ isActive }) =>
         `flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-colors ${
           isActive
@@ -133,6 +137,15 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
 
   return (
     <div className="h-screen flex bg-green-50 text-gray-900 overflow-hidden">
+      {/* Mobile background overlay for clicking outside */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <div
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-green-700 text-white border-r border-green-700 shadow-sm transition-transform duration-200 ease-out flex flex-col md:relative md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -166,6 +179,7 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
               key={index}
               item={item}
               badgeCount={item.badgeId === "feedback" ? unreadCount : undefined}
+              onItemClick={() => setSidebarOpen(false)}
             />
           ))}
         </nav>
@@ -233,7 +247,12 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="text-sm text-green-700">Admin Panel</div>
+            <div className="text-sm font-semibold text-green-700 ml-auto flex items-center gap-2">
+              <div className="bg-green-700 rounded-full flex items-center justify-center mr-2">
+                <NotificationDropdown />
+              </div>
+              Admin Panel
+            </div>
           </div>
         </header>
 

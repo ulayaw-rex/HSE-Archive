@@ -16,6 +16,7 @@ use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\NotificationController;
 
 /*
 | PUBLIC ROUTES (No Login Required)
@@ -77,6 +78,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+
+    // Notifications
+    Route::get('/notifications/unread', [NotificationController::class, 'getUnread']);
+    Route::get('/notifications', [NotificationController::class, 'getAll']);
+    Route::post('/notifications/read/{id}', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 
     //  Publication Actions 
     Route::post('/publications', [PublicationController::class, 'store']);

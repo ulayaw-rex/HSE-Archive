@@ -3,6 +3,7 @@ import type { Publication } from "../../../types/Publication";
 import ConfirmationModal from "../../common/ConfirmationModal";
 import AxiosInstance from "../../../AxiosInstance";
 import { useAuth } from "../../../context/AuthContext";
+import { FaClipboardCheck, FaThumbsUp, FaRocket, FaUndo } from "react-icons/fa";
 
 interface PublicationCardProps {
   publication: Publication;
@@ -103,53 +104,12 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            initiateAction("review");
-          }}
-          className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-md shadow-lg transition-all"
-          title="Mark as Reviewed"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-            />
-          </svg>
-        </button>
-      );
-    }
-
-    if (publication.status === "reviewed" && (isEIC || isAdmin)) {
-      return (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
             initiateAction("approve");
           }}
-          className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-md shadow-lg transition-all"
+          className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
           title="Approve Article"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
+          <FaThumbsUp size={14} /> Approve
         </button>
       );
     }
@@ -159,25 +119,27 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
+            initiateAction("review");
+          }}
+          className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-md shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
+          title="Review Article"
+        >
+          <FaClipboardCheck size={14} /> Review
+        </button>
+      );
+    }
+
+    if (publication.status === "reviewed" && (isEIC || isAdmin)) {
+      return (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
             initiateAction("publish");
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md shadow-lg transition-all"
+          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
           title="Publish Live"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
-            />
-          </svg>
+          <FaRocket size={14} /> Publish
         </button>
       );
     }
@@ -252,22 +214,9 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
                   }}
                   disabled={loading}
                   title="Return"
-                  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-md shadow-lg transition-all"
+                  className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                    />
-                  </svg>
+                  <FaUndo size={14} /> Return
                 </button>
               )}
             </>

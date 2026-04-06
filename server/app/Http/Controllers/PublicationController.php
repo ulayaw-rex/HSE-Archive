@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Laravel\Facades\Image; 
 use App\Http\Controllers\Traits\FormatsPublications;
 use App\Http\Requests\StorePublicationRequest;
+use App\Notifications\ArticleStatusNotification;
+use Illuminate\Support\Facades\Notification;
 
 class PublicationController extends Controller
 {
@@ -23,11 +25,11 @@ class PublicationController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         
-        $query = Publication::withoutGlobalScopes(); 
+        $query = Publication::query(); 
 
         if ($user) {
             if ($user->isAdmin() || $user->isDirector()) {
-                $query->orderByRaw("FIELD(status, 'submitted', 'reviewed', 'approved', 'draft', 'returned', 'published') ASC");
+                $query->orderByRaw("FIELD(status, 'submitted', 'approved', 'reviewed', 'draft', 'returned', 'published') ASC");
                 $query->orderBy('created_at', 'desc');
             
             } elseif ($user->isEditorInChief()) {
@@ -35,7 +37,7 @@ class PublicationController extends Controller
                     $q->whereIn('status', ['reviewed', 'approved', 'published'])
                       ->orWhere('user_id', $user->id); 
                 });
-                $query->orderByRaw("FIELD(status, 'reviewed', 'approved', 'submitted', 'draft', 'returned', 'published') ASC");
+                $query->orderByRaw("FIELD(status, 'approved', 'reviewed', 'submitted', 'draft', 'returned', 'published') ASC");
                 $query->orderBy('created_at', 'desc');
 
             } elseif ($user->isAssociateEditor()) {
@@ -43,7 +45,7 @@ class PublicationController extends Controller
                     $q->whereIn('status', ['submitted', 'reviewed', 'published'])
                       ->orWhere('user_id', $user->id);
                 });
-                $query->orderByRaw("FIELD(status, 'submitted', 'reviewed', 'approved', 'draft', 'returned', 'published') ASC");
+                $query->orderByRaw("FIELD(status, 'submitted', 'approved', 'reviewed', 'draft', 'returned', 'published') ASC");
                 $query->orderBy('created_at', 'desc');
 
             } else {
@@ -145,6 +147,11 @@ class PublicationController extends Controller
         $publication = Publication::create($data);
         $publication->writers()->attach($request->writer_ids);
 
+        if ($publication->status === 'submitted') {
+            $editors = User::where('role', 'admin')->orWhere('position', 'LIKE', '%associate%')->get();
+            Notification::send($editors, new ArticleStatusNotification($publication, 'submitted', "A new article '{$publication->title}' is waiting for your approval."));
+        }
+
         Cache::forget('admin_dashboard_lists');
         AuditLog::record('Created Publication', "Title: {$publication->title}");
 
@@ -212,43 +219,56 @@ class PublicationController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $user = Auth::guard('sanctum')->user();
-        $publication = Publication::withoutGlobalScopes()->findOrFail($id); 
+        $publication = Publication::findOrFail($id); 
         $action = $request->input('action'); 
         if ($action === 'submit') {
             $publication->status = 'submitted';
             $publication->save();
+            
+            $editors = User::where('role', 'admin')->orWhere('position', 'LIKE', '%associate%')->get();
+            Notification::send($editors, new ArticleStatusNotification($publication, 'submitted', "A drafted article '{$publication->title}' was submitted and is waiting for your approval."));
+
             Cache::forget('admin_dashboard_lists');
             return response()->json(['message' => 'Article submitted for review.', 'data' => $publication]);
         }
 
-        if ($action === 'review') {
+        if ($action === 'approve') {
             if (!$user->isAdmin() && !$user->isAssociateEditor() && !$user->isEditorInChief()) {
-                return response()->json(['error' => 'Unauthorized. Only Associate Editors can review.'], 403);
+                return response()->json(['error' => 'Unauthorized. Only Associate Editors can approve.'], 403);
             }
             
-            $publication->status = 'reviewed';
-            $publication->reviewed_by = $user->id; 
-            $publication->reviewed_at = now();      
-            $publication->save();
-            Cache::forget('admin_dashboard_lists');
-            return response()->json(['message' => 'Article reviewed. Sent to EIC.', 'data' => $publication]);
-        }
-
-        if ($action === 'approve') {
-            if (!$user->isAdmin() && !$user->isEditorInChief()) {
-                return response()->json(['error' => 'Unauthorized. Only the EIC can approve.'], 403);
-            }
-
-            if ($publication->status !== 'reviewed' && !$user->isAdmin()) {
-                return response()->json(['error' => 'Article must be reviewed by an Associate Editor first.'], 422);
-            }
-
             $publication->status = 'approved';
             $publication->approved_by = $user->id; 
             $publication->approved_at = now();      
             $publication->save();
+
+            $eic = User::where('role', 'admin')->orWhere('position', 'LIKE', '%chief%')->get();
+            Notification::send($eic, new ArticleStatusNotification($publication, 'approved', "Article '{$publication->title}' was approved by an Editor and needs your final review."));
+            
+            Notification::send($publication->writers, new ArticleStatusNotification($publication, 'approved', "Your article '{$publication->title}' was approved by an Editor and sent to the Editor-in-Chief."));
+
             Cache::forget('admin_dashboard_lists');
-            return response()->json(['message' => 'Article approved. Ready to Publish.', 'data' => $publication]);
+            return response()->json(['message' => 'Article approved. Sent to EIC.', 'data' => $publication]);
+        }
+
+        if ($action === 'review') {
+            if (!$user->isAdmin() && !$user->isEditorInChief()) {
+                return response()->json(['error' => 'Unauthorized. Only the EIC can review.'], 403);
+            }
+
+            if ($publication->status !== 'approved' && !$user->isAdmin()) {
+                return response()->json(['error' => 'Article must be approved by an Associate Editor first.'], 422);
+            }
+
+            $publication->status = 'reviewed';
+            $publication->reviewed_by = $user->id; 
+            $publication->reviewed_at = now();      
+            $publication->save();
+
+            Notification::send($publication->writers, new ArticleStatusNotification($publication, 'reviewed', "Your article '{$publication->title}' was reviewed by the Editor-in-Chief and is now ready to be published."));
+
+            Cache::forget('admin_dashboard_lists');
+            return response()->json(['message' => 'Article reviewed. Ready to Publish.', 'data' => $publication]);
         }
 
         if ($action === 'publish') {
@@ -256,13 +276,16 @@ class PublicationController extends Controller
                 return response()->json(['error' => 'Unauthorized.'], 403);
             }
 
-            if ($publication->status !== 'approved' && !$user->isAdmin()) {
-                return response()->json(['error' => 'Article must be approved first.'], 422);
+            if ($publication->status !== 'reviewed' && !$user->isAdmin()) {
+                return response()->json(['error' => 'Article must be reviewed first.'], 422);
             }
 
             $publication->status = 'published';
             $publication->date_published = $publication->date_published ?? now();
             $publication->save();
+
+            $allUsers = User::all();
+            Notification::send($allUsers, new ArticleStatusNotification($publication, 'published', "The article '{$publication->title}' is now live."));
             
             Cache::forget('news_hub_data');
             Cache::forget('homepage_content');
@@ -278,6 +301,9 @@ class PublicationController extends Controller
             
             $publication->status = 'returned';
             $publication->save();
+
+            Notification::send($publication->writers, new ArticleStatusNotification($publication, 'returned', "Your article '{$publication->title}' requires revisions and has been returned."));
+
             Cache::forget('admin_dashboard_lists');
             return response()->json(['message' => 'Article returned for revision.', 'data' => $publication]);
         }
@@ -320,7 +346,7 @@ class PublicationController extends Controller
         $slug = strtolower($category);
         $normalizedCategory = $categoryMap[$slug] ?? ucfirst($slug);
 
-        $publications = Publication::withoutGlobalScopes()
+        $publications = Publication::query()
             ->where('category', $normalizedCategory)
             ->where('status', 'published') 
             ->with('writers')
@@ -336,7 +362,7 @@ class PublicationController extends Controller
         $query = $request->input('q');
         if (!$query) return response()->json([]);
 
-        $publications = Publication::withoutGlobalScopes()
+        $publications = Publication::query()
             ->where('status', 'published') 
             ->where(function($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
@@ -353,7 +379,7 @@ class PublicationController extends Controller
 
     public function recent()
     {
-        $publications = Publication::withoutGlobalScopes()
+        $publications = Publication::query()
             ->where('status', 'published') 
             ->orderBy('date_published', 'desc')
             ->take(3)
