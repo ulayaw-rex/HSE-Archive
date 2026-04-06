@@ -30,10 +30,7 @@ Route::post('/resend-registration-otp', [AuthController::class, 'resendRegistrat
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:3,1');
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:5,1');
 
-// Email Verification
-Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+
 
 //  Homepage & News 
 Route::get('/home-data', [HomeController::class, 'index']);
@@ -77,9 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/search/users', [UserController::class, 'search']);
     Route::put('/users/{id}', [UserController::class, 'update']); 
-    Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
+
 
     // Notifications
     Route::get('/notifications/unread', [NotificationController::class, 'getUnread']);

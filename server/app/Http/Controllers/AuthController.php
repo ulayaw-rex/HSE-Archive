@@ -8,7 +8,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Events\Verified;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -205,39 +204,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function resendVerificationEmail(Request $request): JsonResponse
-    {
-        if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Already verified']);
-        }
 
-        $request->user()->sendEmailVerificationNotification();
-
-        return response()->json(['message' => 'Verification link sent']);
-    }
-
-    public function verifyEmail(Request $request, $id, $hash): JsonResponse
-    {
-        if (!$request->hasValidSignature()) {
-            return response()->json(['message' => 'Invalid or expired verification URL.'], 403);
-        }
-
-        $user = User::findOrFail($id);
-
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return response()->json(['message' => 'Invalid hash'], 400);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Already verified'], 200);
-        }
-
-        if ($user->markEmailAsVerified()) {
-            event(new Verified($user));
-        }
-
-        return response()->json(['message' => 'Successfully verified email'], 200);
-    }
 
     public function logout(Request $request): JsonResponse
     {

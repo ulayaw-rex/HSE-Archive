@@ -58,14 +58,30 @@ const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsProfileOpen(false);
+      if (e.key === "Escape") {
+        setIsProfileOpen(false);
+        setIsMobileMenuOpen(false);
+      }
     };
-    if (isProfileOpen) window.addEventListener("keydown", handleKeyDown);
+    if (isProfileOpen || isMobileMenuOpen) window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isProfileOpen]);
+  }, [isProfileOpen, isMobileMenuOpen]);
+
+  useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    if (isMobileMenuOpen) {
+      window.addEventListener("pointerdown", handlePointerDown);
+    }
+    return () => window.removeEventListener("pointerdown", handlePointerDown);
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
@@ -102,7 +118,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-[110] h-12 bg-green-700 text-white shadow-lg font-sans flex items-center">
+      <header ref={headerRef} className="sticky top-0 z-[110] h-12 bg-green-700 text-white shadow-lg font-sans flex items-center">
         <div className="container mx-auto px-4 w-[90%]">
           <div className="flex items-center justify-between relative">
             <div className="flex items-center flex-shrink-0">
@@ -120,7 +136,7 @@ const Header: React.FC = () => {
             </div>
 
             <div className="flex-1 flex justify-center lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:w-auto lg:block">
-              <Link to="/" className="lg:hidden cursor-pointer min-w-0">
+              <Link to="/" className="lg:hidden cursor-pointer min-w-0" onClick={() => setIsMobileMenuOpen(false)}>
                 <span className="text-lg font-bold text-white tracking-wide truncate block">
                   The Hillside Echo
                 </span>

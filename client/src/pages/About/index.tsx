@@ -261,6 +261,7 @@ const MemberCard: React.FC<{
   isAlumni?: boolean;
 }> = ({ member, isAlumni = false }) => {
   const navigate = useNavigate();
+  const [isTouched, setIsTouched] = useState(false);
 
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     member.name
@@ -268,7 +269,8 @@ const MemberCard: React.FC<{
 
   return (
     <div
-      onClick={() => navigate(`/profile/${member.id}`)}
+      onClick={() => setIsTouched(!isTouched)}
+      onMouseLeave={() => setIsTouched(false)}
       className="group relative w-full h-[22rem] md:h-[24rem] perspective-1000 cursor-pointer animate-in fade-in zoom-in-95 duration-500"
     >
       <div className="relative w-full h-full bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-500 transform border border-gray-100">
@@ -310,32 +312,34 @@ const MemberCard: React.FC<{
         </div>
 
         <div
-          className={`absolute bottom-0 left-0 w-full h-full text-white p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col justify-center ${
+          className={`absolute bottom-0 left-0 w-full h-full text-white p-4 transition-transform duration-500 flex flex-col justify-center ${
+            isTouched ? "translate-y-0" : "translate-y-full group-hover:translate-y-0"
+          } ${
             isAlumni
               ? "bg-gray-800/95 backdrop-blur-sm"
               : "bg-green-900/95 backdrop-blur-sm"
           }`}
         >
-          <div className="flex flex-col items-center text-center mb-4 md:mb-6">
+          <div className="flex flex-col items-center text-center mb-2 md:mb-3">
             <img
               src={avatarUrl}
               alt={member.name}
-              className="w-16 h-16 rounded-full border-2 border-white/50 shadow-inner object-cover mb-2"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/50 shadow-inner object-cover mb-1"
             />
-            <h4 className="text-lg font-bold truncate w-full px-2">
+            <h4 className="text-base md:text-lg font-bold truncate w-full px-2">
               {member.name}
             </h4>
             <div
-              className={`w-10 h-1 mt-2 rounded-full ${
+              className={`w-8 h-1 mt-1 rounded-full ${
                 isAlumni ? "bg-gray-400" : "bg-green-400"
               }`}
             ></div>
           </div>
 
           <div className="w-full px-1">
-            <div className="space-y-2 md:space-y-3">
-              <div className="flex items-center gap-3 bg-white/10 p-2 rounded-lg">
-                <div className="h-7 w-7 flex items-center justify-center bg-white/20 rounded-full shrink-0">
+            <div className="space-y-1.5 md:space-y-2">
+              <div className="flex items-center gap-2 bg-white/10 p-2 rounded-lg">
+                <div className="h-6 w-6 flex items-center justify-center bg-white/20 rounded-full shrink-0">
                   <FaUserTie className="text-white text-xs" />
                 </div>
                 <span
@@ -361,8 +365,8 @@ const MemberCard: React.FC<{
               </div>
 
               {isAlumni && member.year_graduated && (
-                <div className="flex items-center gap-3 bg-white/10 p-2 rounded-lg">
-                  <div className="h-7 w-7 flex items-center justify-center bg-white/20 rounded-full shrink-0">
+                <div className="flex items-center gap-2 bg-white/10 p-2 rounded-lg">
+                  <div className="h-6 w-6 flex items-center justify-center bg-white/20 rounded-full shrink-0">
                     <FaCalendarAlt className="text-white text-xs" />
                   </div>
                   <span className="font-medium text-xs leading-tight text-left text-gray-200">
@@ -372,9 +376,9 @@ const MemberCard: React.FC<{
               )}
             </div>
 
-            <div className="pt-3 border-t border-white/10 mt-3 text-center">
+            <div className="pt-2 border-t border-white/10 mt-2 flex flex-col items-center">
               <p
-                className={`text-[10px] uppercase tracking-widest font-bold ${
+                className={`text-[9px] md:text-[10px] uppercase tracking-widest font-bold mb-2 ${
                   isAlumni
                     ? "text-gray-400"
                     : "text-green-200 italic opacity-80"
@@ -382,6 +386,19 @@ const MemberCard: React.FC<{
               >
                 {isAlumni ? "FORMER MEMBER" : `"${member.role} Team Member"`}
               </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/profile/${member.id}`);
+                }}
+                className={`text-xs md:text-sm font-bold py-2 px-5 rounded-full transition-transform active:scale-95 shadow-md ${
+                  isAlumni
+                    ? "bg-white text-gray-800 hover:bg-gray-200"
+                    : "bg-white text-green-900 hover:bg-green-50"
+                }`}
+              >
+                View Profile
+              </button>
             </div>
           </div>
         </div>
