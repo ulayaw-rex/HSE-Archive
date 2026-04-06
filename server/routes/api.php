@@ -25,6 +25,8 @@ use App\Http\Controllers\NotificationController;
 //  Authentication 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/verify-registration-otp', [AuthController::class, 'verifyRegistrationOtp'])->middleware('throttle:5,1');
+Route::post('/resend-registration-otp', [AuthController::class, 'resendRegistrationOtp'])->middleware('throttle:3,1');
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:3,1');
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:5,1');
 

@@ -5,6 +5,27 @@ import { FaEye, FaEyeSlash, FaExclamationCircle } from "react-icons/fa";
 import logo from "../../assets/Login.png";
 import { DEPARTMENTS_DATA, POSITION_OPTIONS } from "../../types/SchoolData";
 
+const formatTitleCase = (str: string) => {
+  if (!str) return str;
+  const lowerWords = ['in', 'for', 'of', 'and', 'the', 'a', 'an', 'at', 'to'];
+  const acronyms = ['bs', 'ab', 'ba', 'bsed', 'beed', 'it', 'cs', 'co', 'ii', 'iii', 'iv', 'vi', 'vii'];
+
+  return str.toLowerCase().split(' ').map((word, index, arr) => {
+    if (word.includes('-')) {
+      return word.split('-').map((part, pIndex, pArr) => {
+        if (acronyms.includes(part)) return part.toUpperCase();
+        if (pIndex > 0 && pIndex < pArr.length - 1 && lowerWords.includes(part)) return part;
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      }).join('-');
+    }
+
+    if (acronyms.includes(word)) return word.toUpperCase();
+    if (index > 0 && index < arr.length - 1 && lowerWords.includes(word)) return word;
+
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+};
+
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -166,6 +187,8 @@ const RegistrationPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [resending, setResending] = useState(false);
 
   const [generalError, setGeneralError] = useState<string | null>(null);
 
@@ -182,14 +205,16 @@ const RegistrationPage: React.FC = () => {
     role: "hillsider",
     department: "",
     course: "",
+    custom_course: "",
     position: "",
+    custom_position: "",
     year_graduated: "",
   });
 
   const activeCourseOptions = useMemo(() => {
-    return formData.department
-      ? DEPARTMENTS_DATA[formData.department] || []
-      : [];
+    if (!formData.department) return [];
+    const options = DEPARTMENTS_DATA[formData.department] || [];
+    return [...options, "Others"];
   }, [formData.department]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,7 +280,13 @@ const RegistrationPage: React.FC = () => {
     if (!formData.department)
       newErrors.department = "Please select a department.";
     if (!formData.course) newErrors.course = "Please select a course.";
+    if (formData.course === "Others" && !formData.custom_course.trim()) {
+      newErrors.custom_course = "Please specify your course.";
+    }
     if (!formData.position) newErrors.position = "Please select a position.";
+    if (formData.position === "Others" && !formData.custom_position.trim()) {
+      newErrors.custom_position = "Please specify your position.";
+    }
 
     if (formData.role === "alumni") {
       if (!formData.year_graduated) {
@@ -272,8 +303,17 @@ const RegistrationPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await AxiosInstance.post("/register", formData);
-      setShowSuccessModal(true);
+      const dataToSend = { ...formData };
+      if (dataToSend.course === "Others") {
+        dataToSend.course = formatTitleCase(dataToSend.custom_course);
+      }
+      if (dataToSend.position === "Others") {
+        dataToSend.position = formatTitleCase(dataToSend.custom_position);
+      }
+      const { custom_course, custom_position, ...finalPayload } = dataToSend;
+
+      await AxiosInstance.post("/register", finalPayload);
+      setStep(3);
     } catch (error: any) {
       console.error(error);
 
@@ -314,6 +354,44 @@ const RegistrationPage: React.FC = () => {
     }
   };
 
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGeneralError(null);
+    setLoading(true);
+    try {
+      await AxiosInstance.post('/verify-registration-otp', {
+        email: formData.email,
+        otp: otp
+      });
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      if (error.response && error.response.data.message) {
+        setGeneralError(error.response.data.message);
+      } else {
+        setGeneralError("Verification failed. Please check your code.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setGeneralError(null);
+    setResending(true);
+    try {
+      await AxiosInstance.post('/resend-registration-otp', { email: formData.email });
+      alert("A new OTP has been sent to your email.");
+    } catch (error: any) {
+      if (error.response && error.response.data.message) {
+        setGeneralError(error.response.data.message);
+      } else {
+        setGeneralError("Failed to resend OTP.");
+      }
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#005e2b] p-4 font-sans">
       <SuccessModal isOpen={showSuccessModal} onClose={() => navigate("/")} />
@@ -345,7 +423,7 @@ const RegistrationPage: React.FC = () => {
             </div>
             <span>Sign Up</span>
           </div>
-          <div className="w-12 h-0.5 bg-gray-200" />
+          <div className="w-10 h-0.5 bg-gray-200" />
           <div
             className={`flex flex-col items-center gap-1 transition-colors ${
               step === 2 ? "text-black" : "text-gray-300"
@@ -360,7 +438,24 @@ const RegistrationPage: React.FC = () => {
             >
               2
             </div>
-            <span>Profile Set Up</span>
+            <span>Profile</span>
+          </div>
+          <div className="w-10 h-0.5 bg-gray-200" />
+          <div
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              step === 3 ? "text-black" : "text-gray-300"
+            }`}
+          >
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+                step === 3
+                  ? "border-black bg-black text-white"
+                  : "border-gray-300 text-gray-300"
+              }`}
+            >
+              3
+            </div>
+            <span>Verify</span>
           </div>
         </div>
 
@@ -374,7 +469,11 @@ const RegistrationPage: React.FC = () => {
         )}
 
         <form
-          onSubmit={step === 1 ? handleNext : handleSubmit}
+          onSubmit={(e) => {
+            if (step === 1) handleNext(e);
+            else if (step === 2) handleSubmit(e);
+            else handleVerifyOtp(e);
+          }}
           className="text-left"
         >
           {step === 1 && (
@@ -495,13 +594,39 @@ const RegistrationPage: React.FC = () => {
                 disabled={!formData.department}
               />
 
+              {formData.course === "Others" && (
+                <div className="animate-fadeIn mb-4">
+                  <InputField
+                    name="custom_course"
+                    type="text"
+                    placeholder="Please specify your course"
+                    value={formData.custom_course}
+                    onChange={handleChange}
+                    error={errors.custom_course}
+                  />
+                </div>
+              )}
+
               <CustomDropdown
                 placeholder="Select Position / Title"
                 value={formData.position}
-                options={POSITION_OPTIONS}
+                options={[...POSITION_OPTIONS, "Others"]}
                 onChange={(val) => handleDropdownChange("position", val)}
                 error={errors.position}
               />
+
+              {formData.position === "Others" && (
+                <div className="animate-fadeIn mb-4">
+                  <InputField
+                    name="custom_position"
+                    type="text"
+                    placeholder="Please specify your position"
+                    value={formData.custom_position}
+                    onChange={handleChange}
+                    error={errors.custom_position}
+                  />
+                </div>
+              )}
 
               {formData.role === "alumni" && (
                 <div className="animate-fadeIn mb-4">
@@ -540,6 +665,44 @@ const RegistrationPage: React.FC = () => {
               </div>
             </div>
           )}
+
+        {step === 3 && (
+          <div className="animate-fadeIn text-center">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Verify your email</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              We've sent a 6-digit code to <strong>{formData.email}</strong>. Please enter it below to complete your registration.
+            </p>
+            
+            <InputField
+              name="otp"
+              type="text"
+              maxLength={6}
+              placeholder="Enter 6-digit code"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+              className="text-center tracking-widest text-lg font-bold"
+            />
+
+            <div className="mt-8 flex flex-col gap-3">
+              <button
+                type="submit"
+                disabled={loading || otp.length !== 6}
+                className="w-full bg-[#008543] hover:bg-[#006e36] text-white font-bold py-4 rounded-full transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-900/20 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95"
+              >
+                {loading ? "Verifying..." : "Verify & Finish"}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resending}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-full transition-all disabled:opacity-70"
+              >
+                {resending ? "Sending..." : "Resend Code"}
+              </button>
+            </div>
+          </div>
+        )}
 
           <div className="mt-6 text-center">
             <Link

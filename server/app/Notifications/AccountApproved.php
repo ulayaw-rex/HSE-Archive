@@ -25,10 +25,9 @@ class AccountApproved extends Notification implements ShouldQueue
     {
         return (new MailMessage)
                     ->subject('Welcome to HSE-Archive! Account Approved')
-                    ->greeting('Hello ' . $notifiable->name . '!')
-                    ->line('Great news! Your account has been reviewed and approved by our administrator.')
-                    ->line('You can now log in and access all features.')
-                    ->action('Log In Now', url('https://hse-archive.vercel.app/')) 
-                    ->line('Thank you for being part of the Hillsider community!');
+                    ->view('emails.account_approved', [
+                        'name' => $notifiable->name,
+                        'loginUrl' => url('https://hse-archive.vercel.app/')
+                    ]);
     }
 }

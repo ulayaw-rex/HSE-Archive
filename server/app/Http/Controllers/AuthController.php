@@ -82,7 +82,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email:rfc,strict|max:255|unique:users',
+            'email' => 'required|string|email:rfc,strict|max:255',
             'password' => 'required|string|min:8|confirmed',
             'course' => 'required|string',
             'position' => 'required|string',
@@ -91,23 +91,99 @@ class AuthController extends Controller
             'year_graduated' => 'nullable|required_if:role,alumni|string|max:4',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'course' => $request->course,
-            'position' => $request->position,
-            'department' => $request->department,
-            'year_graduated' => $request->year_graduated,
+        $existingUser = User::where('email', $request->email)->first();
+        if ($existingUser) {
+            if ($existingUser->status !== 'pending_otp') {
+                return response()->json([
+                    'errors' => ['email' => ['The email has already been taken.']]
+                ], 422);
+            }
+            $user = $existingUser;
+            $user->update([
+                'name' => $request->name,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+                'course' => $request->course,
+                'position' => $request->position,
+                'department' => $request->department,
+                'year_graduated' => $request->year_graduated,
+            ]);
+        } else {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+                'course' => $request->course,
+                'position' => $request->position,
+                'department' => $request->department,
+                'year_graduated' => $request->year_graduated,
+                'status' => 'pending_otp'
+            ]);
+        }
+
+        $otp = rand(100000, 999999);
+        \Illuminate\Support\Facades\Cache::put('otp_' . $user->id, $otp, now()->addMinutes(15));
+        
+        $user->notify(new \App\Notifications\RegistrationOtpNotification($otp));
+
+        return response()->json([
+            'message' => 'OTP sent to email. Please verify to continue registration.'
+        ], 201);
+    }
+
+    public function verifyRegistrationOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+        
+        $cachedOtp = \Illuminate\Support\Facades\Cache::get('otp_' . $user->id);
+
+        if (!$cachedOtp || (string)$cachedOtp !== (string)$request->otp) {
+            return response()->json(['message' => 'Invalid or expired OTP.'], 400);
+        }
+
+        $user->update([
             'status' => 'pending'
         ]);
+
+        \Illuminate\Support\Facades\Cache::forget('otp_' . $user->id);
 
         event(new Registered($user));
 
         return response()->json([
-            'message' => 'Registration successful! Please wait for admin approval.'
-        ], 201);
+            'message' => 'Registration verified! Please wait for admin approval.'
+        ], 200);
+    }
+
+    public function resendRegistrationOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || $user->status !== 'pending_otp') {
+            return response()->json(['message' => 'User not found or already verified.'], 400);
+        }
+
+        $otp = rand(100000, 999999);
+        \Illuminate\Support\Facades\Cache::put('otp_' . $user->id, $otp, now()->addMinutes(15));
+
+        $user->notify(new \App\Notifications\RegistrationOtpNotification($otp));
+
+        return response()->json([
+            'message' => 'A new OTP has been sent.'
+        ], 200);
     }
 
     public function me(Request $request): JsonResponse
