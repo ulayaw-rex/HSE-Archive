@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
-import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 
 const VerifyEmailPage: React.FC = () => {
@@ -12,19 +11,32 @@ const VerifyEmailPage: React.FC = () => {
 
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
+  const [status, setStatus] = useState<{ type: "success" | "error" | null; message: string | null }>({
+    type: null,
+    message: null,
+  });
 
   useEffect(() => {
     if (verifyUrl) {
       const verify = async () => {
         setVerifying(true);
+        setStatus({ type: null, message: null });
         try {
           await AxiosInstance.get(verifyUrl);
-          toast.success("Email successfully verified!");
+          setStatus({
+            type: "success",
+            message: "Email successfully verified! Redirecting you...",
+          });
           // Re-fetch auth user state to clear verification barrier
           await checkAuth();
-          navigate("/");
+          setTimeout(() => navigate("/"), 2000);
         } catch (error: any) {
-          toast.error(error.response?.data?.message || "Verification link is invalid or expired.");
+          setStatus({
+            type: "error",
+            message:
+              error.response?.data?.message ||
+              "Verification link is invalid or expired.",
+          });
         } finally {
           setVerifying(false);
         }
@@ -36,11 +48,20 @@ const VerifyEmailPage: React.FC = () => {
 
   const handleResend = async () => {
     setResending(true);
+    setStatus({ type: null, message: null });
     try {
       await AxiosInstance.post("/email/verification-notification");
-      toast.success("Verification link sent to your email address.");
+      setStatus({
+        type: "success",
+        message: "Verification link sent to your email address.",
+      });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to resend link. You may be rate limited.");
+      setStatus({
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          "Failed to resend link. You may be rate limited.",
+      });
     } finally {
       setResending(false);
     }
@@ -72,9 +93,21 @@ const VerifyEmailPage: React.FC = () => {
             We need to verify it's really you. Please check your email for a verification link.
           </p>
 
+          {status.message && (
+            <div
+              className={`mb-6 p-4 rounded-lg text-sm font-medium animate-fadeIn ${
+                status.type === "success"
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              {status.message}
+            </div>
+          )}
+
           <button
             onClick={handleResend}
-            disabled={resending}
+            disabled={resending || status.type === "success"}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-green-700 hover:bg-green-800 focus:outline-none disabled:opacity-50 transition-colors"
           >
             {resending ? "Sending..." : "Resend Verification Email"}

@@ -58,7 +58,7 @@ Route::get('/analytics/system-status', [SiteSettingController::class, 'getSystem
 Route::get('/site-settings/team-photo', [SiteSettingController::class, 'getTeamPhoto']);
 Route::get('/site-settings/team-intro', [SiteSettingController::class, 'getTeamIntro']);
 Route::post('/chat', [ChatBotController::class, 'chat'])->middleware('throttle:10,1');
-Route::post('/contact-us', [ContactController::class, 'submit'])->middleware('throttle:2,1');
+Route::post('/contact-us', [ContactController::class, 'submit'])->middleware('throttle:1,5');
 
 //  Comments (Read Access – guests can view comments) 
 Route::get('/publications/{publication}/comments', [CommentController::class, 'index']);

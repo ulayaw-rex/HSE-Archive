@@ -34,9 +34,26 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
 
         <div className="flex items-center justify-between text-gray-300 text-sm">
           <div className="flex items-center">
-            {publication.photo_credits && (
-              <span className="mr-3">Photo: {publication.photo_credits}</span>
-            )}
+            {publication.photo_credits && (() => {
+              const credits = publication.photo_credits;
+              let type = "Photo";
+              let name = credits;
+              if (credits.startsWith("Photo ")) {
+                type = "Photo";
+                name = credits.substring(6);
+              } else if (credits.startsWith("Art ")) {
+                type = "Art";
+                name = credits.substring(4);
+              } else if (credits.startsWith("Cartoon ")) {
+                type = "Cartoon";
+                name = credits.substring(8);
+              }
+              return (
+                <span className="mr-3">
+                  {type}: <span className="font-bold italic">{name}</span>
+                </span>
+              );
+            })()}
             <span>{new Date(publication.created_at).toLocaleDateString()}</span>
           </div>
 

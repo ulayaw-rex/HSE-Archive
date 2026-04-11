@@ -67,11 +67,26 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
           </p>
         </div>
 
-        {publication.photo_credits && (
-          <p className="text-gray-400 text-xs">
-            Photo: {publication.photo_credits}
-          </p>
-        )}
+        {publication.photo_credits && (() => {
+          const credits = publication.photo_credits;
+          let type = "Photo";
+          let name = credits;
+          if (credits.startsWith("Photo ")) {
+            type = "Photo";
+            name = credits.substring(6);
+          } else if (credits.startsWith("Art ")) {
+            type = "Art";
+            name = credits.substring(4);
+          } else if (credits.startsWith("Cartoon ")) {
+            type = "Cartoon";
+            name = credits.substring(8);
+          }
+          return (
+            <p className="text-gray-400 text-xs">
+              {type}: <span className="font-bold italic">{name}</span>
+            </p>
+          );
+        })()}
 
         <div className="mt-2 flex items-center justify-between">
           <div className={`text-xs font-bold uppercase ${categoryColor}`}>

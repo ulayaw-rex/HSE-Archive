@@ -68,11 +68,26 @@ const PublicationViewModal: React.FC<PublicationViewModalProps> = ({
               </span>
             </div>
 
-            {publication.photo_credits && (
-              <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[10px] px-3 py-1 rounded-tl-lg backdrop-blur-sm">
-                Photo: {publication.photo_credits}
-              </div>
-            )}
+            {publication.photo_credits && (() => {
+              const credits = publication.photo_credits;
+              let type = "Photo";
+              let name = credits;
+              if (credits.startsWith("Photo ")) {
+                type = "Photo";
+                name = credits.substring(6);
+              } else if (credits.startsWith("Art ")) {
+                type = "Art";
+                name = credits.substring(4);
+              } else if (credits.startsWith("Cartoon ")) {
+                type = "Cartoon";
+                name = credits.substring(8);
+              }
+              return (
+                <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[10px] px-3 py-1 rounded-tl-lg backdrop-blur-sm">
+                  {type}: <span className="font-bold italic">{name}</span>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="px-6 py-8 md:px-10">

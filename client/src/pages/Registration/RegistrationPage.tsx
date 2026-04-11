@@ -191,6 +191,7 @@ const RegistrationPage: React.FC = () => {
   const [resending, setResending] = useState(false);
 
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [generalSuccess, setGeneralSuccess] = useState<string | null>(null);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -380,7 +381,7 @@ const RegistrationPage: React.FC = () => {
     setResending(true);
     try {
       await AxiosInstance.post('/resend-registration-otp', { email: formData.email });
-      alert("A new OTP has been sent to your email.");
+      setGeneralSuccess("A new OTP has been sent to your email.");
     } catch (error: any) {
       if (error.response && error.response.data.message) {
         setGeneralError(error.response.data.message);
@@ -464,6 +465,19 @@ const RegistrationPage: React.FC = () => {
             <FaExclamationCircle className="text-red-600 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-red-700 font-medium leading-tight">
               {generalError}
+            </p>
+          </div>
+        )}
+
+        {generalSuccess && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3 text-left animate-fadeIn">
+            <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <p className="text-sm text-green-700 font-medium leading-tight">
+              {generalSuccess}
             </p>
           </div>
         )}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaFacebook,
@@ -41,10 +41,15 @@ type FeedbackState = {
   message: string;
 };
 
+const COOLDOWN_DURATION = 5 * 60 * 1000; // 5 minutes
+const EMAIL_MAX_LENGTH = 100;
+const MESSAGE_MAX_LENGTH = 500;
+
 const Footer: React.FC = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   const [feedback, setFeedback] = useState<FeedbackState>({
     isOpen: false,
@@ -53,12 +58,49 @@ const Footer: React.FC = () => {
     message: "",
   });
 
+  const getCooldownRemaining = useCallback(() => {
+    // We no longer rely on localStorage to prevent bypass attempts.
+    // The backend throttle (1 request per 5 mins) is the true enforcement.
+    return 0; 
+  }, []);
+
+  useEffect(() => {
+    // Initialization from memory only
+    const interval = setInterval(() => {
+      setCooldownRemaining((prev) => (prev > 0 ? prev - 1000 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const startCooldown = () => {
+    setCooldownRemaining(COOLDOWN_DURATION);
+  };
+
+  const formatCooldown = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const isOnCooldown = cooldownRemaining > 0;
+
   const closeFeedback = () => {
     setFeedback((prev) => ({ ...prev, isOpen: false }));
   };
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isOnCooldown) {
+      setFeedback({
+        isOpen: true,
+        type: "error",
+        title: "Please Wait",
+        message: `You can send another message in ${formatCooldown(cooldownRemaining)}.`,
+      });
+      return;
+    }
 
     if (!message.trim()) {
       setFeedback({
@@ -88,6 +130,7 @@ const Footer: React.FC = () => {
 
       setEmail("");
       setMessage("");
+      startCooldown();
     } catch (error) {
       console.error(error);
       const err = error as AxiosError;
@@ -240,26 +283,35 @@ const Footer: React.FC = () => {
                   type="email"
                   placeholder="Your email address"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.slice(0, EMAIL_MAX_LENGTH))}
                   className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-60 transition-all"
                   required
-                  disabled={sending}
+                  maxLength={EMAIL_MAX_LENGTH}
+                  disabled={sending || isOnCooldown}
                 />
-                <textarea
-                  placeholder="Write your message..."
-                  rows={3}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none disabled:opacity-60 transition-all"
-                  required
-                  disabled={sending}
-                />
+                <div className="relative">
+                  <textarea
+                    placeholder="Write your message..."
+                    rows={3}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))}
+                    className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none disabled:opacity-60 transition-all"
+                    required
+                    maxLength={MESSAGE_MAX_LENGTH}
+                    disabled={sending || isOnCooldown}
+                  />
+                  <span className="absolute bottom-2 right-3 text-[10px] text-gray-400">
+                    {message.length}/{MESSAGE_MAX_LENGTH}
+                  </span>
+                </div>
                 <button
                   type="submit"
-                  disabled={sending}
+                  disabled={sending || isOnCooldown}
                   className="w-full px-8 py-3 bg-white text-green-800 font-bold rounded-lg hover:bg-green-50 shadow-sm hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {sending ? (
+                  {isOnCooldown ? (
+                    <span className="text-sm">Wait {formatCooldown(cooldownRemaining)}</span>
+                  ) : sending ? (
                     <span className="animate-pulse">Sending...</span>
                   ) : (
                     <>

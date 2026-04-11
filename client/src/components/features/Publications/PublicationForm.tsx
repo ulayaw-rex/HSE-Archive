@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import WriterSelect from "./WriterSelect";
 import ConfirmationModal from "../../common/ConfirmationModal";
 import AxiosInstance from "../../../AxiosInstance";
+import { toast } from "react-toastify";
 import { useAuth } from "../../../context/AuthContext";
 import type {
   Publication,
@@ -50,8 +51,11 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   const [image, setImage] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [generalError, setGeneralError] = useState<string | null>(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [initialData, setInitialData] = useState<string>("");
+  const [creditType, setCreditType] = useState<string>("Photo");
+  const [creditName, setCreditName] = useState<string>("");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -63,12 +67,31 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       const targetDate =
         publicationToEdit.date_published || publicationToEdit.created_at;
 
+      const rawCredits = publicationToEdit.photo_credits || "";
+      let initType = "Photo";
+      let initName = rawCredits;
+      if (rawCredits.startsWith("Photo ")) {
+        initType = "Photo";
+        initName = rawCredits.substring(6);
+      } else if (rawCredits.startsWith("Art ")) {
+        initType = "Art";
+        initName = rawCredits.substring(4);
+      } else if (rawCredits.startsWith("Cartoon ")) {
+        initType = "Cartoon";
+        initName = rawCredits.substring(8);
+      }
+
+      setCreditType(initType);
+      setCreditName(initName);
+
+      const formattedCredits = initName ? `${initType} ${initName}` : "";
+
       startData = {
         title: publicationToEdit.title,
         byline: publicationToEdit.byline || "",
         body: publicationToEdit.body,
         category: publicationToEdit.category,
-        photo_credits: publicationToEdit.photo_credits || "",
+        photo_credits: formattedCredits,
         writer_ids: publicationToEdit.writers?.length
           ? publicationToEdit.writers.map((w: any) => w.id)
           : currentUser
@@ -78,6 +101,9 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       };
       setExistingImageUrl(publicationToEdit.image || null);
     } else {
+      setCreditType("Photo");
+      setCreditName("");
+
       startData = {
         title: "",
         byline: isAdmin ? "" : currentUser?.name || "",
@@ -178,7 +204,11 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       onClose();
     } catch (error) {
       console.error("Error submitting publication:", error);
-      alert("Failed to save publication. Please check your inputs.");
+      if (isAdmin) {
+        toast.error("Failed to save publication. Please check your inputs.");
+      } else {
+        setGeneralError("Failed to save article. Please check your inputs and connection.");
+      }
     } finally {
       setLoading(false);
     }
@@ -232,6 +262,15 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
             <h2 className="text-3xl font-extrabold mb-8 border-b border-gray-300 pb-4 text-gray-900">
               {mode === "edit" ? "Edit Article" : "Write New Article"}
             </h2>
+
+            {generalError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 animate-fadeIn">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-medium">{generalError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -322,21 +361,42 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
                   <div className="col-span-1">
                     <label className="block text-xs font-semibold text-gray-500 mb-1">
-                      PHOTO CREDITS
+                      MEDIA CREDITS
                     </label>
-                    <input
-                      type="text"
-                      disabled={loading}
-                      placeholder="Photographer Name"
-                      value={formData.photo_credits}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          photo_credits: e.target.value,
-                        })
-                      }
-                      className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
-                    />
+                    <div className="flex bg-white rounded-md border border-gray-700 focus-within:ring-2 focus-within:ring-green-600 focus-within:border-transparent h-[50px] overflow-hidden">
+                      <select
+                        disabled={loading}
+                        value={creditType}
+                        onChange={(e) => {
+                          const newType = e.target.value;
+                          setCreditType(newType);
+                          setFormData({
+                            ...formData,
+                            photo_credits: creditName ? `${newType} ${creditName}` : "",
+                          });
+                        }}
+                        className="bg-gray-100 border-r border-gray-300 text-gray-700 px-3 py-2 outline-none cursor-pointer focus:bg-gray-200 transition-colors"
+                      >
+                        <option value="Photo">Photo</option>
+                        <option value="Art">Art</option>
+                        <option value="Cartoon">Cartoon</option>
+                      </select>
+                      <input
+                        type="text"
+                        disabled={loading}
+                        placeholder="Name"
+                        value={creditName}
+                        onChange={(e) => {
+                          const newName = e.target.value;
+                          setCreditName(newName);
+                          setFormData({
+                            ...formData,
+                            photo_credits: newName ? `${creditType} ${newName}` : "",
+                          });
+                        }}
+                        className="w-full px-3 py-2 outline-none bg-transparent"
+                      />
+                    </div>
                   </div>
                 </div>
 

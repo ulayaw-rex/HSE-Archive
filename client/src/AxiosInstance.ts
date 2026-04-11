@@ -62,8 +62,9 @@ AxiosInstance.interceptors.request.use(
 AxiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    const isAdminPath = window.location.pathname.startsWith("/admin");
     if (!error.response) {
-      toast.error("Network Error. Please check your connection.");
+      if (isAdminPath) toast.error("Network Error. Please check your connection.");
       return Promise.reject(error);
     }
 
@@ -76,18 +77,18 @@ AxiosInstance.interceptors.response.use(
       const isAuthCheck = error.config?.url?.endsWith("/me");
 
       if (!isAuthRoute && !isAuthCheck) {
-        toast.info("Your session has expired.");
+        if (isAdminPath) toast.info("Your session has expired.");
         window.location.href = "/";
       }
     } else if (status === 419) {
       csrfInitialized = false;
-      toast.error("Security session expired. Please try again.");
+      if (isAdminPath) toast.error("Security session expired. Please try again.");
     } else if (status >= 500) {
-      toast.error("Server Error. Please try again later.");
+      if (isAdminPath) toast.error("Server Error. Please try again later.");
     } else if (status === 403) {
-      toast.error(data?.message || "Action unauthorized.");
+      if (isAdminPath) toast.error(data?.message || "Action unauthorized.");
     } else if (status !== 422) {
-      toast.error(data?.message || "An unexpected error occurred.");
+      if (isAdminPath) toast.error(data?.message || "An unexpected error occurred.");
     }
 
     return Promise.reject(error);

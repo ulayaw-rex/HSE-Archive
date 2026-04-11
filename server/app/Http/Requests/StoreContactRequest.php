@@ -16,10 +16,11 @@ class StoreContactRequest extends FormRequest
         return [
             'name' => 'nullable|string|max:255',
             'subject' => 'nullable|string|max:255',
-            'message' => 'required|string',
+            'message' => 'required|string|max:500',
             'email' => [
                 'required',
                 'email:rfc,dns',
+                'max:100',
                 function ($attribute, $value, $fail) {
                     $blockedDomains = [
                         'tempmail.com', '10minutemail.com', 'mailinator.com',

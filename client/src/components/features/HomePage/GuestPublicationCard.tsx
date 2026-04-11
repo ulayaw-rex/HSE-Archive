@@ -80,11 +80,26 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
               })}
             </p>
 
-            {publication.photo_credits && (
-              <p className="text-gray-400 text-[10px] mt-1 italic">
-                Photo: {publication.photo_credits}
-              </p>
-            )}
+            {publication.photo_credits && (() => {
+              const credits = publication.photo_credits;
+              let type = "Photo";
+              let name = credits;
+              if (credits.startsWith("Photo ")) {
+                type = "Photo";
+                name = credits.substring(6);
+              } else if (credits.startsWith("Art ")) {
+                type = "Art";
+                name = credits.substring(4);
+              } else if (credits.startsWith("Cartoon ")) {
+                type = "Cartoon";
+                name = credits.substring(8);
+              }
+              return (
+                <p className="text-gray-400 text-[10px] mt-1">
+                  {type}: <span className="font-bold italic">{name}</span>
+                </p>
+              );
+            })()}
           </div>
 
           <span className="text-xs text-green-600 font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">

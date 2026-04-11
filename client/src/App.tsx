@@ -129,7 +129,9 @@ const AppContent = () => {
         location.pathname !== "/login" &&
         location.pathname !== "/register" && <Chatbot />}
 
-      <ToastContainer position="top-right" autoClose={3000} />
+      {location.pathname.startsWith("/admin") && (
+        <ToastContainer position="top-right" autoClose={3000} />
+      )}
     </>
   );
 };

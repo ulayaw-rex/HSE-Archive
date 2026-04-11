@@ -370,12 +370,27 @@ const ArticleDetail: React.FC = () => {
                 alt={publication.title}
                 className="w-full h-auto rounded-md object-cover"
               />
-              {publication.photo_credits && (
-                <div className="absolute bottom-0 right-0 bg-white bg-opacity-75 px-3 py-1 text-xs text-gray-500 italic rounded-tl-md">
-                  Photo from{" "}
-                  <span className="font-bold">{publication.photo_credits}</span>
-                </div>
-              )}
+              {publication.photo_credits && (() => {
+                const credits = publication.photo_credits;
+                let type = "Photo";
+                let name = credits;
+                if (credits.startsWith("Photo ")) {
+                  type = "Photo";
+                  name = credits.substring(6);
+                } else if (credits.startsWith("Art ")) {
+                  type = "Art";
+                  name = credits.substring(4);
+                } else if (credits.startsWith("Cartoon ")) {
+                  type = "Cartoon";
+                  name = credits.substring(8);
+                }
+                return (
+                  <div className="absolute bottom-0 right-0 bg-white bg-opacity-75 px-3 py-1 text-xs text-gray-500 rounded-tl-md shadow-sm">
+                    {type}{" "}
+                    <span className="font-bold italic">{name}</span>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
