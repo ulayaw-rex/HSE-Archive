@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaFacebook,
@@ -57,12 +57,6 @@ const Footer: React.FC = () => {
     title: "",
     message: "",
   });
-
-  const getCooldownRemaining = useCallback(() => {
-    // We no longer rely on localStorage to prevent bypass attempts.
-    // The backend throttle (1 request per 5 mins) is the true enforcement.
-    return 0; 
-  }, []);
 
   useEffect(() => {
     // Initialization from memory only
@@ -283,7 +277,9 @@ const Footer: React.FC = () => {
                   type="email"
                   placeholder="Your email address"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value.slice(0, EMAIL_MAX_LENGTH))}
+                  onChange={(e) =>
+                    setEmail(e.target.value.slice(0, EMAIL_MAX_LENGTH))
+                  }
                   className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-60 transition-all"
                   required
                   maxLength={EMAIL_MAX_LENGTH}
@@ -294,7 +290,9 @@ const Footer: React.FC = () => {
                     placeholder="Write your message..."
                     rows={3}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))}
+                    onChange={(e) =>
+                      setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))
+                    }
                     className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none disabled:opacity-60 transition-all"
                     required
                     maxLength={MESSAGE_MAX_LENGTH}
@@ -310,7 +308,9 @@ const Footer: React.FC = () => {
                   className="w-full px-8 py-3 bg-white text-green-800 font-bold rounded-lg hover:bg-green-50 shadow-sm hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isOnCooldown ? (
-                    <span className="text-sm">Wait {formatCooldown(cooldownRemaining)}</span>
+                    <span className="text-sm">
+                      Wait {formatCooldown(cooldownRemaining)}
+                    </span>
                   ) : sending ? (
                     <span className="animate-pulse">Sending...</span>
                   ) : (
