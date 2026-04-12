@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
 import { format, parse, getYear, getMonth, setMonth, setYear } from "date-fns";
-import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa";
 import "react-day-picker/dist/style.css";
 
 interface DatePickerProps {
