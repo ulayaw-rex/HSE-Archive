@@ -12,20 +12,14 @@ class HomeController extends Controller
     use FormatsPublications;
 
     private $selectColumns = [
-        'publication_id', 'title', 'category', 'date_published', 
-        'created_at', 'image_path', 'thumbnail_path', 'status', 'views'
+        'publication_id', 'title', 'category', 'date_published',
+        'created_at', 'image_path', 'thumbnail_path', 'status', 'views',
+        'byline', 'body', 'photo_credits',
     ];
-
-    private function formatPublicationForHome($publication)
-    {
-        $this->formatPublication($publication);
-        unset($publication->image_path, $publication->thumbnail_path);
-        return $publication;
-    }
 
     public function index()
     {
-        $data = Cache::remember('homepage_content', 60, function () {
+        $data = Cache::remember('homepage_content', 300, function () {
             
             $featured = Publication::with(['writers' => function($q) { $q->select('user_id', 'name'); }])
                 ->select($this->selectColumns)
@@ -70,7 +64,7 @@ class HomeController extends Controller
 
     public function getNewsHubData()
     {
-        $data = Cache::remember('news_hub_data', 60, function () {
+        $data = Cache::remember('news_hub_data', 300, function () {
             
             $newsCategories = ['News', 'University', 'Local', 'National', 'International'];
             

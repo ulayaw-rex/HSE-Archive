@@ -143,8 +143,11 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, 
-      refetchInterval: 15000,
+      // Server-side cache on homepage/news is 5 min (Cache::remember 300s).
+      // Matching staleTime prevents redundant requests for unchanged data.
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      // No global interval — admin queries that need live updates
+      // set their own refetchInterval in their individual useQuery() calls.
     },
   },
 });

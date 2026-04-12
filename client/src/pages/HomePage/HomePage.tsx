@@ -58,6 +58,9 @@ const HomePage: React.FC = () => {
   const { data, isLoading: loading, refetch } = useQuery({
     queryKey: ["homeData"],
     queryFn: fetchHomeData,
+    // Polls every 15s so new published articles appear without a manual refresh.
+    // Server returns cached data (5 min TTL) so DB load stays low.
+    refetchInterval: 15_000,
   });
 
   const featuredArticles = data?.featured || [];
