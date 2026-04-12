@@ -58,7 +58,7 @@ class DashboardController extends Controller
             ];
         });
 
-        $cachedLists = Cache::remember('admin_dashboard_lists', 60, function () {
+        $cachedLists = Cache::remember('admin_dashboard_lists', 120, function () {
             $totalArticles = Publication::count();
             $popular = Publication::orderBy('views', 'desc')->first();
             $mostPopularArticle = $popular ? [
@@ -108,7 +108,7 @@ class DashboardController extends Controller
                 ]);
 
             $pendingUsers = User::where('status', 'pending')->latest()->get(); 
-            $pendingReviews = Publication::where('status', 'pending')->latest()->get();
+            $pendingReviews = Publication::where('status', 'submitted')->latest()->get();
             
             $creditRequests = CreditRequest::with(['user:id,name,email', 'requestable'])
                 ->where('status', 'pending')
