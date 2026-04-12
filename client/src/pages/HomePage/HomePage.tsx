@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import { Link } from "react-router-dom";
-import FeaturedCarousel from "../../components/features/HomePage/FeaturedCarousel";
+
+// Lazy-load carousel — defers react-slick (~80KB) until after initial render
+const FeaturedCarousel = React.lazy(
+  () => import("../../components/features/HomePage/FeaturedCarousel")
+);
 import PublicationCard from "../../components/features/Admin/PublicationCard";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import { Skeleton, ArticleSkeleton, FeaturedSkeleton } from "../../components/common/Skeleton";
@@ -90,7 +94,9 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pb-12">
       {featuredArticles.length > 0 && (
-        <FeaturedCarousel articles={featuredArticles} />
+        <Suspense fallback={<FeaturedSkeleton />}>
+          <FeaturedCarousel articles={featuredArticles} />
+        </Suspense>
       )}
 
       <div className="w-[90%] mx-auto px-4">
