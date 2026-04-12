@@ -30,6 +30,9 @@ export default defineConfig({
     // Suppress warnings for chunks under 700KB (some admin pages are large)
     chunkSizeWarningLimit: 700,
     rollupOptions: {
+      // slick-carousel has a jQuery dependency that isn't installed.
+      // Mark it as external so any stray require('jquery') is silently ignored.
+      external: ["jquery"],
       output: {
         manualChunks: {
           // Core React runtime — rarely changes, long cache life
@@ -38,8 +41,9 @@ export default defineConfig({
           "vendor-router": ["react-router-dom"],
           // Data-fetching layer
           "vendor-query": ["@tanstack/react-query"],
-          // Carousel — lazy-loaded, so this chunk is only fetched when needed
-          "vendor-slick": ["react-slick", "slick-carousel"],
+          // react-slick JS only (NOT slick-carousel — its CSS is fine as-is,
+          // but its JS pulls jquery which we don't have)
+          "vendor-slick": ["react-slick"],
           // Icons — large package, deserves its own cache bucket
           "vendor-icons": ["react-icons"],
         },
