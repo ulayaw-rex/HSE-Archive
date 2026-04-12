@@ -30,7 +30,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 overflow-hidden">
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 overflow-hidden border border-gray-200 dark:border-white/10">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500" />
         <div className="text-center">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
@@ -143,7 +143,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       )}
 
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-fadeIn">
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg shadow-xl overflow-hidden animate-fadeIn transition-colors">
           <ul className="max-h-48 overflow-y-auto custom-scrollbar">
             {options.length > 0 ? (
               options.map((option) => (
@@ -295,7 +295,7 @@ const UserForm: React.FC<UserFormProps> = ({
     try {
       await onSubmit(submitData);
       toast.success(
-        isEditing ? "User updated successfully!" : "User created successfully!"
+        isEditing ? "User updated successfully!" : "User created successfully!",
       );
       onCancel();
     } catch (error: any) {
@@ -323,7 +323,7 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -370,8 +370,8 @@ const UserForm: React.FC<UserFormProps> = ({
         message={errorMessage}
       />
 
-      <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-8 max-w-4xl mx-auto border border-gray-100">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-black/50 p-8 max-w-4xl mx-auto border border-gray-100 dark:border-white/5 transition-colors">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/10">
           <div>
             <h2 className="text-xl font-bold text-gray-800 tracking-tight">
               {isEditing ? "Edit User Details" : "Create New User"}
@@ -553,7 +553,7 @@ const UserForm: React.FC<UserFormProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end items-center gap-3 pt-6 border-t border-gray-100 mt-2">
+          <div className="flex justify-end items-center gap-3 pt-6 border-t border-gray-100 dark:border-white/10 mt-2">
             <button
               type="button"
               onClick={onCancel}
@@ -570,8 +570,8 @@ const UserForm: React.FC<UserFormProps> = ({
               {loading
                 ? "Processing..."
                 : isEditing
-                ? "Save Changes"
-                : "Create Account"}
+                  ? "Save Changes"
+                  : "Create Account"}
             </button>
           </div>
         </form>

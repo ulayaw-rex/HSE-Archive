@@ -155,7 +155,7 @@ const About: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 transition-colors duration-200">
       <div className="relative w-full h-[50vh] md:h-[65vh] min-h-[400px] overflow-hidden bg-gray-900">
         <div
           className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-out ${
@@ -196,10 +196,10 @@ const About: React.FC = () => {
             id={position.toLowerCase().replace(/\s+/g, "-")}
           >
             <div className="flex items-center gap-4 mb-8 md:mb-10">
-              <h2 className="text-xl md:text-2xl font-bold text-green-900 uppercase tracking-widest whitespace-nowrap">
+              <h2 className="text-xl md:text-2xl font-bold text-green-900 dark:text-green-500 uppercase tracking-widest whitespace-nowrap">
                 {position}
               </h2>
-              <div className="h-px bg-green-200 w-full rounded-full"></div>
+              <div className="h-px bg-green-200 dark:bg-green-900/50 w-full rounded-full"></div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
@@ -213,11 +213,11 @@ const About: React.FC = () => {
         {alumniMembers.length > 0 && (
           <div className="mt-32">
             <div className="flex items-center justify-center mb-16">
-              <div className="h-px bg-gray-300 w-full max-w-xs"></div>
-              <h2 className="mx-6 text-3xl md:text-4xl font-extrabold text-gray-400 uppercase tracking-widest">
+              <div className="h-px bg-gray-300 dark:bg-gray-700 w-full max-w-xs"></div>
+              <h2 className="mx-6 text-3xl md:text-4xl font-extrabold text-gray-400 dark:text-gray-600 uppercase tracking-widest">
                 Alumni
               </h2>
-              <div className="h-px bg-gray-300 w-full max-w-xs"></div>
+              <div className="h-px bg-gray-300 dark:bg-gray-700 w-full max-w-xs"></div>
             </div>
 
             {alumniData.sortedKeys.map((year) => (
@@ -226,10 +226,10 @@ const About: React.FC = () => {
                 className="mb-16 md:mb-24 animate-in fade-in slide-in-from-bottom-4 duration-700"
               >
                 <div className="flex items-center gap-4 mb-8 md:mb-10">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">
                     {year === "Unknown Year" ? year : `Class of ${year}`}
                   </h3>
-                  <div className="h-px bg-gray-200 w-full rounded-full"></div>
+                  <div className="h-px bg-gray-200 dark:bg-gray-800 w-full rounded-full"></div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
@@ -247,7 +247,7 @@ const About: React.FC = () => {
         )}
 
         {members.length === 0 && pageLoaded && (
-          <div className="text-center py-20 text-gray-500">
+          <div className="text-center py-20 text-gray-500 dark:text-gray-400">
             No members found.
           </div>
         )}
@@ -273,27 +273,27 @@ const MemberCard: React.FC<{
       onMouseLeave={() => setIsTouched(false)}
       className="group relative w-full h-[22rem] md:h-[24rem] perspective-1000 cursor-pointer animate-in fade-in zoom-in-95 duration-500"
     >
-      <div className="relative w-full h-full bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-500 transform border border-gray-100">
-        <div className="h-full w-full bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-start pt-10">
+      <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-500 transform border border-gray-100 dark:border-gray-700">
+        <div className="h-full w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/50 dark:to-gray-800 flex flex-col items-center justify-start pt-10">
           <div className="relative">
             <div
               className={`absolute inset-0 rounded-full blur-md opacity-20 transform scale-110 transition-transform group-hover:scale-125 ${
-                isAlumni ? "bg-gray-400" : "bg-green-200"
+                isAlumni ? "bg-gray-400 dark:bg-gray-600" : "bg-green-200 dark:bg-green-900"
               }`}
             ></div>
             <img
               src={avatarUrl}
               alt={member.name}
-              className="relative w-28 h-28 md:w-32 md:h-32 rounded-full border-[5px] border-white shadow-lg object-cover transition-transform duration-500 group-hover:scale-105"
+              className="relative w-28 h-28 md:w-32 md:h-32 rounded-full border-[5px] border-white dark:border-gray-800 shadow-lg object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
 
           <div className="mt-5 text-center px-4 w-full">
             <h3
-              className={`text-lg md:text-xl font-bold text-gray-800 transition-colors truncate px-2 ${
+              className={`text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 transition-colors truncate px-2 ${
                 isAlumni
-                  ? "group-hover:text-gray-600"
-                  : "group-hover:text-green-700"
+                  ? "group-hover:text-gray-600 dark:group-hover:text-gray-400"
+                  : "group-hover:text-green-700 dark:group-hover:text-green-400"
               }`}
             >
               {member.name}
@@ -302,7 +302,7 @@ const MemberCard: React.FC<{
             <div className="flex items-center justify-center mt-2 px-2">
               <p
                 className={`text-xs md:text-sm font-bold uppercase tracking-wider leading-tight line-clamp-2 ${
-                  isAlumni ? "text-gray-500" : "text-green-600"
+                  isAlumni ? "text-gray-500 dark:text-gray-400" : "text-green-600 dark:text-green-500"
                 }`}
               >
                 {member.position}
@@ -316,15 +316,15 @@ const MemberCard: React.FC<{
             isTouched ? "translate-y-0" : "translate-y-full group-hover:translate-y-0"
           } ${
             isAlumni
-              ? "bg-gray-800/95 backdrop-blur-sm"
-              : "bg-green-900/95 backdrop-blur-sm"
+              ? "bg-gray-800/95 dark:bg-gray-950/95 backdrop-blur-sm"
+              : "bg-green-900/95 dark:bg-green-950/95 backdrop-blur-sm"
           }`}
         >
           <div className="flex flex-col items-center text-center mb-2 md:mb-3">
             <img
               src={avatarUrl}
               alt={member.name}
-              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/50 shadow-inner object-cover mb-1"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/50 dark:border-white/20 shadow-inner object-cover mb-1"
             />
             <h4 className="text-base md:text-lg font-bold truncate w-full px-2">
               {member.name}
@@ -344,7 +344,7 @@ const MemberCard: React.FC<{
                 </div>
                 <span
                   className={`font-medium text-xs leading-tight text-left ${
-                    isAlumni ? "text-gray-200" : "text-green-50"
+                    isAlumni ? "text-gray-200" : "text-green-50/90"
                   }`}
                 >
                   {member.position}
@@ -357,7 +357,7 @@ const MemberCard: React.FC<{
                 </div>
                 <span
                   className={`font-medium text-xs leading-tight text-left ${
-                    isAlumni ? "text-gray-200" : "text-green-50"
+                    isAlumni ? "text-gray-200" : "text-green-50/90"
                   }`}
                 >
                   {member.course}
@@ -380,8 +380,8 @@ const MemberCard: React.FC<{
               <p
                 className={`text-[9px] md:text-[10px] uppercase tracking-widest font-bold mb-2 ${
                   isAlumni
-                    ? "text-gray-400"
-                    : "text-green-200 italic opacity-80"
+                    ? "text-gray-400 dark:text-gray-500"
+                    : "text-green-200 dark:text-green-400 italic opacity-80"
                 }`}
               >
                 {isAlumni ? "FORMER MEMBER" : `"${member.role} Team Member"`}
@@ -393,8 +393,8 @@ const MemberCard: React.FC<{
                 }}
                 className={`text-xs md:text-sm font-bold py-2 px-5 rounded-full transition-transform active:scale-95 shadow-md ${
                   isAlumni
-                    ? "bg-white text-gray-800 hover:bg-gray-200"
-                    : "bg-white text-green-900 hover:bg-green-50"
+                    ? "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    : "bg-white dark:bg-green-700 text-green-900 dark:text-white hover:bg-green-50 dark:hover:bg-green-600"
                 }`}
               >
                 View Profile

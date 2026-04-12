@@ -17,7 +17,7 @@ const PrevArrow = (props: any) => {
         onClick();
       }}
     >
-      <div className="bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/10 text-white opacity-0 group-hover/arrow:opacity-100 transform -translate-x-8 group-hover/arrow:translate-x-0 transition-all duration-500 ease-out">
+      <div className="bg-white/10 dark:bg-black/20 backdrop-blur-md p-3 rounded-full border border-white/10 dark:border-white/5 text-white opacity-0 group-hover/arrow:opacity-100 transform -translate-x-8 group-hover/arrow:translate-x-0 transition-all duration-500 ease-out">
         <FaChevronLeft size={18} />
       </div>
     </div>
@@ -35,7 +35,7 @@ const NextArrow = (props: any) => {
         onClick();
       }}
     >
-      <div className="bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/10 text-white opacity-0 group-hover/arrow:opacity-100 transform translate-x-8 group-hover/arrow:translate-x-0 transition-all duration-500 ease-out">
+      <div className="bg-white/10 dark:bg-black/20 backdrop-blur-md p-3 rounded-full border border-white/10 dark:border-white/5 text-white opacity-0 group-hover/arrow:opacity-100 transform translate-x-8 group-hover/arrow:translate-x-0 transition-all duration-500 ease-out">
         <FaChevronRight size={18} />
       </div>
     </div>
@@ -66,7 +66,7 @@ const getCategoryTextColor = (category: string) => {
     case "literary":
       return "text-pink-600";
     default:
-      return "text-gray-800";
+      return "text-gray-800 dark:text-gray-200";
   }
 };
 
@@ -104,7 +104,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
   if (articles.length === 0) return null;
 
   return (
-    <div className="mb-12 relative overflow-hidden shadow-2xl group bg-black">
+    <div className="mb-12 relative overflow-hidden shadow-2xl group bg-black dark:bg-gray-950">
       <style>{`
         .slick-dots li {
           width: auto !important;
@@ -185,7 +185,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
                     <div className="mb-4 animate-reveal-1">
                       <div className="flex items-center gap-3">
                         <span
-                          className={`bg-white px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.25em] shadow-xl ${categoryTextColor}`}
+                          className={`bg-white dark:bg-gray-800 px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-[0.25em] shadow-xl ${categoryTextColor}`}
                         >
                           {article.category}
                         </span>
@@ -225,7 +225,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ articles }) => {
 
                       <Link
                         to={`/news/${article.publication_id}`}
-                        className="ml-auto mr-16 md:mr-[7%] px-6 py-2 bg-white text-black hover:bg-green-600 hover:text-white text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
+                        className="ml-auto mr-16 md:mr-[7%] px-6 py-2 bg-white dark:bg-white/90 text-black hover:bg-green-600 hover:text-white dark:hover:bg-green-500 text-[10px] md:text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] hover:-translate-y-0.5"
                       >
                         Read Story
                       </Link>

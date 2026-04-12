@@ -151,7 +151,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     <>
       <div className="relative group">
         <div
-          className="rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 relative bg-gray-300"
+          className="rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 relative bg-gray-300 dark:bg-gray-800"
           style={{ minHeight: "250px" }}
           onClick={onClick}
         >
@@ -162,8 +162,8 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-              <span className="text-4xl opacity-20">📰</span>
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-900 transition-colors">
+              <span className="text-4xl opacity-20 dark:opacity-10">📰</span>
             </div>
           )}
 
@@ -191,10 +191,10 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
               </h3>
               <div className="border-t border-white/40 w-full my-2"></div>
               <div className="flex justify-between items-end">
-                <p className="text-sm text-gray-200 drop-shadow font-medium truncate max-w-[60%]">
+                <p className="text-sm text-gray-200 dark:text-gray-300/90 drop-shadow font-medium truncate max-w-[60%]">
                   {publication.byline || "Hillside Echo"}
                 </p>
-                <p className="text-xs text-gray-300 drop-shadow italic">
+                <p className="text-xs text-gray-300 dark:text-gray-400/80 drop-shadow italic">
                   {displayDate.toLocaleDateString()}
                 </p>
               </div>

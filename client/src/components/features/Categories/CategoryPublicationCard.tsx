@@ -10,23 +10,23 @@ const getCategoryTextColor = (category: string) => {
   const lowerCat = category.toLowerCase();
   switch (lowerCat) {
     case "university":
-      return "text-green-700";
+      return "text-green-700 dark:text-green-400";
     case "local":
-      return "text-blue-700";
+      return "text-blue-700 dark:text-blue-400";
     case "national":
-      return "text-red-700";
+      return "text-red-700 dark:text-red-400";
     case "entertainment":
-      return "text-purple-700";
+      return "text-purple-700 dark:text-purple-400";
     case "sci-tech":
-      return "text-indigo-700";
+      return "text-indigo-700 dark:text-indigo-400";
     case "sports":
-      return "text-orange-600";
+      return "text-orange-600 dark:text-orange-400";
     case "opinion":
-      return "text-teal-700";
+      return "text-teal-700 dark:text-teal-400";
     case "literary":
-      return "text-pink-700";
+      return "text-pink-700 dark:text-pink-400";
     default:
-      return "text-gray-600";
+      return "text-gray-600 dark:text-gray-400";
   }
 };
 
@@ -38,7 +38,7 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="group flex bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+      className="group flex bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-transparent dark:border-gray-700"
     >
       <div className="w-1/3 flex-shrink-0">
         <img
@@ -50,19 +50,19 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
 
       <div className="w-2/3 p-4 flex flex-col justify-between">
         <div>
-          <h3 className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-green-700 transition-colors">
+          <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2 line-clamp-2 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
             {publication.title}
           </h3>
 
-          <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-3">
             {publication.body}
           </p>
 
-          <p className="text-gray-700 text-sm font-medium mb-1">
+          <p className="text-gray-700 dark:text-gray-200 text-sm font-medium mb-1">
             By {publication.byline}
           </p>
 
-          <p className="text-gray-500 text-xs mb-2">
+          <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">
             {new Date(publication.created_at).toLocaleDateString()}
           </p>
         </div>
@@ -82,7 +82,7 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
             name = credits.substring(8);
           }
           return (
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-400 dark:text-gray-500 text-xs">
               {type}: <span className="font-bold italic">{name}</span>
             </p>
           );
@@ -93,7 +93,7 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
             {publication.category.toUpperCase()}
           </div>
 
-          <span className="text-xs text-green-600 font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+          <span className="text-xs text-green-600 dark:text-green-400 font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
             READ NOW →
           </span>
         </div>

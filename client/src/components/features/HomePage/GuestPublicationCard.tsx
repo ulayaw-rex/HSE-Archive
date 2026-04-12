@@ -10,23 +10,23 @@ const getCategoryTextColor = (category: string) => {
   const lowerCat = category.toLowerCase();
   switch (lowerCat) {
     case "university":
-      return "text-green-700";
+      return "text-green-700 dark:text-green-400";
     case "local":
-      return "text-blue-700";
+      return "text-blue-700 dark:text-blue-400";
     case "national":
-      return "text-red-700";
+      return "text-red-700 dark:text-red-400";
     case "entertainment":
-      return "text-purple-700";
+      return "text-purple-700 dark:text-purple-400";
     case "sci-tech":
-      return "text-indigo-700";
+      return "text-indigo-700 dark:text-indigo-400";
     case "sports":
-      return "text-orange-600";
+      return "text-orange-600 dark:text-orange-400";
     case "opinion":
-      return "text-teal-700";
+      return "text-teal-700 dark:text-teal-400";
     case "literary":
-      return "text-pink-700";
+      return "text-pink-700 dark:text-pink-400";
     default:
-      return "text-gray-600";
+      return "text-gray-600 dark:text-gray-400";
   }
 };
 
@@ -42,9 +42,9 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="group max-w-sm overflow-hidden bg-white hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-100 flex flex-col h-full hover:-translate-y-1"
+      className="group max-w-sm overflow-hidden bg-white dark:bg-gray-900 hover:shadow-2xl transition-all duration-500 rounded-xl border border-gray-100 dark:border-gray-800 flex flex-col h-full hover:-translate-y-2"
     >
-      <div className="w-full h-48 bg-gray-200 shrink-0 overflow-hidden relative">
+      <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 shrink-0 overflow-hidden relative">
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 z-10" />
 
         <img
@@ -62,17 +62,17 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
           {publication.category}
         </div>
 
-        <div className="font-bold text-xl mb-2 text-gray-900 line-clamp-2 leading-tight group-hover:text-green-700 transition-colors">
+        <div className="font-bold text-xl mb-2 text-gray-900 dark:text-gray-100 line-clamp-2 leading-tight group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
           {publication.title}
         </div>
 
-        <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">
           {publication.body}
         </p>
 
-        <div className="border-t border-gray-100 pt-3 mt-auto flex justify-between items-center">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-auto flex justify-between items-center">
           <div>
-            <p className="text-gray-500 text-xs font-medium">
+            <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">
               {displayDate.toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "long",
@@ -95,14 +95,14 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
                 name = credits.substring(8);
               }
               return (
-                <p className="text-gray-400 text-[10px] mt-1">
+                <p className="text-gray-400 dark:text-gray-500 text-[10px] mt-1">
                   {type}: <span className="font-bold italic">{name}</span>
                 </p>
               );
             })()}
           </div>
 
-          <span className="text-xs text-green-600 font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+          <span className="text-xs text-green-600 dark:text-green-400 font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
             READ NOW →
           </span>
         </div>

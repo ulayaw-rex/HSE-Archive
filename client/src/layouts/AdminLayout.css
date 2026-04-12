@@ -1,4 +1,4 @@
-.sidebar .parent-button {
+.parent-button {
   width: 100%;
   display: flex;
   align-items: center;
@@ -8,17 +8,22 @@
   margin-bottom: 0.25rem; /* mb-1 */
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  background-color: #15803d !important; /* bg-green-700 */
-  color: #fff !important;
-  border: none !important;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  color: #fff;
+  border: none;
 }
 
-.sidebar .parent-button:hover {
-  background-color: rgba(22, 163, 74, 0.6) !important; /* bg-green-600/60 */
+.parent-button:hover {
+  background-color: rgba(22, 163, 74, 0.4);
 }
 
-.sidebar .parent-button.active {
+.parent-button.active {
   background-color: #16a34a !important; /* bg-green-600 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  color: white !important;
+}
+
+:global(.dark) .parent-button.active {
+  background-color: #15803d !important; /* dark:bg-green-700 */
 }

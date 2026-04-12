@@ -34,11 +34,11 @@ interface SuccessModalProps {
 const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn transition-colors">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-transparent dark:border-gray-700">
+        <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg
-            className="w-10 h-10 text-green-600"
+            className="w-10 h-10 text-green-600 dark:text-green-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -51,10 +51,10 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) => {
             ></path>
           </svg>
         </div>
-        <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
+        <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
           Registration Successful!
         </h2>
-        <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 leading-relaxed">
           Your account has been created successfully. <br />
           Please wait for an <strong>Administrator</strong> to approve your
           account before you can log in.
@@ -81,20 +81,20 @@ const InputField: React.FC<InputFieldProps> = ({ error, suffix, ...props }) => (
     <div className="relative">
       <input
         {...props}
-        className={`w-full text-sm rounded-lg block p-4 placeholder-gray-400 outline-none transition-all shadow-sm border-2 ${
+        className={`w-full text-sm rounded-lg block p-4 placeholder-gray-400 dark:placeholder-gray-500 outline-none transition-all shadow-sm border-2 ${
           error
-            ? "bg-red-50 border-red-500 text-red-900 focus:ring-red-200 placeholder-red-300"
-            : "bg-gray-100 border-transparent text-gray-800 focus:ring-2 focus:ring-green-800"
+            ? "bg-red-50 dark:bg-red-900/10 border-red-500 text-red-900 dark:text-red-400 focus:ring-red-200 placeholder-red-300 dark:placeholder-red-900/50"
+            : "bg-gray-100 dark:bg-gray-900 border-transparent dark:border-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-green-800 dark:focus:ring-green-600"
         } ${suffix ? "pr-12" : ""}`}
       />
       {suffix && (
-        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 flex items-center">
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 flex items-center">
           {suffix}
         </div>
       )}
     </div>
     {error && (
-      <p className="mt-1 text-xs text-red-600 font-medium ml-1">{error}</p>
+      <p className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium ml-1">{error}</p>
     )}
   </div>
 );
@@ -130,21 +130,21 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         onClick={toggleOpen}
         className={`w-full p-4 rounded-lg text-sm flex justify-between items-center transition-colors border-2 ${
           disabled
-            ? "bg-gray-100 border-transparent cursor-not-allowed opacity-60"
+            ? "bg-gray-100 dark:bg-gray-900 border-transparent cursor-not-allowed opacity-60"
             : "cursor-pointer"
         } ${
           error
-            ? "bg-red-50 border-red-500 text-red-900"
+            ? "bg-red-50 dark:bg-red-900/10 border-red-500 text-red-900 dark:text-red-400"
             : isOpen
-            ? "border-green-800 bg-white"
-            : "bg-gray-100 border-transparent hover:bg-gray-200"
+            ? "border-green-800 dark:border-green-600 bg-white dark:bg-gray-800"
+            : "bg-gray-100 dark:bg-gray-900 border-transparent dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800"
         }`}
       >
-        <span className={value ? "text-gray-900 font-medium" : "text-gray-400"}>
+        <span className={value ? "text-gray-900 dark:text-gray-100 font-medium" : "text-gray-400 dark:text-gray-500"}>
           {value || placeholder}
         </span>
         <span
-          className={`text-xs text-gray-500 transition-transform ${
+          className={`text-xs text-gray-500 dark:text-gray-400 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         >
@@ -153,11 +153,11 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       </div>
 
       {error && (
-        <p className="mt-1 text-xs text-red-600 font-medium ml-1">{error}</p>
+        <p className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium ml-1">{error}</p>
       )}
 
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full bg-white border border-gray-100 shadow-xl rounded-lg mt-1 max-h-48 overflow-y-auto custom-scrollbar animate-fadeIn">
+        <div className="absolute z-50 w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl rounded-lg mt-1 max-h-48 overflow-y-auto custom-scrollbar animate-fadeIn">
           {options.length > 0 ? (
             options.map((opt) => (
               <div
@@ -166,13 +166,13 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                   onChange(opt);
                   setIsOpen(false);
                 }}
-                className="px-4 py-3 hover:bg-green-50 text-sm cursor-pointer text-gray-700 hover:text-green-800 transition-colors border-b border-gray-50 last:border-0 font-medium"
+                className="px-4 py-3 hover:bg-green-50 dark:hover:bg-green-900/20 text-sm cursor-pointer text-gray-700 dark:text-gray-300 hover:text-green-800 dark:hover:text-green-500 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0 font-medium"
               >
                 {opt}
               </div>
             ))
           ) : (
-            <div className="px-4 py-3 text-sm text-gray-400 italic">
+            <div className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500 italic">
               No options available
             </div>
           )}
@@ -394,14 +394,14 @@ const RegistrationPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#005e2b] p-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-[#005e2b] dark:bg-gray-950 p-4 font-sans transition-colors duration-200">
       <SuccessModal isOpen={showSuccessModal} onClose={() => navigate("/")} />
 
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 md:p-12 text-center relative z-10">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-8 md:p-12 text-center relative z-10 border border-transparent dark:border-gray-700">
         <div className="flex items-center justify-center gap-3 mb-8">
-          <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
-          <div className="text-left border-l-2 border-green-800 pl-3">
-            <h1 className="text-xl font-bold text-green-900 tracking-wide leading-none">
+          <img src={logo} alt="Logo" className="w-12 h-12 object-contain dark:opacity-90" />
+          <div className="text-left border-l-2 border-green-800 dark:border-green-600 pl-3">
+            <h1 className="text-xl font-bold text-green-900 dark:text-green-500 tracking-wide leading-none">
               HSE-ARCHIVE
             </h1>
           </div>
@@ -410,48 +410,48 @@ const RegistrationPage: React.FC = () => {
         <div className="flex justify-center items-center gap-4 mb-8 text-[10px] font-bold tracking-widest uppercase">
           <div
             className={`flex flex-col items-center gap-1 transition-colors ${
-              step === 1 ? "text-black" : "text-gray-300"
+              step === 1 ? "text-black dark:text-white" : "text-gray-300 dark:text-gray-600"
             }`}
           >
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
                 step === 1
-                  ? "border-black bg-black text-white"
-                  : "border-gray-300 text-gray-300"
+                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-gray-900"
+                  : "border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700"
               }`}
             >
               1
             </div>
             <span>Sign Up</span>
           </div>
-          <div className="w-10 h-0.5 bg-gray-200" />
+          <div className="w-10 h-0.5 bg-gray-200 dark:bg-gray-700" />
           <div
             className={`flex flex-col items-center gap-1 transition-colors ${
-              step === 2 ? "text-black" : "text-gray-300"
+              step === 2 ? "text-black dark:text-white" : "text-gray-300 dark:text-gray-600"
             }`}
           >
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
                 step === 2
-                  ? "border-black bg-black text-white"
-                  : "border-gray-300 text-gray-300"
+                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-gray-900"
+                  : "border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700"
               }`}
             >
               2
             </div>
             <span>Profile</span>
           </div>
-          <div className="w-10 h-0.5 bg-gray-200" />
+          <div className="w-10 h-0.5 bg-gray-200 dark:bg-gray-700" />
           <div
             className={`flex flex-col items-center gap-1 transition-colors ${
-              step === 3 ? "text-black" : "text-gray-300"
+              step === 3 ? "text-black dark:text-white" : "text-gray-300 dark:text-gray-600"
             }`}
           >
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
                 step === 3
-                  ? "border-black bg-black text-white"
-                  : "border-gray-300 text-gray-300"
+                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-gray-900"
+                  : "border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700"
               }`}
             >
               3
@@ -461,22 +461,22 @@ const RegistrationPage: React.FC = () => {
         </div>
 
         {generalError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-left animate-fadeIn">
-            <FaExclamationCircle className="text-red-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-red-700 font-medium leading-tight">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg flex items-start gap-3 text-left animate-fadeIn">
+            <FaExclamationCircle className="text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-700 dark:text-red-300 font-medium leading-tight">
               {generalError}
             </p>
           </div>
         )}
 
         {generalSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3 text-left animate-fadeIn">
-            <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-lg flex items-start gap-3 text-left animate-fadeIn">
+            <div className="w-5 h-5 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg className="w-3 h-3 text-green-600 dark:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <p className="text-sm text-green-700 font-medium leading-tight">
+            <p className="text-sm text-green-700 dark:text-green-300 font-medium leading-tight">
               {generalSuccess}
             </p>
           </div>
@@ -520,7 +520,7 @@ const RegistrationPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="focus:outline-none hover:text-green-800 transition-colors"
+                    className="focus:outline-none hover:text-green-800 dark:hover:text-green-400 transition-colors"
                   >
                     {showPassword ? (
                       <FaEyeSlash size={18} />
@@ -546,7 +546,7 @@ const RegistrationPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="focus:outline-none hover:text-green-800 transition-colors"
+                    className="focus:outline-none hover:text-green-800 dark:hover:text-green-400 transition-colors"
                   >
                     {showConfirmPassword ? (
                       <FaEyeSlash size={18} />
@@ -570,7 +570,7 @@ const RegistrationPage: React.FC = () => {
 
           {step === 2 && (
             <div className="animate-fadeIn">
-              <div className="mb-6 flex justify-center bg-gray-100 p-1 rounded-full">
+              <div className="mb-6 flex justify-center bg-gray-100 dark:bg-gray-900 p-1 rounded-full">
                 {["hillsider", "alumni"].map((role) => (
                   <button
                     key={role}
@@ -578,8 +578,8 @@ const RegistrationPage: React.FC = () => {
                     onClick={() => handleDropdownChange("role", role)}
                     className={`flex-1 py-2 rounded-full text-xs font-bold uppercase transition-all ${
                       formData.role === role
-                        ? "bg-white text-green-800 shadow-sm"
-                        : "text-gray-400 hover:text-gray-600"
+                        ? "bg-white dark:bg-gray-800 text-green-800 dark:text-green-500 shadow-sm"
+                        : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                     }`}
                   >
                     {role}
@@ -665,7 +665,7 @@ const RegistrationPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-4 rounded-full transition-all"
+                  className="w-1/3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 font-bold py-4 rounded-full transition-all"
                 >
                   Back
                 </button>
@@ -682,8 +682,8 @@ const RegistrationPage: React.FC = () => {
 
         {step === 3 && (
           <div className="animate-fadeIn text-center">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Verify your email</h2>
-            <p className="text-sm text-gray-500 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Verify your email</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
               We've sent a 6-digit code to <strong>{formData.email}</strong>. Please enter it below to complete your registration.
             </p>
             
@@ -710,7 +710,7 @@ const RegistrationPage: React.FC = () => {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={resending}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-full transition-all disabled:opacity-70"
+                className="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 font-bold py-3 rounded-full transition-all disabled:opacity-70"
               >
                 {resending ? "Sending..." : "Resend Code"}
               </button>
@@ -721,10 +721,10 @@ const RegistrationPage: React.FC = () => {
           <div className="mt-6 text-center">
             <Link
               to="/"
-              className="text-gray-400 text-sm hover:text-green-800 transition-colors font-medium"
+              className="text-gray-400 dark:text-gray-500 text-sm hover:text-green-800 dark:hover:text-green-400 transition-colors font-medium"
             >
               Already have an account?{" "}
-              <span className="underline decoration-green-800/30">Log In</span>
+              <span className="underline decoration-green-800/30 dark:decoration-green-500/30">Log In</span>
             </Link>
           </div>
         </form>

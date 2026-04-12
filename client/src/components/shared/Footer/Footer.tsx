@@ -159,31 +159,31 @@ const Footer: React.FC = () => {
             onClick={closeFeedback}
           />
 
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-gray-100">
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-gray-100 dark:border-gray-700">
             <button
               onClick={closeFeedback}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
             >
               <FaTimes size={18} />
             </button>
 
             <div
               className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6 ${
-                feedback.type === "success" ? "bg-green-100" : "bg-red-100"
+                feedback.type === "success" ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
               }`}
             >
               {feedback.type === "success" ? (
-                <FaCheckCircle className="h-9 w-9 text-green-600" />
+                <FaCheckCircle className="h-9 w-9 text-green-600 dark:text-green-400" />
               ) : (
-                <FaExclamationTriangle className="h-8 w-8 text-red-600" />
+                <FaExclamationTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
               )}
             </div>
 
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               {feedback.title}
             </h3>
 
-            <p className="text-gray-500 mb-8 text-sm leading-relaxed px-2">
+            <p className="text-gray-500 dark:text-gray-400 mb-8 text-sm leading-relaxed px-2">
               {feedback.message}
             </p>
 
@@ -191,8 +191,8 @@ const Footer: React.FC = () => {
               onClick={closeFeedback}
               className={`w-full py-3 px-4 font-semibold rounded-xl transition-all shadow-md hover:shadow-lg text-white ${
                 feedback.type === "success"
-                  ? "bg-green-800 hover:bg-green-900"
-                  : "bg-red-600 hover:bg-red-700"
+                  ? "bg-green-800 hover:bg-green-900 dark:bg-green-600 dark:hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
               }`}
             >
               {feedback.type === "success" ? "Okay, Got it" : "Try Again"}
@@ -201,7 +201,7 @@ const Footer: React.FC = () => {
         </div>
       )}
 
-      <footer className="bg-gradient-to-b from-green-800 to-green-900 text-white shadow-2xl relative z-10">
+      <footer className="bg-gradient-to-b from-green-800 to-green-900 dark:from-gray-900 dark:to-black text-white shadow-2xl relative z-10 transition-colors duration-300">
         <div className="container mx-auto px-6 py-16 w-[90%]">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="flex flex-col items-start space-y-6">
@@ -280,7 +280,7 @@ const Footer: React.FC = () => {
                   onChange={(e) =>
                     setEmail(e.target.value.slice(0, EMAIL_MAX_LENGTH))
                   }
-                  className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg border border-transparent dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 dark:focus:ring-green-500 disabled:opacity-60 transition-all"
                   required
                   maxLength={EMAIL_MAX_LENGTH}
                   disabled={sending || isOnCooldown}
@@ -293,19 +293,19 @@ const Footer: React.FC = () => {
                     onChange={(e) =>
                       setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))
                     }
-                    className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none disabled:opacity-60 transition-all"
+                    className="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg border border-transparent dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 dark:focus:ring-green-500 resize-none disabled:opacity-60 transition-all"
                     required
                     maxLength={MESSAGE_MAX_LENGTH}
                     disabled={sending || isOnCooldown}
                   />
-                  <span className="absolute bottom-2 right-3 text-[10px] text-gray-400">
+                  <span className="absolute bottom-2 right-3 text-[10px] text-gray-400 dark:text-gray-500">
                     {message.length}/{MESSAGE_MAX_LENGTH}
                   </span>
                 </div>
                 <button
                   type="submit"
                   disabled={sending || isOnCooldown}
-                  className="w-full px-8 py-3 bg-white text-green-800 font-bold rounded-lg hover:bg-green-50 shadow-sm hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-8 py-3 bg-white dark:bg-green-700 text-green-800 dark:text-white font-bold rounded-lg hover:bg-green-50 dark:hover:bg-green-600 shadow-sm hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isOnCooldown ? (
                     <span className="text-sm">

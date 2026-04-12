@@ -48,14 +48,14 @@ const NewsPage: React.FC = () => {
 
   if (loading && !featuredArticle) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 transition-colors duration-200">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-12 animate-in fade-in duration-500 transition-colors duration-200">
       <style>{`
         @keyframes slowZoom {
           0% { transform: scale(1); }
@@ -167,13 +167,13 @@ const NewsPage: React.FC = () => {
 
           return (
             <section key={category} className="space-y-8 mb-20">
-              <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
+              <div className="flex items-center gap-3 border-b border-gray-200 dark:border-gray-800 pb-4">
                 <div
                   className={`h-8 w-2 rounded-full ${getCategoryTextColor(
                     category
                   ).replace("text-", "bg-")}`}
                 ></div>
-                <h2 className="text-3xl font-black text-gray-900 capitalize tracking-tight">
+                <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 capitalize tracking-tight">
                   {category.replace("-", " ")}
                 </h2>
               </div>

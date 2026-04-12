@@ -33,7 +33,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         onClick={isLoading ? undefined : onClose}
       />
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 overflow-hidden">
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 overflow-hidden border border-transparent dark:border-gray-700">
         <div
           className={`absolute top-0 left-0 w-full h-1.5 ${
             isDangerous ? "bg-red-500" : "bg-green-600"
@@ -44,8 +44,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <div
             className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
               isDangerous
-                ? "bg-red-100 text-red-600"
-                : "bg-green-100 text-green-600"
+                ? "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"
+                : "bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400"
             }`}
           >
             {isDangerous ? (
@@ -55,8 +55,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             )}
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
-          <p className="text-sm text-gray-500 mb-8 leading-relaxed px-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-2">
             {message}
           </p>
 
@@ -65,7 +65,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="w-full sm:w-1/2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-1/2 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cancelLabel}
             </button>
@@ -74,11 +74,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               type="button"
               onClick={onConfirm}
               disabled={isLoading}
-              className={`w-full sm:w-1/2 px-4 py-2.5 text-white font-semibold rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all 
+              className={`w-full sm:w-1/2 px-4 py-2.5 text-white font-semibold rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition-all 
               ${
                 isDangerous
-                  ? "bg-red-600 hover:bg-red-700 focus:ring-red-500 shadow-red-200"
-                  : "bg-green-600 hover:bg-green-700 focus:ring-green-500 shadow-green-200"
+                  ? "bg-red-600 hover:bg-red-700 focus:ring-red-500 shadow-red-200 dark:shadow-red-900/20"
+                  : "bg-green-600 hover:bg-green-700 focus:ring-green-500 shadow-green-200 dark:shadow-green-900/20"
               } 
               ${isLoading ? "opacity-70 cursor-wait" : ""}`}
             >

@@ -21,6 +21,8 @@ class ContactController extends Controller
             'is_read' => false,
         ]);
 
+        \Illuminate\Support\Facades\Cache::forget('contact_unread_count');
+
         try {
             $data = [
                 'name'         => $senderName,
@@ -51,6 +53,9 @@ class ContactController extends Controller
     {
         $message = ContactSubmission::findOrFail($id);
         $message->update(['is_read' => true]);
+        
+        \Illuminate\Support\Facades\Cache::forget('contact_unread_count');
+        
         return response()->json(['message' => 'Marked as read']);
     }
 
@@ -58,6 +63,9 @@ class ContactController extends Controller
     {
         $message = ContactSubmission::findOrFail($id);
         $message->delete();
+
+        \Illuminate\Support\Facades\Cache::forget('contact_unread_count');
+
         return response()->json(['message' => 'Message deleted']);
     }
 
@@ -82,7 +90,10 @@ class ContactController extends Controller
 
     public function unreadCount()
     {
-        $count = ContactSubmission::where('is_read', false)->count();
+        $count = \Illuminate\Support\Facades\Cache::remember('contact_unread_count', 60, function () {
+            return ContactSubmission::where('is_read', false)->count();
+        });
+        
         return response()->json(['count' => $count]);
     }
 }

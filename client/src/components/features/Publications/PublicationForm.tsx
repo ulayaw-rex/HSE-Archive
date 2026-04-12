@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import WriterSelect from "./WriterSelect";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import DatePicker from "../../common/DatePicker";
 import AxiosInstance from "../../../AxiosInstance";
 import { toast } from "react-toastify";
 import { useAuth } from "../../../context/AuthContext";
@@ -207,7 +208,9 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       if (isAdmin) {
         toast.error("Failed to save publication. Please check your inputs.");
       } else {
-        setGeneralError("Failed to save article. Please check your inputs and connection.");
+        setGeneralError(
+          "Failed to save article. Please check your inputs and connection.",
+        );
       }
     } finally {
       setLoading(false);
@@ -219,16 +222,16 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   return (
     <>
       <div
-        className="user-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        className="user-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-colors"
         onClick={(e) => {
           if (e.target === e.currentTarget) handleCloseAttempt();
         }}
       >
-        <div className="user-modal-container relative bg-white rounded-lg shadow-2xl w-full md:w-auto md:min-w-[800px] lg:min-w-[1000px] max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="user-modal-container relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl w-full md:w-auto md:min-w-[800px] lg:min-w-[1000px] max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-transparent dark:border-white/5">
           {loading && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center">
+            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center transition-colors">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
-              <p className="text-lg font-semibold text-gray-700">
+              <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                 Publishing article...
               </p>
             </div>
@@ -239,7 +242,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
               type="button"
               onClick={handleCloseAttempt}
               disabled={loading}
-              className={`absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none z-10 ${
+              className={`absolute top-6 right-6 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none z-10 ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
@@ -259,14 +262,24 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
               </svg>
             </button>
 
-            <h2 className="text-3xl font-extrabold mb-8 border-b border-gray-300 pb-4 text-gray-900">
+            <h2 className="text-3xl font-extrabold mb-8 border-b border-gray-300 dark:border-white/10 pb-4 text-gray-900 dark:text-gray-100">
               {mode === "edit" ? "Edit Article" : "Write New Article"}
             </h2>
 
             {generalError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 animate-fadeIn">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg flex items-center gap-3 text-red-700 dark:text-red-400 animate-fadeIn">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span className="text-sm font-medium">{generalError}</span>
               </div>
@@ -274,12 +287,12 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <h3 className="text-green-700 font-semibold mb-3 text-lg">
+                <h3 className="text-green-700 dark:text-green-500 font-semibold mb-3 text-lg">
                   Details
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
                   <div className="col-span-1">
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 tracking-wider">
                       WRITER(S)
                     </label>
 
@@ -301,7 +314,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                         type="text"
                         disabled
                         value={currentUser?.name || "Unknown"}
-                        className="w-full h-[50px] p-3 rounded-md border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed font-medium"
+                        className="w-full h-[50px] p-3 rounded-md border border-gray-300 dark:border-white/10 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed font-medium"
                       />
                     )}
 
@@ -313,7 +326,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   </div>
 
                   <div className="col-span-1">
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 tracking-wider">
                       CATEGORY
                     </label>
                     <select
@@ -322,7 +335,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
+                      className="w-full h-[50px] p-3 rounded-md border border-gray-700 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100"
                     >
                       <option value="university">University</option>
                       <option value="local">Local</option>
@@ -336,21 +349,21 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   </div>
 
                   <div className="col-span-1">
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-wider uppercase">
                       DATE <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="date"
-                      disabled={loading}
+                    <DatePicker
                       value={formData.date_published}
-                      onChange={(e) => {
+                      onChange={(date) => {
                         setFormData({
                           ...formData,
-                          date_published: e.target.value,
+                          date_published: date,
                         });
                         clearError("date_published");
                       }}
-                      className={`w-full h-[50px] p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 ${errors.date_published ? "border-red-500" : "border-gray-700"}`}
+                      placeholder="Select publication date"
+                      disabled={loading}
+                      error={!!errors.date_published}
                     />
                     {errors.date_published && (
                       <p className="text-red-500 text-xs mt-1">
@@ -360,10 +373,10 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                   </div>
 
                   <div className="col-span-1">
-                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 tracking-wider">
                       MEDIA CREDITS
                     </label>
-                    <div className="flex bg-white rounded-md border border-gray-700 focus-within:ring-2 focus-within:ring-green-600 focus-within:border-transparent h-[50px] overflow-hidden">
+                    <div className="flex bg-white dark:bg-gray-950 rounded-md border border-gray-700 dark:border-white/10 focus-within:ring-2 focus-within:ring-green-600 focus-within:border-transparent h-[50px] overflow-hidden">
                       <select
                         disabled={loading}
                         value={creditType}
@@ -372,10 +385,12 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                           setCreditType(newType);
                           setFormData({
                             ...formData,
-                            photo_credits: creditName ? `${newType} ${creditName}` : "",
+                            photo_credits: creditName
+                              ? `${newType} ${creditName}`
+                              : "",
                           });
                         }}
-                        className="bg-gray-100 border-r border-gray-300 text-gray-700 px-3 py-2 outline-none cursor-pointer focus:bg-gray-200 transition-colors"
+                        className="bg-gray-100 dark:bg-gray-800 border-r border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-3 py-2 outline-none cursor-pointer focus:bg-gray-200 dark:focus:bg-gray-700 transition-colors"
                       >
                         <option value="Photo">Photo</option>
                         <option value="Art">Art</option>
@@ -391,17 +406,19 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                           setCreditName(newName);
                           setFormData({
                             ...formData,
-                            photo_credits: newName ? `${creditType} ${newName}` : "",
+                            photo_credits: newName
+                              ? `${creditType} ${newName}`
+                              : "",
                           });
                         }}
-                        className="w-full px-3 py-2 outline-none bg-transparent"
+                        className="w-full px-3 py-2 outline-none bg-transparent text-gray-800 dark:text-gray-100"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-xs font-semibold text-gray-500 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 tracking-wider">
                     BYLINE DISPLAY (Optional)
                   </label>
                   <input
@@ -412,13 +429,13 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     onChange={(e) =>
                       setFormData({ ...formData, byline: e.target.value })
                     }
-                    className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+                    className="w-full h-[50px] p-3 rounded-md border border-gray-700 dark:border-white/10 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-600 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <h3 className="text-green-700 font-semibold mb-3 text-lg">
+                <h3 className="text-green-700 dark:text-green-500 font-semibold mb-3 text-lg">
                   Article Content
                 </h3>
 
@@ -431,7 +448,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     setFormData({ ...formData, title: e.target.value });
                     clearError("title");
                   }}
-                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 mb-1 text-lg font-medium ${errors.title ? "border-red-500" : "border-gray-700"}`}
+                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 mb-1 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 text-lg font-medium transition-all ${errors.title ? "border-red-500" : "border-gray-700 dark:border-white/10"}`}
                 />
                 {errors.title && (
                   <p className="text-red-500 text-xs mb-3">{errors.title}</p>
@@ -445,16 +462,16 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                     setFormData({ ...formData, body: e.target.value });
                     clearError("body");
                   }}
-                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 h-64 resize-none leading-relaxed ${errors.body ? "border-red-500" : "border-gray-700"}`}
+                  className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 h-64 resize-none leading-relaxed bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200 placeholder-gray-400 transition-all ${errors.body ? "border-red-500" : "border-gray-700 dark:border-white/10"}`}
                 />
                 {errors.body && (
                   <p className="text-red-500 text-xs mt-1">{errors.body}</p>
                 )}
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4 pt-6 border-t border-gray-200">
+              <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4 pt-6 border-t border-gray-200 dark:border-white/10">
                 <label
-                  className={`cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto transition-colors ${loading ? "opacity-50" : "hover:bg-gray-900"}`}
+                  className={`cursor-pointer bg-gray-800 dark:bg-gray-700 text-white px-6 py-3 rounded-md flex items-center justify-center space-x-2 w-full md:w-auto transition-all ${loading ? "opacity-50" : "hover:bg-gray-900 dark:hover:bg-gray-600 active:scale-95"}`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -483,7 +500,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`bg-green-700 text-white px-8 py-3 rounded-full font-bold shadow-md w-full md:w-auto flex items-center justify-center space-x-2 ${loading ? "opacity-70 cursor-wait" : "hover:bg-green-800"}`}
+                  className={`bg-green-700 dark:bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-md w-full md:w-auto flex items-center justify-center space-x-2 transition-all transform active:scale-95 ${loading ? "opacity-70 cursor-wait" : "hover:bg-green-800 dark:hover:bg-green-700"}`}
                 >
                   <span>
                     {mode === "edit" ? "Update Article" : "Submit Article"}
@@ -493,13 +510,13 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
 
               {mode === "edit" && existingImageUrl && !image && (
                 <div className="mt-6">
-                  <p className="text-gray-700 mb-2 font-medium">
+                  <p className="text-gray-700 dark:text-gray-300 mb-2 font-medium">
                     Current Photo:
                   </p>
                   <img
                     src={existingImageUrl}
                     alt="Current publication"
-                    className="max-h-60 rounded-md border border-gray-300 shadow-sm"
+                    className="max-h-60 rounded-md border border-gray-300 dark:border-gray-700 shadow-sm"
                   />
                 </div>
               )}

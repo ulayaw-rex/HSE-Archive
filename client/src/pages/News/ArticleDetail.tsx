@@ -135,35 +135,35 @@ const ArticleDetail: React.FC = () => {
 
   if (loading)
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16 flex flex-col items-start gap-8">
-        <Skeleton className="w-24 h-6 rounded-full" />
-        <Skeleton className="w-3/4 h-12" />
-        <Skeleton className="w-48 h-4" />
-        <Skeleton className="w-full h-96 object-cover my-6" />
+      <div className="max-w-5xl mx-auto px-4 py-16 flex flex-col items-start gap-8 bg-white dark:bg-gray-900 min-h-screen transition-colors duration-200">
+        <Skeleton className="w-24 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="w-3/4 h-12 bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="w-48 h-4 bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="w-full h-96 object-cover my-6 bg-gray-200 dark:bg-gray-700" />
         <div className="w-full space-y-4">
-          <Skeleton className="w-full h-4" />
-          <Skeleton className="w-full h-4" />
-          <Skeleton className="w-5/6 h-4" />
-          <Skeleton className="w-3/4 h-4" />
+          <Skeleton className="w-full h-4 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="w-full h-4 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="w-5/6 h-4 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="w-3/4 h-4 bg-gray-200 dark:bg-gray-700" />
         </div>
       </div>
     );
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-red-600 font-bold">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-red-600 dark:text-red-500 font-bold">
         {error}
       </div>
     );
   if (!publication)
     return (
-      <div className="p-8 text-center text-gray-600">Article not found.</div>
+      <div className="p-8 text-center text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 min-h-screen">Article not found.</div>
     );
 
   const isWriter = user && publication.writers?.some((w) => w.id === user.id);
   const badgeColorClass = getCategoryColor(publication.category);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
       <ConfirmationModal
         isOpen={isClaimModalOpen}
         onClose={() => !requestingCredit && setIsClaimModalOpen(false)}
@@ -182,14 +182,14 @@ const ArticleDetail: React.FC = () => {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setShowSuccessModal(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-              <FaCheckCircle className="h-10 w-10 text-green-600" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-transparent dark:border-gray-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
+              <FaCheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Request Sent!
             </h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
               Your request has been submitted successfully. The administrator
               will review your claim shortly.
             </p>
@@ -209,14 +209,14 @@ const ArticleDetail: React.FC = () => {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setShowAlreadySubmittedModal(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
-              <FaInfoCircle className="h-10 w-10 text-blue-600" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-transparent dark:border-gray-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
+              <FaInfoCircle className="h-10 w-10 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Request Pending
             </h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
               You have already submitted a request for this article. Please wait
               for approval.
             </p>
@@ -236,14 +236,14 @@ const ArticleDetail: React.FC = () => {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setShowAlreadyWriterModal(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
-              <FaInfoCircle className="h-10 w-10 text-yellow-600" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-transparent dark:border-gray-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-6">
+              <FaInfoCircle className="h-10 w-10 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Already Listed
             </h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
               You are already credited as a writer for this article. No further
               action is needed.
             </p>
@@ -263,14 +263,14 @@ const ArticleDetail: React.FC = () => {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setShowErrorModal(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
-              <FaExclamationCircle className="h-10 w-10 text-red-600" />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform transition-all scale-100 border border-transparent dark:border-gray-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
+              <FaExclamationCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Something Went Wrong
             </h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
               We couldn't process your request at this time. Please try again
               later.
             </p>
@@ -286,7 +286,7 @@ const ArticleDetail: React.FC = () => {
 
       {publication.status === "submitted" && (
         <div
-          className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"
+          className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-4 mb-4"
           role="alert"
         >
           <p className="font-bold">Pending Approval</p>
@@ -305,13 +305,13 @@ const ArticleDetail: React.FC = () => {
             {publication.category}
           </div>
 
-          <h1 className="text-4xl font-extrabold text-black mb-4 leading-tight">
+          <h1 className="text-4xl font-extrabold text-black dark:text-gray-100 mb-4 leading-tight">
             {publication.title}
           </h1>
 
-          <div className="flex flex-wrap items-center text-gray-600 mb-6 gap-4 text-sm">
+          <div className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 mb-6 gap-4 text-sm">
             <div className="flex items-center space-x-1">
-              <FaCalendarAlt className="text-green-600" />
+              <FaCalendarAlt className="text-green-600 dark:text-green-500" />
               <span className="font-medium">
                 {new Date(
                   publication.date_published ||
@@ -333,7 +333,7 @@ const ArticleDetail: React.FC = () => {
                   <span key={writer.id} className="flex items-center">
                     <Link
                       to={`/profile/${writer.id}`}
-                      className="font-bold hover:text-green-700 hover:underline transition-colors"
+                      className="font-bold hover:text-green-700 dark:hover:text-green-400 hover:underline transition-colors"
                     >
                       {writer.name}
                     </Link>
@@ -355,7 +355,7 @@ const ArticleDetail: React.FC = () => {
                 <button
                   onClick={handleClaimClick}
                   disabled={requestingCredit}
-                  className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:border-green-300"
+                  className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 hover:border-green-300 dark:hover:border-green-700"
                 >
                   <FaUserPlus /> Add Attribute
                 </button>
@@ -385,7 +385,7 @@ const ArticleDetail: React.FC = () => {
                   name = credits.substring(8);
                 }
                 return (
-                  <div className="absolute bottom-0 right-0 bg-white bg-opacity-75 px-3 py-1 text-xs text-gray-500 rounded-tl-md shadow-sm">
+                  <div className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 dark:bg-opacity-90 bg-opacity-75 px-3 py-1 text-xs text-gray-500 dark:text-gray-400 rounded-tl-md shadow-sm">
                     {type}{" "}
                     <span className="font-bold italic">{name}</span>
                   </div>
@@ -394,38 +394,38 @@ const ArticleDetail: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center mb-8 bg-white border border-gray-200 rounded-full shadow-sm w-max overflow-hidden transition-all hover:shadow-md">
-            <div className="px-4 py-2.5 bg-gray-50 border-r border-gray-200 flex items-center justify-center">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest select-none">
+          <div className="flex items-center mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm w-max overflow-hidden transition-all hover:shadow-md">
+            <div className="px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex items-center justify-center">
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest select-none">
                 Text Size
               </span>
             </div>
 
             <button
-              onClick={decreaseTextSize}
-              disabled={textSize <= 12}
-              className="px-4 py-2.5 text-gray-600 hover:text-green-600 hover:bg-green-50 active:bg-green-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all outline-none"
-              title="Decrease text size"
-            >
-              <FaMinus size={12} />
-            </button>
+               onClick={decreaseTextSize}
+               disabled={textSize <= 12}
+               className="px-4 py-2.5 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 active:bg-green-100 dark:active:bg-green-900/50 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all outline-none"
+               title="Decrease text size"
+             >
+               <FaMinus size={12} />
+             </button>
 
-            <div className="w-px h-5 bg-gray-200"></div>
+            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
 
             <button
               onClick={resetTextSize}
-              className="px-4 py-2.5 text-gray-500 hover:text-gray-800 hover:bg-gray-50 active:bg-gray-100 text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 outline-none select-none"
+              className="px-4 py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800 text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 outline-none select-none"
               title="Reset to default"
             >
               <FaUndo size={10} /> Reset
             </button>
 
-            <div className="w-px h-5 bg-gray-200"></div>
+            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
 
             <button
               onClick={increaseTextSize}
               disabled={textSize >= 36}
-              className="px-4 py-2.5 text-gray-600 hover:text-green-600 hover:bg-green-50 active:bg-green-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all outline-none"
+              className="px-4 py-2.5 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 active:bg-green-100 dark:active:bg-green-900/50 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all outline-none"
               title="Increase text size"
             >
               <FaPlus size={12} />
@@ -433,7 +433,7 @@ const ArticleDetail: React.FC = () => {
           </div>
 
           <article
-            className="prose max-w-none text-gray-800 leading-relaxed transition-all duration-300 ease-in-out"
+            className="prose max-w-none text-gray-800 dark:text-gray-200 leading-relaxed transition-all duration-300 ease-in-out"
             style={{ fontSize: `${textSize}px` }}
           >
             {(publication.body ?? "").split("\n").map((para, idx) => (

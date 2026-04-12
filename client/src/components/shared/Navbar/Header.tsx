@@ -67,7 +67,8 @@ const Header: React.FC = () => {
         setIsMobileMenuOpen(false);
       }
     };
-    if (isProfileOpen || isMobileMenuOpen) window.addEventListener("keydown", handleKeyDown);
+    if (isProfileOpen || isMobileMenuOpen)
+      window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isProfileOpen, isMobileMenuOpen]);
 
@@ -118,7 +119,10 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header ref={headerRef} className="sticky top-0 z-[110] h-12 bg-green-700 text-white shadow-lg font-sans flex items-center">
+      <header
+        ref={headerRef}
+        className="sticky top-0 z-[110] h-12 bg-green-700 text-white shadow-lg font-sans flex items-center transition-colors duration-200"
+      >
         <div className="container mx-auto px-4 w-[90%]">
           <div className="flex items-center justify-between relative">
             <div className="flex items-center flex-shrink-0">
@@ -136,14 +140,18 @@ const Header: React.FC = () => {
             </div>
 
             <div className="flex-1 flex justify-center lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:w-auto lg:block">
-              <Link to="/" className="lg:hidden cursor-pointer min-w-0" onClick={() => setIsMobileMenuOpen(false)}>
-                <span className="text-lg font-bold text-white tracking-wide truncate block">
+              <Link
+                to="/"
+                className="lg:hidden cursor-pointer min-w-0"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className="text-lg font-bold text-white dark:text-gray-100 tracking-wide truncate block">
                   The Hillside Echo
                 </span>
               </Link>
 
               <div className="hidden lg:block">
-                <span className="text-sm text-green-50 font-medium tracking-wide">
+                <span className="text-sm text-green-50 font-medium tracking-wide transition-colors">
                   {new Date().toLocaleDateString("en-US", {
                     weekday: "long",
                     year: "numeric",
@@ -186,15 +194,15 @@ const Header: React.FC = () => {
                   </button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 top-full mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-[101] transform transition-all duration-200 ease-out origin-top-right">
-                      <div className="absolute -top-2 right-2 w-4 h-4 bg-white transform rotate-45 border-l border-t border-gray-100"></div>
+                    <div className="absolute right-0 top-full mt-3 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-800 z-[101] transform transition-all duration-200 ease-out origin-top-right">
+                      <div className="absolute -top-2 right-2 w-4 h-4 bg-white dark:bg-gray-900 transform rotate-45 border-l border-t border-gray-100 dark:border-gray-800"></div>
 
-                      <div className="relative bg-white rounded-xl overflow-hidden py-1">
-                        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                          <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                      <div className="relative bg-white dark:bg-gray-900 rounded-xl overflow-hidden py-1 transition-colors">
+                        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold tracking-wider">
                             Signed in as
                           </p>
-                          <p className="text-sm font-medium text-gray-800 truncate">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                             {user.email}
                           </p>
                         </div>
@@ -203,29 +211,29 @@ const Header: React.FC = () => {
                           {user.role === "admin" && (
                             <NavLink
                               to="/admin"
-                              className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
+                              className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-gray-800 hover:text-green-700 dark:hover:text-green-400 transition-colors group"
                               onClick={() => setIsProfileOpen(false)}
                             >
-                              <FaCog className="mr-3 text-gray-400 group-hover:text-green-600" />
+                              <FaCog className="mr-3 text-gray-400 dark:text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400" />
                               Admin Dashboard
                             </NavLink>
                           )}
 
                           <NavLink
                             to={`/profile/${user.id}`}
-                            className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
+                            className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-gray-800 hover:text-green-700 dark:hover:text-green-400 transition-colors group"
                             onClick={() => setIsProfileOpen(false)}
                           >
-                            <FaUser className="mr-3 text-gray-400 group-hover:text-green-600" />
+                            <FaUser className="mr-3 text-gray-400 dark:text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400" />
                             My Profile
                           </NavLink>
                         </div>
 
-                        <div className="border-t border-gray-100 my-1"></div>
+                        <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
 
                         <button
                           onClick={handleLogout}
-                          className="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium group"
+                          className="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium group"
                         >
                           <FaSignOutAlt className="mr-3 text-red-400 group-hover:text-red-600" />
                           Logout
@@ -237,7 +245,7 @@ const Header: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setIsLoginModalOpen(true)}
-                  className="flex items-center space-x-2 text-sm font-medium text-green-100 hover:text-white transition-colors duration-200 bg-green-800/30 hover:bg-green-800/50 px-3 py-1.5 rounded-full"
+                  className="flex items-center space-x-2 text-sm font-medium text-green-100 dark:text-gray-300 hover:text-white transition-colors duration-200 bg-green-800/30 dark:bg-gray-800 hover:bg-green-800/50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-full"
                 >
                   <span className="hidden sm:inline">Log in</span>
                   <FaUserCircle size={16} />
@@ -300,7 +308,7 @@ const Header: React.FC = () => {
                         setIsLoginModalOpen(true);
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-white text-green-800 font-bold py-2 rounded-lg shadow-sm hover:bg-green-50 transition-colors"
+                      className="w-full bg-white dark:bg-gray-800 text-green-800 dark:text-green-100 font-bold py-2 rounded-lg shadow-sm hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       Log In / Sign Up
                     </button>

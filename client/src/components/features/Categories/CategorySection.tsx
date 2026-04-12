@@ -27,7 +27,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, items }) => {
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">{title}</h2>
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg dark:shadow-gray-900/50 overflow-hidden mb-6 border border-gray-200 dark:border-gray-700 transition-colors">
           {featured.imageUrl && (
             <a href={featured.href || "#"}>
               <img
@@ -56,7 +56,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, items }) => {
           {others.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-lg shadow-sm overflow-hidden flex"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-lg dark:shadow-gray-900/30 overflow-hidden flex border border-gray-200 dark:border-gray-700 transition-colors"
             >
               {item.imageUrl && (
                 <a href={item.href || "#"} className="w-1/3 hidden sm:block">

@@ -152,28 +152,28 @@ const UserManagement: React.FC = () => {
           loading={loading}
         />
         {!loading && pagination.last_page > 1 && (
-          <div className="flex items-center justify-end border-t border-gray-100 pt-4 mt-4">
+          <div className="flex items-center justify-end border-t border-gray-100 dark:border-white/10 pt-4 mt-4">
             <nav className="flex items-center gap-4">
               <button
                 onClick={() => handlePageChange(pagination.current_page - 1)}
                 disabled={pagination.current_page === 1}
-                className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-400 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
               >
                 Previous
               </button>
 
-              <div className="text-sm">
-                <span className="font-bold text-green-700">
+              <div className="text-sm dark:text-gray-300">
+                <span className="font-bold text-green-700 dark:text-green-500">
                   {pagination.current_page}
                 </span>
                 <span className="text-gray-400 mx-1">/</span>
-                <span className="text-gray-600">{pagination.last_page}</span>
+                <span className="text-gray-600 dark:text-gray-400">{pagination.last_page}</span>
               </div>
 
               <button
                 onClick={() => handlePageChange(pagination.current_page + 1)}
                 disabled={pagination.current_page === pagination.last_page}
-                className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-400 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
               >
                 Next
               </button>

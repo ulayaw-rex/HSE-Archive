@@ -42,14 +42,29 @@ class DashboardController extends Controller
                 ->get()
                 ->map(fn($item) => ['name' => ucfirst($item->category), 'articles' => $item->count]);
 
-            $mostViewed = DB::table('publication_views')
-                ->join('publications', 'publication_views.publication_id', '=', 'publications.publication_id')
-                ->where('publication_views.created_at', '>=', $startDate)
-                ->select('publications.title as name', DB::raw('count(*) as value'))
-                ->groupBy('publications.title')
+            $mostViewedRaw = DB::table('publication_views')
+                ->where('created_at', '>=', $startDate)
+                ->select('publication_id', DB::raw('count(*) as value'))
+                ->groupBy('publication_id')
                 ->orderByDesc('value')
                 ->limit(5)
                 ->get();
+
+            $publicationIds = $mostViewedRaw->pluck('publication_id');
+            
+            $publicationTitles = [];
+            if ($publicationIds->isNotEmpty()) {
+                $publicationTitles = DB::table('publications')
+                    ->whereIn('publication_id', $publicationIds)
+                    ->pluck('title', 'publication_id');
+            }
+
+            $mostViewed = $mostViewedRaw->map(function ($item) use ($publicationTitles) {
+                return [
+                    'name' => $publicationTitles[$item->publication_id] ?? 'Unknown Article',
+                    'value' => $item->value
+                ];
+            });
 
             return [
                 'weeklyEngagement' => $weeklyEngagement,

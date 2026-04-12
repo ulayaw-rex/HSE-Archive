@@ -81,15 +81,15 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row">
-        <div className="hidden md:flex flex-col justify-center items-center bg-gray-50 w-1/2 p-8 border-r border-gray-100">
-          <img src={LoginArt} alt="HSE" className="max-w-[200px] mb-6" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row border border-transparent dark:border-gray-700">
+        <div className="hidden md:flex flex-col justify-center items-center bg-gray-50 dark:bg-gray-900/50 w-1/2 p-8 border-r border-gray-100 dark:border-gray-700">
+          <img src={LoginArt} alt="HSE" className="max-w-[200px] mb-6 dark:opacity-80 transition-opacity" />
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-green-800 tracking-wider">
+            <h2 className="text-2xl font-bold text-green-800 dark:text-green-500 tracking-wider">
               HSE-ARCHIVE
             </h2>
-            <p className="text-sm text-gray-500 mt-2">Admin Portal</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2 font-medium">Admin Portal</p>
           </div>
         </div>
 
@@ -99,13 +99,13 @@ const LoginPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center md:text-left">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center md:text-left">
               LOG IN
             </h1>
 
             <div className="flex flex-col gap-1">
               <input
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
+                className="w-full p-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 type="email"
                 placeholder="Email"
                 value={credentials.email}
@@ -118,7 +118,7 @@ const LoginPage: React.FC = () => {
 
             <div className="relative">
               <input
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all pr-10"
+                className="w-full p-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all pr-10"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={credentials.password}
@@ -133,7 +133,7 @@ const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
               >
                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </button>
@@ -141,10 +141,10 @@ const LoginPage: React.FC = () => {
 
             {error && (
               <div
-                className={`text-sm p-3 rounded-md text-center ${
+                className={`text-sm p-3 rounded-md text-center border ${
                   isPendingError
-                    ? "bg-yellow-50 text-yellow-800 border border-yellow-200"
-                    : "bg-red-50 text-red-600 border border-red-200"
+                    ? "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900/30"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/30"
                 }`}
               >
                 {isPendingError ? (
@@ -170,7 +170,7 @@ const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="text-gray-400 hover:text-green-600 text-sm"
+                className="text-gray-400 dark:text-gray-500 hover:text-green-600 dark:hover:text-green-400 text-sm transition-colors"
               >
                 &larr; Back to Site
               </button>

@@ -172,8 +172,8 @@ export function Comments({
   };
 
   return (
-    <section className="comments-section mt-8 border-t border-gray-200 pt-6">
-      <h3 className="text-xl font-bold text-green-800 mb-6 flex items-center gap-2">
+    <section className="comments-section mt-8 border-t border-gray-200 dark:border-gray-800 pt-6 transition-colors duration-200">
+      <h3 className="text-xl font-bold text-green-800 dark:text-green-500 mb-6 flex items-center gap-2">
         {user ? `Comments (${comments.length})` : "Comments"}
         <span className="flex h-2 w-2 relative">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -182,12 +182,12 @@ export function Comments({
       </h3>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-3 shadow-sm animate-fadeIn">
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg mb-6 flex items-start gap-3 shadow-sm animate-fadeIn">
           <FaExclamationCircle className="mt-1 flex-shrink-0" />
           <div className="flex-1 text-sm font-medium">{error}</div>
           <button
             onClick={() => setError(null)}
-            className="text-red-400 hover:text-red-700 transition-colors"
+            className="text-red-400 dark:text-red-500 hover:text-red-700 dark:hover:text-red-300 transition-colors"
           >
             <FaTimes />
           </button>
@@ -196,8 +196,8 @@ export function Comments({
 
       <div className="mb-8">
         {user ? (
-          <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex items-center mb-2 text-green-700 font-semibold">
+          <form onSubmit={handleSubmit} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-transparent dark:border-gray-700 transition-colors duration-200">
+            <div className="flex items-center mb-2 text-green-700 dark:text-green-500 font-semibold">
               <FaUserCircle className="mr-2" />
               Posting as {user.name}
             </div>
@@ -209,14 +209,14 @@ export function Comments({
               }}
               rows={3}
               placeholder="Share your thoughts..."
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
               required
             />
             <div className="flex justify-end mt-2">
               <button
                 type="button"
                 onClick={(e) => handleSubmit(e as any)}
-                className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800 transition-colors"
+                className="px-4 py-2 bg-green-700 dark:bg-green-600 text-white rounded hover:bg-green-800 dark:hover:bg-green-700 transition-colors font-semibold"
               >
                 Post Comment
               </button>
@@ -224,19 +224,19 @@ export function Comments({
           </form>
         ) : (
           <div
-            className="flex flex-col items-center justify-center p-8 bg-gray-50 border border-gray-200 border-dashed rounded-xl cursor-pointer hover:bg-gray-100 transition-all group"
+            className="flex flex-col items-center justify-center p-8 bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 border-dashed rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
             onClick={handleGuestClick}
           >
-            <div className="bg-green-100 p-3 rounded-full mb-3 group-hover:scale-110 transition-transform">
-              <FaLock className="text-green-600 text-xl" />
+            <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-full mb-3 group-hover:scale-110 transition-transform">
+              <FaLock className="text-green-600 dark:text-green-500 text-xl" />
             </div>
-            <h4 className="text-gray-800 font-bold text-lg">
+            <h4 className="text-gray-800 dark:text-gray-100 font-bold text-lg">
               Join the discussion
             </h4>
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
               Log in or sign up to leave a comment.
             </p>
-            <button className="px-6 py-2 bg-green-700 text-white font-semibold rounded-full hover:bg-green-800 transition-colors shadow-sm">
+            <button className="px-6 py-2 bg-green-700 dark:bg-green-600 text-white font-semibold rounded-full hover:bg-green-800 dark:hover:bg-green-700 transition-colors shadow-sm">
               Log In
             </button>
           </div>
@@ -246,31 +246,31 @@ export function Comments({
       {user ? (
         <div className="space-y-6">
           {comments.length === 0 ? (
-            <p className="text-gray-500 italic">
+            <p className="text-gray-500 dark:text-gray-400 italic">
               No comments yet. Be the first!
             </p>
           ) : (
             comments.map((comment) => (
               <div key={comment.id} className="flex space-x-3">
                 <div className="flex-shrink-0">
-                  <FaUserCircle className="text-3xl text-gray-400" />
+                  <FaUserCircle className="text-3xl text-gray-400 dark:text-gray-600" />
                 </div>
 
                 <div className="flex-1">
-                  <div className="bg-gray-100 p-3 rounded-lg rounded-tl-none relative group">
+                  <div className="bg-gray-100 dark:bg-gray-800/80 p-3 rounded-lg rounded-tl-none border border-transparent dark:border-gray-700 relative group transition-colors duration-200">
                     <div className="flex items-center justify-between mb-1">
-                      <strong className="text-gray-900 text-sm">
+                      <strong className="text-gray-900 dark:text-gray-100 text-sm">
                         {comment.user.name}
                       </strong>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {new Date(comment.created_at).toLocaleDateString()}
                         </span>
 
                         {comment.is_edited && (
                           <button
                             onClick={() => viewHistory(comment.id)}
-                            className="text-xs text-gray-400 hover:text-green-700 underline decoration-dotted cursor-pointer transition-colors"
+                            className="text-xs text-gray-400 dark:text-gray-500 hover:text-green-700 dark:hover:text-green-400 underline decoration-dotted cursor-pointer transition-colors"
                             title="View Edit History"
                           >
                             (Edited)
@@ -312,20 +312,20 @@ export function Comments({
                         <div className="flex justify-end gap-2 mt-2">
                           <button
                             onClick={cancelEditing}
-                            className="flex items-center gap-1 px-3 py-1 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                            className="flex items-center gap-1 px-3 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
                           >
                             <FaTimes /> Cancel
                           </button>
                           <button
                             onClick={() => saveEdit(comment.id)}
-                            className="flex items-center gap-1 px-3 py-1 text-xs text-white bg-green-700 rounded hover:bg-green-800"
+                            className="flex items-center gap-1 px-3 py-1 text-xs text-white bg-green-700 dark:bg-green-600 rounded hover:bg-green-800 dark:hover:bg-green-500"
                           >
                             <FaCheck /> Save
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-gray-800 text-sm leading-relaxed break-words">
+                      <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed break-words">
                         {comment.body}
                       </p>
                     )}
@@ -336,8 +336,8 @@ export function Comments({
           )}
         </div>
       ) : (
-        <div className="text-center py-8 bg-gray-50 rounded border border-gray-100 mt-4">
-          <p className="text-gray-500 italic">
+        <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/80 rounded border border-gray-100 dark:border-gray-700 mt-4 transition-colors">
+          <p className="text-gray-500 dark:text-gray-400 italic">
             Comments are hidden for guests.
           </p>
         </div>
@@ -349,14 +349,14 @@ export function Comments({
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setHistoryModalOpen(false)}
           />
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden animate-fadeIn">
-            <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <FaHistory className="text-green-700" /> Edit History
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden animate-fadeIn border border-transparent dark:border-gray-700">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                <FaHistory className="text-green-700 dark:text-green-500" /> Edit History
               </h3>
               <button
                 onClick={() => setHistoryModalOpen(false)}
-                className="text-gray-500 hover:text-red-500"
+                className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
               >
                 <FaTimes />
               </button>
@@ -374,25 +374,25 @@ export function Comments({
                       key={item.id}
                       className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0 relative"
                     >
-                      <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-gray-400"></div>
+                      <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-gray-400 dark:bg-gray-600"></div>
 
-                      <p className="text-xs text-gray-500 mb-1 font-mono uppercase">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-mono uppercase">
                         {new Date(item.created_at).toLocaleString()}
                       </p>
-                      <div className="bg-gray-100 p-3 rounded text-sm text-gray-700">
+                      <div className="bg-gray-100 dark:bg-gray-900 p-3 rounded text-sm text-gray-700 dark:text-gray-300 border border-transparent dark:border-gray-700">
                         {item.body}
                       </div>
                     </div>
                   ))}
                   <div className="border-l-2 border-green-500 pl-4 relative pt-2">
-                    <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-green-600"></div>
-                    <p className="text-xs text-green-700 font-bold uppercase mb-1">
+                    <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-green-600 dark:bg-green-500"></div>
+                    <p className="text-xs text-green-700 dark:text-green-500 font-bold uppercase mb-1">
                       Current Version
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-gray-500 italic">
+                <p className="text-center text-gray-500 dark:text-gray-400 italic py-4">
                   No edit history available.
                 </p>
               )}

@@ -33,23 +33,23 @@ const AdminPage: React.FC = () => {
 
   const AdminSkeleton = () => (
     <div className="animate-pulse space-y-10">
-      <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-        <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
-        <div className="h-96 bg-gray-200 rounded-lg border border-gray-300"></div>
+      <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+        <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+        <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600"></div>
       </div>
-      <div className="h-32 w-full bg-gray-200 rounded-lg"></div>
+      <div className="h-32 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
     </div>
   );
 
   return (
-    <div className="admin-container bg-gray-50 min-h-screen">
+    <div className="admin-container transition-colors duration-200">
       <div className="admin-content p-6 max-w-7xl mx-auto">
         <div className="admin-header mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-500 mt-1">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
               Overview of system performance and pending tasks.
             </p>
           </div>
@@ -58,18 +58,18 @@ const AdminPage: React.FC = () => {
         {loading && !dashboardStats ? (
           <AdminSkeleton />
         ) : error ? (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 font-medium">
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 font-medium">
             Error: {error}
           </div>
         ) : dashboardStats ? (
           <div className="space-y-10 animate-in fade-in duration-500">
             <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                 <span className="w-2 h-6 bg-yellow-500 rounded-full"></span>
                 Action Items
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="h-96">
                   <PendingUsersWidget
                     users={pendingUsers}
@@ -94,7 +94,7 @@ const AdminPage: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                 <span className="w-2 h-6 bg-green-600 rounded-full"></span>
                 Performance Overview
               </h2>

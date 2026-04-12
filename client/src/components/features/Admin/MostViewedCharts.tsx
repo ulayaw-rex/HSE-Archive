@@ -1,12 +1,7 @@
 import React from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import type { MostViewedData } from "./DashboardStats";
+import { useTheme } from "../../../context/ThemeContext";
 
 const COLORS = ["#14532d", "#166534", "#15803d", "#22c55e", "#86efac"];
 
@@ -15,6 +10,12 @@ interface MostViewedChartProps {
 }
 
 export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const tooltipBg = isDark ? "#1f2937" : "#ffffff";
+  const tooltipBorder = isDark ? "rgba(255, 255, 255, 0.1)" : "#e5e7eb";
+
   const getDateRange = () => {
     const end = new Date();
     const start = new Date();
@@ -25,14 +26,14 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
     };
     return `${start.toLocaleDateString(
       "en-US",
-      options
+      options,
     )} - ${end.toLocaleDateString("en-US", { ...options, year: "numeric" })}`;
   };
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center h-full min-h-[300px]">
-        <h3 className="text-gray-400 font-medium">
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center h-full min-h-[300px] transition-colors duration-200">
+        <h3 className="text-gray-400 dark:text-gray-500 font-medium">
           No views recorded this week
         </h3>
       </div>
@@ -42,13 +43,15 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
   const totalViews = data.reduce((sum, item) => sum + (item.value || 0), 0);
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative h-full">
+    <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 relative h-full transition-colors duration-200">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="text-lg font-extrabold text-gray-900 uppercase tracking-wide flex items-center gap-2">
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-gray-100 uppercase tracking-wide flex items-center gap-2">
             <span className="text-2xl">👁</span> Most Viewed This Week
           </h3>
-          <p className="text-sm text-gray-500 mt-1">{getDateRange()}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {getDateRange()}
+          </p>
         </div>
       </div>
 
@@ -74,12 +77,18 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number | undefined) => [`${value || 0} Views`, ""]}
+              formatter={(value: number | undefined) => [
+                `${value || 0} Views`,
+                "",
+              ]}
               contentStyle={{
+                backgroundColor: tooltipBg,
                 borderRadius: "8px",
-                border: "none",
+                border: `1px solid ${tooltipBorder}`,
                 boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                color: isDark ? "#f9fafb" : "#111827",
               }}
+              itemStyle={{ color: isDark ? "#10b981" : "#059669" }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -97,10 +106,10 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
               className="w-3 h-3 rounded-full shrink-0"
               style={{ backgroundColor: COLORS[index % COLORS.length] }}
             />
-            <span className="text-sm text-gray-700 truncate flex-1 min-w-0">
+            <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 min-w-0 group-hover:dark:text-white group-hover:text-gray-900 transition-colors">
               {item.name}
             </span>
-            <span className="text-xs font-bold text-gray-500 shrink-0 tabular-nums">
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 shrink-0 tabular-nums">
               {item.value} views
             </span>
           </div>
@@ -108,9 +117,13 @@ export const MostViewedChart: React.FC<MostViewedChartProps> = ({ data }) => {
       </div>
 
       {/* Total */}
-      <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</span>
-        <span className="text-sm font-bold text-gray-700 tabular-nums">{totalViews} views</span>
+      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/10 flex justify-between items-center">
+        <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+          Total
+        </span>
+        <span className="text-sm font-bold text-gray-700 dark:text-gray-300 tabular-nums">
+          {totalViews} views
+        </span>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ const SiteLayout: React.FC = () => {
   const isRegisterPage = location.pathname === "/register";
 
   return (
-    <div className="App">
+    <div className="App dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen flex flex-col">
       {!isRegisterPage && <Header />}
       {!isRegisterPage && <Navbar />}
 

@@ -68,20 +68,20 @@ const SearchResults: React.FC = () => {
   }, [results, selectedCategory, sortBy]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 transition-colors duration-200">
       <div className="max-w-5xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Search Results
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Showing results for{" "}
-            <span className="font-bold text-green-700">"{query}"</span>
+            <span className="font-bold text-green-700 dark:text-green-500">"{query}"</span>
           </p>
         </div>
 
         {!loading && results.length > 0 && (
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-2 w-full md:w-auto">
               <FaFilter className="text-gray-400" />
               <div className="flex gap-2 overflow-x-auto">
@@ -91,8 +91,8 @@ const SearchResults: React.FC = () => {
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
                       selectedCategory === cat
-                        ? "bg-green-700 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-green-700 dark:bg-green-600 text-white shadow-md shadow-green-900/20"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
                     }`}
                   >
                     {cat}
@@ -109,12 +109,12 @@ const SearchResults: React.FC = () => {
           </div>
         ) : filteredAndSortedResults.length === 0 ? (
           <div>
-            <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-gray-100 mb-12">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold text-gray-800">
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-800 mb-12">
+              <div className="text-6xl mb-4 opacity-50 dark:opacity-20">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                 No matching results found
               </h3>
-              <p className="text-gray-500 mt-2">
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
                 We couldn't find anything matching "{query}"
                 {selectedCategory !== "All" ? ` in ${selectedCategory}` : ""}.
               </p>
@@ -130,8 +130,8 @@ const SearchResults: React.FC = () => {
 
             {suggestedArticles.length > 0 && (
               <div>
-                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaArrowRight className="text-green-600" /> You might be
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                  <FaArrowRight className="text-green-600 dark:text-green-500" /> You might be
                   interested in
                 </h2>
                 <div className="grid gap-6">
@@ -139,11 +139,11 @@ const SearchResults: React.FC = () => {
                     <Link
                       to={`/news/${article.publication_id}`}
                       key={article.publication_id}
-                      className="block bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+                      className="block bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-800 group"
                     >
                       <div className="flex flex-col md:flex-row gap-6">
                         {article.image && (
-                          <div className="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-200">
+                          <div className="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-200 dark:bg-gray-800">
                             <img
                               src={article.image}
                               alt={article.title}
@@ -152,13 +152,13 @@ const SearchResults: React.FC = () => {
                           </div>
                         )}
                         <div className="flex-1">
-                          <span className="text-xs font-bold text-green-600 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">
                             {article.category}
                           </span>
-                          <h2 className="text-xl font-bold text-gray-900 mt-1 mb-2 group-hover:text-green-700 transition-colors">
+                          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-1 mb-2 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
                             {article.title}
                           </h2>
-                          <div className="mt-3 text-xs text-gray-400">
+                          <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
                             {new Date(article.created_at).toLocaleDateString()}{" "}
                             • By {article.byline}
                           </div>
@@ -176,11 +176,11 @@ const SearchResults: React.FC = () => {
               <Link
                 to={`/news/${article.publication_id}`}
                 key={article.publication_id}
-                className="block bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+                className="block bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-800 group"
               >
                 <div className="flex flex-col md:flex-row gap-6">
                   {article.image && (
-                    <div className="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-200">
+                    <div className="w-full md:w-48 h-32 flex-shrink-0 overflow-hidden rounded-md bg-gray-200 dark:bg-gray-800">
                       <img
                         src={article.image}
                         alt={article.title}
@@ -189,16 +189,16 @@ const SearchResults: React.FC = () => {
                     </div>
                   )}
                   <div className="flex-1">
-                    <span className="text-xs font-bold text-green-600 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">
                       {article.category}
                     </span>
-                    <h2 className="text-xl font-bold text-gray-900 mt-1 mb-2 group-hover:text-green-700 transition-colors">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-1 mb-2 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
                       {article.title}
                     </h2>
-                    <p className="text-gray-600 text-sm line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
                       {article.body}
                     </p>
-                    <div className="mt-3 text-xs text-gray-400">
+                    <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
                       {new Date(article.created_at).toLocaleDateString()} • By{" "}
                       {article.byline}
                     </div>

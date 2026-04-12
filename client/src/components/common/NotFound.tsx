@@ -25,7 +25,7 @@ const NewspaperIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 const NotFoundPage: React.FC = () => {
   return (
     <div className="bg-gray-50 flex items-center justify-center min-h-screen text-gray-800 font-sans">
-      <div className="text-center p-8 bg-white rounded-lg shadow-xl max-w-md w-full mx-4 border-t-8 border-green-800">
+      <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 border-t-8 border-green-800 dark:border-green-600 transition-colors">
         <header className="mb-6">
           <NewspaperIcon className="w-24 h-24 mx-auto text-green-700" />
           <h1 className="text-8xl font-extrabold text-green-800 mt-4">404</h1>

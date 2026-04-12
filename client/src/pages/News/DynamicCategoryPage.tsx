@@ -27,9 +27,9 @@ const DynamicCategoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors duration-200">
         <div className="container mx-auto px-4 space-y-6 w-[90%]">
-          <Skeleton className="w-64 h-10 mb-6 bg-gray-200" />
+          <Skeleton className="w-64 h-10 mb-6 bg-gray-200 dark:bg-gray-700" />
           <FeaturedSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <ArticleSkeleton />
@@ -51,9 +51,9 @@ const DynamicCategoryPage: React.FC = () => {
   const [featured, ...others] = publications;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 space-y-6 w-[90%]">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-6 uppercase">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors duration-200">
+      <div className="container mx-auto px-4 space-y-6 w-[90%] text-gray-900 dark:text-gray-100">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-6 uppercase">
           {category?.replace("-", " ")}
         </h1>
         {publications.length === 0 ? (

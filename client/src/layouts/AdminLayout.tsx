@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import AxiosInstance from "../AxiosInstance";
 import NotificationDropdown from "../components/common/NotificationDropdown";
+import ThemeToggle from "../components/common/ThemeToggle";
 import "./AdminLayout.css";
 import type { SidebarItemType } from "../pages/Admin/SidebarItems";
 
@@ -15,12 +16,31 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItem
   badgeCount,
   onItemClick,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { pathname } = useLocation();
   const hasChildren = item.children && item.children.length > 0;
 
-  const isActive = item.to
-    ? window.location.pathname.startsWith(item.to)
-    : false;
+  // A parent is active if its own path matches OR if any of its children's paths match
+  const checkIsActive = () => {
+    if (item.to && (item.end ? pathname === item.to : pathname.startsWith(item.to))) {
+      return true;
+    }
+    if (hasChildren) {
+      return item.children?.some(child => 
+        child.to && pathname.startsWith(child.to)
+      );
+    }
+    return false;
+  };
+
+  const isActive = checkIsActive();
+  const [isOpen, setIsOpen] = useState(isActive);
+
+  // Sync isOpen with isActive only when the route changes to a child of this parent
+  useEffect(() => {
+    if (isActive && hasChildren) {
+      setIsOpen(true);
+    }
+  }, [isActive, hasChildren]);
 
   const Badge = () =>
     badgeCount && badgeCount > 0 ? (
@@ -35,7 +55,8 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItem
         <div className="sidebar">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`parent-button ${isActive || isOpen ? "active" : ""}`}
+            className={`parent-button ${isActive ? "active" : ""}`}
+            aria-expanded={isOpen}
           >
             <span className="opacity-90">{item.icon}</span>
             <span className="text-sm font-medium flex-1 text-left">
@@ -55,8 +76,8 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItem
           </button>
         </div>
 
-        {isOpen && (
-          <div className="ml-4 mt-1 space-y-1 border-l border-green-600/40 pl-2">
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"}`}>
+          <div className="ml-4 space-y-1 border-l border-white/10 dark:border-gray-700 pl-2">
             {item.children?.map((child, index) => (
               <NavLink
                 key={index}
@@ -64,11 +85,11 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItem
                 end={child.end}
                 onClick={onItemClick}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-colors 
+                  `flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-all 
                   ${
                     isActive
-                      ? "bg-green-600 text-white shadow-sm"
-                      : "hover:bg-green-600/60 text-white"
+                      ? "bg-green-600 dark:bg-green-700 text-white shadow-sm ring-1 ring-white/10"
+                      : "hover:bg-white/5 text-gray-300 hover:text-white"
                   }`
                 }
               >
@@ -77,7 +98,7 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItem
               </NavLink>
             ))}
           </div>
-        )}
+        </div>
       </div>
     );
   }
@@ -88,11 +109,7 @@ const SidebarItem: React.FC<{ item: SidebarItemType; badgeCount?: number; onItem
       end={item.end}
       onClick={onItemClick}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-3 py-2 rounded-md mb-1 transition-colors ${
-          isActive
-            ? "bg-green-600 text-white"
-            : "hover:bg-green-600/60 text-white"
-        }`
+        `parent-button ${isActive ? "active" : "text-gray-300 hover:text-white"}`
       }
     >
       <span className="opacity-90">{item.icon}</span>
@@ -136,28 +153,28 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
   };
 
   return (
-    <div className="h-screen flex bg-green-50 text-gray-900 overflow-hidden">
+    <div className="h-screen flex bg-green-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 overflow-hidden transition-colors duration-200">
       {/* Mobile background overlay for clicking outside */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-green-700 text-white border-r border-green-700 shadow-sm transition-transform duration-200 ease-out flex flex-col md:relative md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-green-700 dark:bg-gray-800 text-white border-r border-green-700 dark:border-gray-800 shadow-sm transition-transform duration-200 ease-out flex flex-col lg:relative lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="px-4 py-4 border-b border-green-600 flex items-center justify-between flex-shrink-0">
+        <div className="px-4 py-4 border-b border-green-600 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
           <div>
             <div className="text-lg font-semibold">HSE Admin</div>
             <div className="text-xs opacity-80">Content Management</div>
           </div>
           <button
-            className="md:hidden p-2 rounded hover:bg-green-600/50"
+            className="lg:hidden p-2 rounded hover:bg-green-600/50 dark:hover:bg-gray-700 transition-colors"
             aria-label="Close sidebar"
             onClick={() => setSidebarOpen(false)}
           >
@@ -184,10 +201,10 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
           ))}
         </nav>
 
-        <div className="p-2 border-t border-green-600/50 flex-shrink-0 space-y-1">
+        <div className="p-2 border-t border-green-600/50 dark:border-gray-700 flex-shrink-0 space-y-1">
           <a
             href="/"
-            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-green-600/60 text-white"
+            className="flex items-center gap-3 px-3 py-2 rounded-md transition-all hover:bg-green-600/60 dark:hover:bg-gray-700 text-white"
           >
             <svg
               viewBox="0 0 24 24"
@@ -211,7 +228,7 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
               e.preventDefault();
               handleLogout();
             }}
-            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-red-600/80 text-white"
+            className="flex items-center gap-3 px-3 py-2 rounded-md transition-all hover:bg-red-600/80 dark:hover:bg-red-900/80 text-white"
           >
             <svg
               viewBox="0 0 24 24"
@@ -230,10 +247,10 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 md:ml-0 overflow-hidden">
-        <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur flex-shrink-0">
+        <header className="sticky top-0 z-30 border-b dark:border-white/10 bg-white/80 dark:bg-gray-900/80 backdrop-blur flex-shrink-0 transition-colors duration-200">
           <div className="px-4 md:px-6 h-14 flex items-center justify-between">
             <button
-              className="md:hidden p-2 rounded hover:bg-green-50"
+              className="lg:hidden p-2 rounded hover:bg-green-50 dark:hover:bg-gray-800 transition-colors"
               aria-label="Open sidebar"
               onClick={() => setSidebarOpen(true)}
             >
@@ -247,11 +264,10 @@ const AdminLayout: React.FC<{ sidebarItems: SidebarItemType[] }> = ({
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="text-sm font-semibold text-green-700 ml-auto flex items-center gap-2">
-              <div className="bg-green-700 rounded-full flex items-center justify-center mr-2">
-                <NotificationDropdown />
-              </div>
-              Admin Panel
+            <div className="text-sm font-semibold text-green-700 dark:text-green-500 ml-auto flex items-center gap-2">
+              <ThemeToggle variant="light-bg" />
+              <NotificationDropdown variant="light-bg" />
+              <span className="hidden sm:inline pl-1">Admin Panel</span>
             </div>
           </div>
         </header>

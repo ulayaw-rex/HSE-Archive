@@ -12,6 +12,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DataProvider } from "./context/DataContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AxiosInstance from "./AxiosInstance";
 import ScrollToTop from "./components/common/ScrollToTop";
 import Chatbot from "./components/common/Chatbot";
@@ -157,12 +158,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <ErrorBoundary>
-          <ScrollToTop />
-          <AuthProvider>
-            <DataProvider>
-              <AppContent />
-            </DataProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <ScrollToTop />
+            <AuthProvider>
+              <DataProvider>
+                <AppContent />
+              </DataProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </ErrorBoundary>
       </Router>
     </QueryClientProvider>

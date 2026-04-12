@@ -141,7 +141,7 @@ const Chatbot: React.FC = () => {
 
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 p-3 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center">
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center transition-colors">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
@@ -153,7 +153,7 @@ const Chatbot: React.FC = () => {
 
             <form
               onSubmit={handleSend}
-              className="p-3 bg-white border-t border-gray-100 flex gap-2 flex-shrink-0 safe-area-bottom"
+              className="p-3 bg-white dark:bg-gray-800 border-t dark:border-t-gray-700 border-gray-100 flex gap-2 flex-shrink-0 safe-area-bottom transition-colors"
             >
               <input
                 type="text"

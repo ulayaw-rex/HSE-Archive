@@ -50,28 +50,28 @@ const DeleteConfirmationModal: React.FC<ModalProps> = ({
 }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative animate-fade-in">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-sm p-6 relative animate-fade-in border border-gray-200 dark:border-gray-700">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
         >
           <FaTimes />
         </button>
         <div className="flex flex-col items-center text-center">
-          <div className="bg-red-50 p-4 rounded-full mb-4">
-            <FaExclamationTriangle className="text-red-600 text-2xl" />
+          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-full mb-4">
+            <FaExclamationTriangle className="text-red-600 dark:text-red-500 text-2xl" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Delete Message?
           </h3>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             This action cannot be undone.
           </p>
           <div className="flex gap-3 w-full">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-bold text-gray-700"
+              className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 font-bold text-gray-700 dark:text-gray-300 transition-colors"
             >
               Cancel
             </button>
@@ -110,59 +110,60 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative flex flex-col h-auto max-h-[90vh]">
-        <div className="flex justify-between items-center mb-4 pb-4 border-b">
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <FaReply className="text-blue-600" /> Reply to Message
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg p-6 relative flex flex-col h-auto max-h-[90vh] border border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-4 pb-4 border-b dark:border-gray-800">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <FaReply className="text-blue-600 dark:text-blue-500" /> Reply to
+            Message
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <FaTimes />
           </button>
         </div>
 
         <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm">
-            <span className="font-bold text-gray-500 uppercase text-xs mr-2">
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-sm">
+            <span className="font-bold text-gray-500 dark:text-gray-400 uppercase text-xs mr-2">
               To:
             </span>
-            <span className="text-gray-800 font-medium">
+            <span className="text-gray-800 dark:text-gray-200 font-medium">
               {recipientName} &lt;{recipientEmail}&gt;
             </span>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">
               Subject
             </label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 outline-none transition-colors"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
             />
           </div>
 
           <div className="flex-1 min-h-[150px]">
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">
               Message
             </label>
             <textarea
-              className="w-full h-full min-h-[200px] border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+              className="w-full h-full min-h-[200px] border border-gray-300 dark:border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 outline-none resize-none transition-colors"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             ></textarea>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t flex justify-end gap-3">
+        <div className="mt-4 pt-4 border-t dark:border-gray-800 flex justify-end gap-3 transition-colors">
           <button
             onClick={onClose}
             disabled={isSending}
-            className="px-5 py-2 rounded-lg font-bold text-gray-600 hover:bg-gray-100"
+            className="px-5 py-2 rounded-lg font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             Cancel
           </button>
@@ -193,7 +194,7 @@ const Feedback: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedMessage, setSelectedMessage] = useState<FeedbackItem | null>(
-    null
+    null,
   );
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -206,7 +207,7 @@ const Feedback: React.FC = () => {
     if (isManualRefresh) setLoading(true);
     try {
       const res = await AxiosInstance.get("/admin/contact-submissions");
-      setMessages(Array.isArray(res.data) ? res.data : (res.data.data || []));
+      setMessages(Array.isArray(res.data) ? res.data : res.data.data || []);
       if (isManualRefresh) toast.success("Inbox updated");
     } catch (error) {
       toast.error("Failed to load messages", { toastId: "fetchError" });
@@ -225,7 +226,7 @@ const Feedback: React.FC = () => {
       try {
         await AxiosInstance.put(`/admin/contact-submissions/${msg.id}/read`);
         setMessages((prev) =>
-          prev.map((m) => (m.id === msg.id ? { ...m, is_read: true } : m))
+          prev.map((m) => (m.id === msg.id ? { ...m, is_read: true } : m)),
         );
       } catch (error) {
         console.error("Read status error");
@@ -246,7 +247,7 @@ const Feedback: React.FC = () => {
     if (messageToDelete === null) return;
     try {
       await AxiosInstance.delete(
-        `/admin/contact-submissions/${messageToDelete}`
+        `/admin/contact-submissions/${messageToDelete}`,
       );
       setMessages((prev) => prev.filter((m) => m.id !== messageToDelete));
       if (selectedMessage?.id === messageToDelete) setSelectedMessage(null);
@@ -270,7 +271,7 @@ const Feedback: React.FC = () => {
     try {
       await AxiosInstance.post(
         `/admin/contact-submissions/${selectedMessage.id}/reply`,
-        { subject, message }
+        { subject, message },
       );
       toast.success("Reply sent successfully!");
       setIsReplyModalOpen(false);
@@ -294,7 +295,7 @@ const Feedback: React.FC = () => {
   const unreadCount = messages.filter((m) => !m.is_read).length;
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex flex-col md:flex-row gap-6 h-[calc(100vh-64px)]">
+    <div className="p-4 md:p-6 flex flex-col md:flex-row gap-6 h-[calc(100vh-64px)] transition-colors duration-200">
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -312,16 +313,17 @@ const Feedback: React.FC = () => {
       />
 
       <div
-        className={`w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-gray-200 flex-col overflow-hidden ${
+        className={`w-full md:w-1/3 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 flex-col overflow-hidden ${
           selectedMessage ? "hidden md:flex" : "flex"
         }`}
       >
-        <div className="p-4 border-b border-gray-100 bg-gray-50">
+        <div className="p-4 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <FaEnvelopeOpen className="text-green-600" /> Inbox
+            <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+              <FaEnvelopeOpen className="text-green-600 dark:text-green-500" />{" "}
+              Inbox
               {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
                   {unreadCount}
                 </span>
               )}
@@ -340,7 +342,7 @@ const Feedback: React.FC = () => {
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-white/10 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition-colors"
             />
           </div>
         </div>
@@ -359,18 +361,18 @@ const Feedback: React.FC = () => {
               <div
                 key={msg.id}
                 onClick={() => handleView(msg)}
-                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors hover:bg-gray-50 ${
+                className={`p-4 border-b border-gray-100 dark:border-white/5 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
                   selectedMessage?.id === msg.id
-                    ? "bg-green-50 border-l-4 border-l-green-600"
+                    ? "bg-green-50 dark:bg-green-900/20 border-l-4 border-l-green-600 dark:border-l-green-500"
                     : "border-l-4 border-l-transparent"
-                } ${!msg.is_read ? "bg-white" : "bg-gray-50/50"}`}
+                } ${!msg.is_read ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/30"}`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <span
                     className={`text-sm ${
                       !msg.is_read
-                        ? "font-bold text-gray-900"
-                        : "font-medium text-gray-600"
+                        ? "font-bold text-gray-900 dark:text-gray-100"
+                        : "font-medium text-gray-600 dark:text-gray-400"
                     }`}
                   >
                     {msg.name || "Anonymous"}
@@ -381,12 +383,14 @@ const Feedback: React.FC = () => {
                 </div>
                 <div
                   className={`text-sm mb-1 truncate ${
-                    !msg.is_read ? "font-bold text-green-700" : "text-gray-700"
+                    !msg.is_read
+                      ? "font-bold text-green-700 dark:text-green-500"
+                      : "text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   {msg.subject || "(No Subject)"}
                 </div>
-                <div className="text-xs text-gray-500 truncate opacity-80">
+                <div className="text-xs text-gray-500 dark:text-gray-500 truncate opacity-80">
                   {msg.message}
                 </div>
               </div>
@@ -396,31 +400,31 @@ const Feedback: React.FC = () => {
       </div>
 
       <div
-        className={`w-full md:flex-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col relative overflow-hidden ${
+        className={`w-full md:flex-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 p-6 md:p-8 flex-col relative overflow-hidden ${
           selectedMessage ? "flex" : "hidden md:flex"
         }`}
       >
         {selectedMessage ? (
           <>
-            <div className="flex justify-between items-start mb-6 pb-6 border-b border-gray-100">
+            <div className="flex justify-between items-start mb-6 pb-6 border-b border-gray-100 dark:border-white/10 transition-colors">
               <div className="flex items-center gap-4">
                 <button
                   onClick={handleBackToList}
-                  className="md:hidden p-2 text-gray-500 hover:text-green-600 bg-gray-100 rounded-lg"
+                  className="md:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 bg-gray-100 dark:bg-gray-800 rounded-lg transition-colors"
                 >
                   <FaArrowLeft />
                 </button>
 
-                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xl shrink-0">
+                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-700 dark:text-green-500 font-bold text-xl shrink-0">
                   {(selectedMessage.name || "?").charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h1 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">
+                  <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                     {selectedMessage.subject || "No Subject"}
                   </h1>
-                  <div className="text-xs md:text-sm text-gray-500 mt-1 break-all">
+                  <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1 break-all">
                     From:{" "}
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 dark:text-gray-200">
                       {selectedMessage.name || "Anonymous"}
                     </span>{" "}
                     &lt;{selectedMessage.email}&gt;
@@ -437,27 +441,28 @@ const Feedback: React.FC = () => {
                 </button>
                 <button
                   onClick={() => initiateDelete(selectedMessage.id)}
-                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   title="Delete"
                 >
                   <FaTrash size={20} />
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto text-gray-700 leading-relaxed whitespace-pre-wrap font-sans text-sm md:text-base">
+            <div className="flex-1 overflow-y-auto text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-sm md:text-base transition-colors">
               {selectedMessage.message}
             </div>
-            <div className="mt-6 pt-4 border-t border-gray-100 text-xs text-gray-400 flex items-center gap-2">
-              <FaCheckCircle className="text-green-500" /> Received on{" "}
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2 transition-colors">
+              <FaCheckCircle className="text-green-500 dark:text-green-600" />{" "}
+              Received on{" "}
               {new Date(selectedMessage.created_at).toLocaleString()}
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
-            <div className="bg-gray-50 p-6 rounded-full mb-4">
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-300 dark:text-gray-700">
+            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-full mb-4">
               <FaEnvelope className="text-5xl opacity-20" />
             </div>
-            <p className="text-lg font-medium text-gray-400 text-center">
+            <p className="text-lg font-medium text-gray-400 dark:text-gray-500 text-center">
               Select a message to read
             </p>
           </div>

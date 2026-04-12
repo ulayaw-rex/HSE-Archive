@@ -161,7 +161,7 @@ const UserProfile: React.FC = () => {
 
   if (!profileUser) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 -mt-20">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center px-4 -mt-20 transition-colors duration-200">
         <div className="text-center">
           <FaUserSlash className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h2 className="text-2xl font-bold text-gray-800">
@@ -176,12 +176,12 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-12 transition-colors duration-200">
       <div className="container mx-auto px-4 pt-10">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 flex flex-col md:flex-row items-center md:items-end gap-6 relative z-10">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 mb-8 flex flex-col md:flex-row items-center md:items-end gap-6 relative z-10 border border-transparent dark:border-gray-800">
           <div className="relative flex-shrink-0">
             <div
-              className={`w-32 h-32 rounded-full border-4 flex items-center justify-center text-4xl text-white font-bold shadow-md overflow-hidden ${isAlumni ? "bg-purple-900 border-purple-100" : "bg-green-900 border-white"}`}
+              className={`w-32 h-32 rounded-full border-4 flex items-center justify-center text-4xl text-white font-bold shadow-md overflow-hidden ${isAlumni ? "bg-purple-900 border-purple-100 dark:border-purple-900/50" : "bg-green-900 border-white dark:border-gray-800"}`}
             >
               {profileUser.avatar ? (
                 <img
@@ -194,20 +194,20 @@ const UserProfile: React.FC = () => {
               )}
             </div>
             {isAlumni && (
-              <div className="absolute -bottom-2 -right-2 bg-purple-600 text-white p-2 rounded-full border-4 border-white shadow-md">
+              <div className="absolute -bottom-2 -right-2 bg-purple-600 text-white p-2 rounded-full border-4 border-white dark:border-gray-900 shadow-md">
                 <FaUserGraduate size={20} />
               </div>
             )}
           </div>
 
           <div className="flex-grow text-center md:text-left mb-2">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {profileUser.name || "Unknown User"}
             </h1>
-            <p className="text-gray-500 font-medium">{profileUser.email}</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">{profileUser.email}</p>
             <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
               <span
-                className={`px-3 py-1 text-sm font-semibold rounded-full uppercase tracking-wide ${isAlumni ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"}`}
+                className={`px-3 py-1 text-sm font-semibold rounded-full uppercase tracking-wide ${isAlumni ? "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400" : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"}`}
               >
                 {profileUser.position || "Member"}
               </span>
@@ -222,7 +222,7 @@ const UserProfile: React.FC = () => {
           {isOwnProfile && (
             <button
               onClick={handleCreateClick}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-bold shadow-md transition-all flex items-center gap-2"
+              className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 text-white px-6 py-3 rounded-full font-bold shadow-md transition-all flex items-center gap-2 transform active:scale-95"
             >
               <FaPenNib /> Write Article
             </button>
@@ -231,11 +231,11 @@ const UserProfile: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-lg shadow-sm min-h-[500px]">
-              <div className="flex border-b border-gray-200 overflow-x-auto">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm min-h-[500px] border border-transparent dark:border-gray-800 overflow-hidden">
+              <div className="flex border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab("portfolio")}
-                  className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "portfolio" ? "border-b-4 border-green-600 text-green-700 bg-green-50" : "text-gray-500 hover:text-gray-700"}`}
+                  className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "portfolio" ? "border-b-4 border-green-600 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20" : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <FaNewspaper /> Portfolio ({portfolio.length})
@@ -244,7 +244,7 @@ const UserProfile: React.FC = () => {
                 {isOwnProfile && (
                   <button
                     onClick={() => setActiveTab("workbench")}
-                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "workbench" ? "border-b-4 border-blue-600 text-blue-700 bg-blue-50" : "text-gray-500 hover:text-gray-700"}`}
+                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "workbench" ? "border-b-4 border-blue-600 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20" : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <FaClock /> Workbench ({workbench.length})
@@ -254,7 +254,7 @@ const UserProfile: React.FC = () => {
                 {isOwnProfile && isManagement && (
                   <button
                     onClick={() => setActiveTab("queue")}
-                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "queue" ? "border-b-4 border-red-600 text-red-700 bg-red-50" : "text-gray-500 hover:text-gray-700"}`}
+                    className={`flex-1 min-w-[150px] py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "queue" ? "border-b-4 border-red-600 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20" : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <FaCheckDouble /> Review ({reviewQueue.length})
@@ -281,7 +281,7 @@ const UserProfile: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="col-span-full text-center py-20 text-gray-400">
+                      <div className="col-span-full text-center py-20 text-gray-400 dark:text-gray-600">
                         <FaNewspaper className="mx-auto text-4xl mb-3 opacity-30" />{" "}
                         No published articles.
                       </div>
@@ -303,7 +303,7 @@ const UserProfile: React.FC = () => {
                         />
                       ))
                     ) : (
-                      <div className="col-span-full text-center py-20 text-gray-400">
+                      <div className="col-span-full text-center py-20 text-gray-400 dark:text-gray-600">
                         <FaClock className="mx-auto text-4xl mb-3 opacity-30" />{" "}
                         Your workbench is empty.
                       </div>
@@ -313,9 +313,9 @@ const UserProfile: React.FC = () => {
 
                 {activeTab === "queue" && (
                   <div className="space-y-6">
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 flex items-center rounded-lg">
-                      <FaExclamationCircle className="h-5 w-5 text-yellow-400 mr-3" />
-                      <p className="text-sm text-yellow-700">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-700 p-4 flex items-center rounded-lg">
+                      <FaExclamationCircle className="h-5 w-5 text-yellow-400 dark:text-yellow-600 mr-3" />
+                      <p className="text-sm text-yellow-700 dark:text-yellow-400">
                         You have <strong>{reviewQueue.length}</strong> articles
                         waiting for action.
                       </p>
@@ -338,7 +338,7 @@ const UserProfile: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-6">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm overflow-hidden sticky top-6 border border-transparent dark:border-gray-800">
               <div
                 className={`py-3 px-4 ${isAlumni ? "bg-purple-800" : "bg-green-800"}`}
               >
@@ -404,9 +404,9 @@ const UserProfile: React.FC = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="text-gray-400 py-10">
-                    <div className="bg-gray-100 p-4 rounded-full inline-block mb-3">
-                      <FaBookOpen className="w-8 h-8 text-gray-300" />
+                  <div className="text-gray-400 dark:text-gray-600 py-10">
+                    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full inline-block mb-3">
+                      <FaBookOpen className="w-8 h-8 text-gray-300 dark:text-gray-700" />
                     </div>
                     <p className="text-sm">No print media found.</p>
                   </div>

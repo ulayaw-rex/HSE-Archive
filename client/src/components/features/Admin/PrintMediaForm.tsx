@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import DatePicker from "../../common/DatePicker";
 import type {
   PrintMedia,
   CreatePrintMediaData,
@@ -178,7 +179,7 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
           }
         }}
       >
-        <div className="user-modal-container relative bg-white rounded-lg shadow-xl w-full md:w-auto md:min-w-[700px] lg:min-w-[900px] max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="user-modal-container relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full md:w-auto md:min-w-[700px] lg:min-w-[900px] max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors">
           {loading && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
@@ -276,30 +277,23 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
 
                 <div className="col-span-1">
                   <label
-                    className="block text-green-700 font-semibold mb-2"
+                    className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2 uppercase tracking-wider"
                     htmlFor="date_published"
                   >
                     Date Published <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="date_published"
-                    type="date"
-                    disabled={loading}
+                  <DatePicker
                     value={formData.date_published}
-                    onChange={(e) => {
+                    onChange={(date) => {
                       setFormData({
                         ...formData,
-                        date_published: e.target.value,
+                        date_published: date,
                       });
                       clearError("date_published");
                     }}
-                    className={`w-full h-[50px] p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-600 
-                    ${
-                      errors.date_published
-                        ? "border-red-500"
-                        : "border-gray-700"
-                    }
-                    ${loading ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                    placeholder="Select publication date"
+                    disabled={loading}
+                    error={!!errors.date_published}
                   />
                   {errors.date_published && (
                     <p className="text-red-500 text-xs mt-1">
@@ -491,8 +485,8 @@ const PrintMediaForm: React.FC<PrintMediaFormProps> = ({
                     {loading
                       ? "Uploading..."
                       : mode === "edit"
-                      ? "Update Archive"
-                      : "Post Archive +"}
+                        ? "Update Archive"
+                        : "Post Archive +"}
                   </span>
                 </button>
               </div>

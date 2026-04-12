@@ -97,13 +97,13 @@ const WriterSelect: React.FC<WriterSelectProps> = ({
           {selectedUsers.map((user) => (
             <span
               key={user.id}
-              className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full flex items-center gap-2 border border-green-200"
+              className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm px-3 py-1 rounded-full flex items-center gap-2 border border-green-200 dark:border-green-800"
             >
               {user.name}
               <button
                 type="button"
                 onClick={() => handleRemove(user.id)}
-                className="text-green-600 hover:text-green-900 focus:outline-none flex items-center justify-center"
+                className="text-green-600 dark:text-green-500 hover:text-green-900 dark:hover:text-green-400 focus:outline-none flex items-center justify-center"
               >
                 <FaTimes size={12} />
               </button>
@@ -121,7 +121,7 @@ const WriterSelect: React.FC<WriterSelectProps> = ({
         }
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full h-[50px] p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+        className="w-full h-[50px] p-3 rounded-md border border-gray-700 dark:border-gray-800 bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-600 transition-colors"
       />
 
       {loading && (
@@ -129,12 +129,12 @@ const WriterSelect: React.FC<WriterSelectProps> = ({
       )}
 
       {isOpen && suggestions.length > 0 && (
-        <ul className="absolute z-50 left-0 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto shadow-lg rounded-md text-sm">
+        <ul className="absolute z-50 left-0 w-full bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 mt-1 max-h-48 overflow-y-auto shadow-xl rounded-md text-sm transition-all duration-200">
           {suggestions.map((user) => (
             <li
               key={user.id}
               onClick={() => handleSelect(user)}
-              className="p-3 hover:bg-green-50 cursor-pointer text-gray-800 border-b border-gray-100 last:border-0 flex justify-between"
+              className="p-3 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 last:border-0 flex justify-between transition-colors"
             >
               <span>{user.name}</span>
             </li>
@@ -143,7 +143,7 @@ const WriterSelect: React.FC<WriterSelectProps> = ({
       )}
 
       {isOpen && suggestions.length === 0 && query.length > 1 && !loading && (
-        <div className="absolute z-50 left-0 w-full bg-white border border-gray-300 mt-1 p-3 text-red-500 text-sm shadow-lg rounded-md">
+        <div className="absolute z-50 left-0 w-full bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 mt-1 p-3 text-red-500 dark:text-red-400 text-sm shadow-xl rounded-md">
           User not found
         </div>
       )}

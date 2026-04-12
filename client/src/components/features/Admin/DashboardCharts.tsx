@@ -11,6 +11,7 @@ import {
   Bar,
 } from "recharts";
 import type { WeeklyData, CategoryData } from "./DashboardStats";
+import { useTheme } from "../../../context/ThemeContext";
 
 interface DashboardChartsProps {
   weeklyData: WeeklyData[];
@@ -21,10 +22,18 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
   weeklyData,
   categoryData,
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const gridColor = isDark ? "#374151" : "#e5e7eb";
+  const textColor = isDark ? "#9ca3af" : "#6b7280";
+  const tooltipBg = isDark ? "#1f2937" : "#ffffff";
+  const tooltipBorder = isDark ? "rgba(255, 255, 255, 0.1)" : "#e5e7eb";
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 transition-colors duration-200">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
           Weekly Engagement
         </h3>
         <div className="h-[300px] w-full font-sans text-sm">
@@ -42,26 +51,29 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#e5e7eb"
+                stroke={gridColor}
               />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#9ca3af" }}
+                tick={{ fill: textColor }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#9ca3af" }}
+                tick={{ fill: textColor }}
                 allowDecimals={false}
               />
               <Tooltip
                 contentStyle={{
+                  backgroundColor: tooltipBg,
                   borderRadius: "8px",
-                  border: "none",
+                  border: `1px solid ${tooltipBorder}`,
                   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  color: isDark ? "#f9fafb" : "#111827",
                 }}
+                itemStyle={{ color: isDark ? "#10b981" : "#059669" }}
               />
               <Area
                 type="monotone"
@@ -76,8 +88,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 transition-colors duration-200">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
           Content Distribution
         </h3>
         <div className="h-[300px] w-full font-sans text-sm">
@@ -89,26 +101,28 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#e5e7eb"
+                stroke={gridColor}
               />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#9ca3af" }}
+                tick={{ fill: textColor }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#9ca3af" }}
+                tick={{ fill: textColor }}
                 allowDecimals={false}
               />
               <Tooltip
-                cursor={{ fill: "#f0fdf4" }}
+                cursor={{ fill: isDark ? "rgba(255, 255, 255, 0.05)" : "#f0fdf4" }}
                 contentStyle={{
+                  backgroundColor: tooltipBg,
                   borderRadius: "8px",
-                  border: "none",
+                  border: `1px solid ${tooltipBorder}`,
                   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  color: isDark ? "#f9fafb" : "#111827",
                 }}
               />
               <Bar

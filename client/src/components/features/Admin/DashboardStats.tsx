@@ -33,9 +33,9 @@ interface DashboardStatsCardsProps {
 
 const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ stats }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex items-center hover:shadow-md transition-shadow duration-200">
-        <div className="p-4 rounded-full bg-blue-50 text-blue-600 mr-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 rounded-xl p-6 shadow-sm flex items-center hover:shadow-md transition-shadow duration-200">
+        <div className="p-4 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 mr-4">
           <svg
             className="w-8 h-8"
             fill="none"
@@ -51,20 +51,20 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ stats }) => {
           </svg>
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             Total Articles
           </p>
-          <h3 className="text-3xl font-extrabold text-gray-900 mt-1">
+          <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-1">
             {stats.totalArticles}
           </h3>
-          <p className="text-xs text-blue-600 font-medium mt-1">
+          <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
             Published Content
           </p>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex items-center hover:shadow-md transition-shadow duration-200">
-        <div className="p-4 rounded-full bg-green-50 text-green-600 mr-4">
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 rounded-xl p-6 shadow-sm flex items-center hover:shadow-md transition-shadow duration-200">
+        <div className="p-4 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 mr-4">
           <svg
             className="w-8 h-8"
             fill="none"
@@ -80,29 +80,31 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ stats }) => {
           </svg>
         </div>
         <div className="flex-1 overflow-hidden">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             Most Popular (All Time)
           </p>
 
           {stats.mostPopularArticle ? (
             <>
               <h3
-                className="text-lg font-bold text-gray-900 mt-1 truncate"
+                className="text-lg font-bold text-gray-900 dark:text-white mt-1 truncate"
                 title={stats.mostPopularArticle.title}
               >
                 {stats.mostPopularArticle.title}
               </h3>
               <div className="flex items-center mt-1 space-x-3">
-                <span className="text-2xl font-extrabold text-green-600">
+                <span className="text-2xl font-extrabold text-green-600 dark:text-green-400">
                   {stats.mostPopularArticle.views.toLocaleString()}
                 </span>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-gray-500">
                   views since {stats.mostPopularArticle.date}
                 </span>
               </div>
             </>
           ) : (
-            <p className="text-gray-400 italic mt-2">No data available yet</p>
+            <p className="text-gray-400 dark:text-gray-500 italic mt-2">
+              No data available yet
+            </p>
           )}
         </div>
       </div>

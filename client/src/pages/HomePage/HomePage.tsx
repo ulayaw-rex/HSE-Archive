@@ -76,13 +76,13 @@ const HomePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white pb-12">
+      <div className="min-h-screen bg-white dark:bg-gray-900 pb-12 transition-colors duration-200">
         <FeaturedSkeleton />
         <div className="w-[90%] mx-auto px-4 mt-12 space-y-12">
           {categories.slice(0, 3).map((category) => (
             <section key={category} className="space-y-6">
-              <div className="flex items-center justify-between border-b-2 border-gray-100 pb-4">
-                 <Skeleton className="w-48 h-8 bg-gray-200" />
+              <div className="flex items-center justify-between border-b-2 border-gray-100 dark:border-gray-800 pb-4">
+                 <Skeleton className="w-48 h-8 bg-gray-200 dark:bg-gray-700" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                  {[1, 2, 3, 4].map(key => <ArticleSkeleton key={key} />)}
@@ -95,7 +95,7 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-12">
+    <div className="min-h-screen bg-white dark:bg-gray-900 pb-12 transition-colors duration-200">
       {featuredArticles.length > 0 && (
         <Suspense fallback={<FeaturedSkeleton />}>
           <FeaturedCarousel articles={featuredArticles} />
@@ -106,7 +106,7 @@ const HomePage: React.FC = () => {
         {categories.map((category) =>
           categoryArticles[category]?.length > 0 ? (
             <section key={category} className="space-y-6 mt-12">
-              <div className="flex items-center justify-between border-b-2 border-gray-100 pb-4">
+              <div className="flex items-center justify-between border-b-2 border-gray-100 dark:border-gray-800 pb-4">
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-8 w-2 rounded-full ${getCategoryColor(
@@ -114,14 +114,14 @@ const HomePage: React.FC = () => {
                     )}`}
                   ></div>
 
-                  <h2 className="text-3xl font-black text-gray-900 capitalize tracking-tight">
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 capitalize tracking-tight">
                     {category.replace("-", " ")}
                   </h2>
                 </div>
 
                 <Link
                   to={`/category/${category}`}
-                  className="group flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-green-700 transition-colors uppercase tracking-wider"
+                  className="group flex items-center gap-1 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-400 transition-colors uppercase tracking-wider"
                 >
                   See More
                   <span className="transform transition-transform duration-300 group-hover:translate-x-1">

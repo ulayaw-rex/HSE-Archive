@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import AxiosInstance from "../../AxiosInstance";
+import DatePicker from "../../components/common/DatePicker";
 import { usePolling } from "../../hooks/usePolling";
 import {
   PieChart,
@@ -277,30 +278,33 @@ const Analytics: React.FC = () => {
     <div className="animate-pulse space-y-8">
       {showCharts && (
         <>
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-white/5">
             <div className="flex justify-between items-center mb-6">
-              <div className="h-6 w-40 bg-gray-200 rounded"></div>
-              <div className="h-8 w-32 bg-gray-200 rounded-lg"></div>
+              <div className="h-6 w-40 bg-gray-200 dark:bg-gray-800 rounded"></div>
+              <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
             </div>
-            <div className="h-64 bg-gray-200 rounded w-full"></div>
+            <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded w-full"></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
-              <div className="h-6 w-32 bg-gray-200 rounded mb-6"></div>
-              <div className="h-48 w-48 bg-gray-200 rounded-full"></div>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-white/5 flex flex-col items-center">
+              <div className="h-6 w-32 bg-gray-200 dark:bg-gray-800 rounded mb-6"></div>
+              <div className="h-48 w-48 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
-              <div className="h-6 w-32 bg-gray-200 rounded mb-6"></div>
-              <div className="h-48 w-full bg-gray-200 rounded"></div>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-white/5 flex flex-col items-center\">
+              <div className="h-6 w-32 bg-gray-200 dark:bg-gray-800 rounded mb-6"></div>
+              <div className="h-48 w-full bg-gray-200 dark:bg-gray-800 rounded"></div>
             </div>
           </div>
         </>
       )}
-      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-        <div className="h-12 bg-gray-100 border-b border-gray-200"></div>
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="h-12 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"></div>
         <div className="p-4 space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-10 bg-gray-50 rounded"></div>
+            <div
+              key={i}
+              className="h-10 bg-gray-50 dark:bg-gray-800/50 rounded"
+            ></div>
           ))}
         </div>
       </div>
@@ -308,9 +312,9 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
+    <div className="p-4 md:p-6 transition-colors duration-200">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
           Analytics Center
         </h1>
         <div className="flex gap-2 w-full lg:w-auto">
@@ -339,17 +343,17 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6 border border-gray-100">
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm mb-6 border border-gray-100 dark:border-white/5">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 justify-between lg:items-end">
-          <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto">
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg overflow-x-auto">
             {["articles", "staff"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize whitespace-nowrap flex-1 lg:flex-none ${
                   activeTab === tab
-                    ? "bg-white text-green-800 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-white dark:bg-gray-700 text-green-800 dark:text-green-400 shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 }`}
               >
                 {tab === "articles"
@@ -360,31 +364,29 @@ const Analytics: React.FC = () => {
           </div>
           <div className="flex flex-wrap gap-4 w-full lg:w-auto">
             <div className="flex-1 min-w-[140px]">
-              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2 transition-colors tracking-wide">
                 Start Date
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
+                onChange={(date) => {
+                  setStartDate(date);
                   setViewMode("weekly");
                 }}
-                className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                placeholder="Select start date"
               />
             </div>
             <div className="flex-1 min-w-[140px]">
-              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase mb-2 transition-colors tracking-wide">
                 End Date
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={endDate}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
+                onChange={(date) => {
+                  setEndDate(date);
                   setViewMode("weekly");
                 }}
-                className="w-full border border-gray-300 p-2 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                placeholder="Select end date"
               />
             </div>
           </div>
@@ -397,18 +399,18 @@ const Analytics: React.FC = () => {
         <>
           {activeTab === "articles" && (
             <div className="space-y-6 mb-8 animate-in fade-in duration-300">
-              <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100">
+              <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 dark:border-white/5">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-                  <h3 className="text-lg font-bold text-gray-800">
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
                     Production Trends
                   </h3>
-                  <div className="bg-gray-100 p-1 rounded-lg flex text-xs font-medium">
+                  <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg flex text-xs font-medium">
                     <button
                       onClick={() => handleViewModeChange("monthly")}
                       className={`px-3 py-1 rounded transition-all ${
                         viewMode === "monthly"
-                          ? "bg-green-100 text-green-800 shadow-sm"
-                          : "text-gray-500 hover:text-gray-700"
+                          ? "bg-white dark:bg-gray-700 text-green-800 dark:text-green-400 shadow-sm"
+                          : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                       }`}
                     >
                       Monthly
@@ -417,8 +419,8 @@ const Analytics: React.FC = () => {
                       onClick={() => handleViewModeChange("weekly")}
                       className={`px-3 py-1 rounded transition-all ${
                         viewMode === "weekly"
-                          ? "bg-green-100 text-green-800 shadow-sm"
-                          : "text-gray-500 hover:text-gray-700"
+                          ? "bg-white dark:bg-gray-700 text-green-800 dark:text-green-400 shadow-sm"
+                          : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                       }`}
                     >
                       Weekly
@@ -500,8 +502,8 @@ const Analytics: React.FC = () => {
 
               {articleStats.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">
+                  <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
                       Content Balance
                     </h3>
                     <div className="w-full h-64">
@@ -531,8 +533,8 @@ const Analytics: React.FC = () => {
                       </ResponsiveContainer>
                     </div>
                   </div>
-                  <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">
+                  <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 dark:border-white/5 flex flex-col items-center">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
                       Reader Interests
                     </h3>
                     <div className="w-full h-64">
@@ -562,35 +564,35 @@ const Analytics: React.FC = () => {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow border border-gray-200 animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-white/5 animate-in fade-in duration-300 overflow-hidden">
             <div className="overflow-x-auto">
               {activeTab === "articles" && (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/5">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Title
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Category
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Author(s)
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Views
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Date Published
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-white/5">
                     {articleStats.length === 0 ? (
                       <tr>
                         <td
                           colSpan={5}
-                          className="text-center py-8 text-gray-500"
+                          className="text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                           No articles found in this range.
                         </td>
@@ -599,23 +601,23 @@ const Analytics: React.FC = () => {
                       articleStats.map((stat, index) => (
                         <tr
                           key={index}
-                          className="hover:bg-gray-50 transition-colors"
+                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-gray-100">
                             {stat.title}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                            <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-full text-xs">
                               {stat.category}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                             {stat.author_name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-semibold">
                             {stat.views}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500">
                             {new Date(
                               stat.date_published || stat.created_at,
                             ).toLocaleDateString()}
@@ -627,29 +629,29 @@ const Analytics: React.FC = () => {
                 </table>
               )}
               {activeTab === "staff" && (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/5">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Staff Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Position
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Articles Published
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Last Active
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-white/5">
                     {staffStats.length === 0 ? (
                       <tr>
                         <td
                           colSpan={4}
-                          className="text-center py-8 text-gray-500"
+                          className="text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                           No active staff found.
                         </td>
@@ -658,22 +660,22 @@ const Analytics: React.FC = () => {
                       staffStats.map((stat, index) => (
                         <tr
                           key={index}
-                          className="hover:bg-gray-50 transition-colors"
+                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-gray-100">
                             {stat.name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                             {stat.position}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <div className="flex items-center">
-                              <span className="font-bold text-gray-900 mr-2">
+                              <span className="font-bold text-gray-900 dark:text-gray-100 mr-2">
                                 {stat.article_count}
                               </span>
-                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden hidden sm:block">
+                              <div className="w-24 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden hidden sm:block">
                                 <div
-                                  className="h-full bg-blue-600"
+                                  className="h-full bg-blue-600 dark:bg-blue-500"
                                   style={{
                                     width: `${Math.min(stat.article_count * 10, 100)}%`,
                                   }}
@@ -681,7 +683,7 @@ const Analytics: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500">
                             {new Date(stat.last_active).toLocaleDateString()}
                           </td>
                         </tr>
@@ -693,23 +695,23 @@ const Analytics: React.FC = () => {
             </div>
 
             {!loading && pagination.last_page > 1 && (
-              <div className="flex items-center justify-end border-t border-gray-100 p-4">
+              <div className="flex items-center justify-end border-t border-gray-100 dark:border-white/10 p-4">
                 <nav className="flex items-center gap-4">
                   <button
                     onClick={() =>
                       handlePageChange(pagination.current_page - 1)
                     }
                     disabled={pagination.current_page === 1}
-                    className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                    className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-500 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
                   >
                     Previous
                   </button>
                   <div className="text-sm">
-                    <span className="font-bold text-green-700">
+                    <span className="font-bold text-green-700 dark:text-green-500">
                       {pagination.current_page}
                     </span>
                     <span className="text-gray-400 mx-1">/</span>
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                       {pagination.last_page}
                     </span>
                   </div>
@@ -718,7 +720,7 @@ const Analytics: React.FC = () => {
                       handlePageChange(pagination.current_page + 1)
                     }
                     disabled={pagination.current_page === pagination.last_page}
-                    className="text-sm font-medium text-gray-500 hover:text-green-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                    className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-500 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
                   >
                     Next
                   </button>

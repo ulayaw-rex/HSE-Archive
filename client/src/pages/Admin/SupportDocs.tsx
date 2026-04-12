@@ -122,15 +122,15 @@ const SupportDocs: React.FC = () => {
       items: category.items.filter(
         (item) =>
           item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.answer.toLowerCase().includes(searchQuery.toLowerCase())
+          item.answer.toLowerCase().includes(searchQuery.toLowerCase()),
       ),
     }))
     .filter((cat) => cat.items.length > 0);
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen font-sans text-gray-800">
+    <div className="p-4 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200 transition-colors duration-200">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-2 flex items-center gap-3">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight mb-2 flex items-center gap-3 transition-colors">
           <FaLifeRing className="text-green-700 shrink-0" />
           Support & Docs
         </h1>
@@ -139,13 +139,13 @@ const SupportDocs: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex gap-4 mb-6 border-b border-gray-200 overflow-x-auto no-scrollbar">
+      <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto no-scrollbar transition-colors">
         <button
           onClick={() => setActiveTab("guides")}
           className={`pb-3 px-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "guides"
-              ? "border-green-600 text-green-700"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-green-600 text-green-700 dark:text-green-400"
+              : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           }`}
         >
           User Manual & Guides
@@ -154,8 +154,8 @@ const SupportDocs: React.FC = () => {
           onClick={() => setActiveTab("contact")}
           className={`pb-3 px-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "contact"
-              ? "border-green-600 text-green-700"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              ? "border-green-600 text-green-700 dark:text-green-400"
+              : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           }`}
         >
           Contact Developer
@@ -169,7 +169,7 @@ const SupportDocs: React.FC = () => {
             <input
               type="text"
               placeholder="Search help..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm text-sm"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm text-sm transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -178,7 +178,7 @@ const SupportDocs: React.FC = () => {
           {filteredDocs.length > 0 ? (
             filteredDocs.map((cat, catIndex) => (
               <div key={catIndex} className="mb-8">
-                <h3 className="text-base md:text-lg font-bold text-gray-700 mb-3 uppercase tracking-wider border-l-4 border-green-500 pl-3">
+                <h3 className="text-base md:text-lg font-bold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider border-l-4 border-green-500 pl-3 transition-colors">
                   {cat.category}
                 </h3>
                 <div className="space-y-3">
@@ -188,10 +188,10 @@ const SupportDocs: React.FC = () => {
                     return (
                       <div
                         key={itemIndex}
-                        className={`bg-white border rounded-lg transition-all ${
+                        className={`bg-white dark:bg-gray-800 border rounded-lg transition-all ${
                           isOpen
-                            ? "border-green-200 shadow-md"
-                            : "border-gray-200 hover:border-green-200"
+                            ? "border-green-200 dark:border-green-800 shadow-md"
+                            : "border-gray-200 dark:border-gray-700 hover:border-green-200 dark:hover:border-green-700"
                         }`}
                       >
                         <button
@@ -200,7 +200,9 @@ const SupportDocs: React.FC = () => {
                         >
                           <span
                             className={`font-semibold text-sm md:text-base pr-4 ${
-                              isOpen ? "text-green-800" : "text-gray-700"
+                              isOpen
+                                ? "text-green-800 dark:text-green-400"
+                                : "text-gray-700 dark:text-gray-300"
                             }`}
                           >
                             {item.question}
@@ -212,7 +214,7 @@ const SupportDocs: React.FC = () => {
                           )}
                         </button>
                         {isOpen && (
-                          <div className="p-4 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-100 mt-2 bg-green-50/30 rounded-b-lg">
+                          <div className="p-4 pt-0 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-gray-700 mt-2 bg-green-50/30 dark:bg-green-900/10 rounded-b-lg transition-colors">
                             {item.answer}
                           </div>
                         )}
@@ -233,7 +235,7 @@ const SupportDocs: React.FC = () => {
 
       {activeTab === "contact" && (
         <div className="flex flex-col gap-6 max-w-3xl mx-auto mt-4 md:mt-8">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
             <div className="bg-green-700 p-6 text-white text-center">
               <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
                 <FaEnvelope className="text-3xl text-white" />
@@ -244,19 +246,19 @@ const SupportDocs: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-6 md:p-8">
+            <div className="p-6 md:p-8 bg-gray-50 dark:bg-gray-700 transition-colors">
               <div className="space-y-4">
-                <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 transition-colors hover:border-green-200 text-center md:text-left">
+                <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-600 transition-colors hover:border-green-200 dark:hover:border-green-800 text-center md:text-left">
                   <div className="bg-blue-100 p-3 rounded-full text-blue-600">
                     <FaEnvelope />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase font-bold">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold transition-colors">
                       Email Address
                     </p>
                     <a
                       href={`mailto:${supportEmail}`}
-                      className="text-gray-900 font-medium hover:text-green-700 transition-colors break-all md:break-normal block"
+                      className="text-gray-900 dark:text-gray-100 font-medium hover:text-green-700 dark:hover:text-green-400 transition-colors break-all md:break-normal block"
                     >
                       {supportEmail}
                     </a>
@@ -270,17 +272,17 @@ const SupportDocs: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 transition-colors hover:border-green-200 text-center md:text-left">
+                <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-600 transition-colors hover:border-green-200 dark:hover:border-green-800 text-center md:text-left">
                   <div className="bg-purple-100 p-3 rounded-full text-purple-600">
                     <FaPhone />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase font-bold">
-                      Phone / Mobile
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold transition-colors">
+                      Phone
                     </p>
                     <a
                       href={`tel:${supportPhone}`}
-                      className="text-gray-900 font-medium hover:text-green-700 transition-colors block"
+                      className="text-gray-900 dark:text-gray-100 font-medium hover:text-green-700 dark:hover:text-green-400 transition-colors"
                     >
                       {supportPhone}
                     </a>
