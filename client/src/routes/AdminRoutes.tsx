@@ -2,21 +2,11 @@ import React, { Suspense } from "react";
 import type { ComponentType } from "react";
 import { Route } from "react-router-dom";
 
-// Admin loader spinner
-const AdminLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500" />
-  </div>
-);
-
-/**
- * Same Suspense-in-element-prop pattern as SiteRoutes.
- * React Router v6 cannot have <Suspense> as a direct route child.
- */
+// No spinner — each admin page has its own skeleton loading state
 const lazyRoute = (factory: () => Promise<{ default: ComponentType<any> }>) => {
   const Component = React.lazy(factory);
   return (
-    <Suspense fallback={<AdminLoader />}>
+    <Suspense fallback={null}>
       <Component />
     </Suspense>
   );

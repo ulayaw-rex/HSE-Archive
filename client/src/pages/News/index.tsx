@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import GuestPublicationCard from "../../components/features/HomePage/GuestPublicationCard";
 import type { Publication } from "../../types/Publication";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { useQuery } from "@tanstack/react-query";
 
 const categories = ["university", "local", "national", "international"];
@@ -47,11 +46,7 @@ const NewsPage: React.FC = () => {
   const categoryArticles = data?.categories || {};
 
   if (loading && !featuredArticle) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 transition-colors duration-200">
-        <LoadingSpinner />
-      </div>
-    );
+    return null;
   }
 
   return (

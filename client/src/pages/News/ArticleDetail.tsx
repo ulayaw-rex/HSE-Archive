@@ -12,7 +12,6 @@ import {
 } from "react-icons/fa";
 import AxiosInstance from "../../AxiosInstance";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "../../components/common/Skeleton";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import type { Publication } from "../../types/Publication";
 import { useAuth } from "../../context/AuthContext";
@@ -135,19 +134,67 @@ const ArticleDetail: React.FC = () => {
 
   if (loading)
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16 flex flex-col items-start gap-8 bg-white dark:bg-gray-900 min-h-screen transition-colors duration-200">
-        <Skeleton className="w-24 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
-        <Skeleton className="w-3/4 h-12 bg-gray-200 dark:bg-gray-700" />
-        <Skeleton className="w-48 h-4 bg-gray-200 dark:bg-gray-700" />
-        <Skeleton className="w-full h-96 object-cover my-6 bg-gray-200 dark:bg-gray-700" />
-        <div className="w-full space-y-4">
-          <Skeleton className="w-full h-4 bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="w-full h-4 bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="w-5/6 h-4 bg-gray-200 dark:bg-gray-700" />
-          <Skeleton className="w-3/4 h-4 bg-gray-200 dark:bg-gray-700" />
+      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            {/* Category badge */}
+            <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded-full mb-3" />
+
+            {/* Title */}
+            <div className="space-y-2 mb-4">
+              <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+            </div>
+
+            {/* Date + byline */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded" />
+            </div>
+
+            {/* Article image — contained, same padding as content */}
+            <div className="w-full h-72 sm:h-96 bg-gray-200 dark:bg-gray-700 rounded-md mb-5" />
+
+            {/* Text size control bar */}
+            <div className="h-9 w-48 bg-gray-100 dark:bg-gray-800 rounded-full mb-6 border border-gray-200 dark:border-gray-700" />
+
+            {/* Body paragraphs */}
+            <div className="space-y-2.5">
+              {[100, 100, 100, 88, 100, 100, 92, 72].map((w, i) => (
+                <div
+                  key={i}
+                  className="h-4 bg-gray-200 dark:bg-gray-700 rounded"
+                  style={{ width: `${w}%` }}
+                />
+              ))}
+              <div className="pt-3" />
+              {[100, 100, 95, 100, 80, 60].map((w, i) => (
+                <div
+                  key={`b${i}`}
+                  className="h-4 bg-gray-200 dark:bg-gray-700 rounded"
+                  style={{ width: `${w}%` }}
+                />
+              ))}
+              <div className="pt-3" />
+              {[100, 100, 88, 75].map((w, i) => (
+                <div
+                  key={`c${i}`}
+                  className="h-4 bg-gray-200 dark:bg-gray-700 rounded"
+                  style={{ width: `${w}%` }}
+                />
+              ))}
+            </div>
+
+            {/* Comments section stub */}
+            <div className="mt-10 pt-6 border-t border-gray-100 dark:border-gray-800 space-y-3">
+              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-24 w-full bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700" />
+            </div>
+          </div>
         </div>
       </div>
     );
+
   if (error)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-red-600 dark:text-red-500 font-bold">

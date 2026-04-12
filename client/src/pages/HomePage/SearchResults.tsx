@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { useQuery } from "@tanstack/react-query";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { FaFilter, FaArrowRight } from "react-icons/fa";
 import type { Publication } from "../../types/Publication";
 
@@ -104,8 +103,20 @@ const SearchResults: React.FC = () => {
         )}
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <LoadingSpinner />
+          <div className="grid gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="flex gap-6">
+                  <div className="w-48 h-32 bg-gray-200 dark:bg-gray-700 rounded-md flex-shrink-0" />
+                  <div className="flex-1 space-y-3 py-1">
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16" />
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredAndSortedResults.length === 0 ? (
           <div>

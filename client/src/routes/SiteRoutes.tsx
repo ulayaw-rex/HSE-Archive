@@ -2,22 +2,11 @@ import React, { Suspense } from "react";
 import type { ComponentType } from "react";
 import { Route } from "react-router-dom";
 
-// Page-level loading spinner
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-700" />
-  </div>
-);
-
-/**
- * Creates a lazy-loaded route element with its own Suspense boundary.
- * Suspense is placed INSIDE the element prop, not around <Route> tags,
- * because React Router v6 only permits <Route> or <Fragment> as route children.
- */
+// No spinner — each page has its own skeleton loading state
 const lazyRoute = (factory: () => Promise<{ default: ComponentType<any> }>) => {
   const Component = React.lazy(factory);
   return (
-    <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={null}>
       <Component />
     </Suspense>
   );
