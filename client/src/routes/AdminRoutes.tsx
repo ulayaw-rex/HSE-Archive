@@ -1,4 +1,5 @@
-import React, { Suspense, ComponentType } from "react";
+import React, { Suspense } from "react";
+import type { ComponentType } from "react";
 import { Route } from "react-router-dom";
 
 // Admin loader spinner
