@@ -201,7 +201,7 @@ const Footer: React.FC = () => {
         </div>
       )}
 
-      <footer className="bg-gradient-to-b from-green-800 to-green-900 dark:from-gray-900 dark:to-black text-white shadow-2xl relative z-10 transition-colors duration-300">
+      <footer className="bg-gradient-to-b from-green-800 to-green-900 dark:from-gray-900 dark:to-black text-white shadow-2xl relative z-10 transition-colors duration-300 border-t border-white/10 dark:border-white/5">
         <div className="container mx-auto px-6 py-16 w-[90%]">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="flex flex-col items-start space-y-6">
@@ -216,8 +216,7 @@ const Footer: React.FC = () => {
                 />
               </div>
               <p className="text-sm text-gray-200 leading-relaxed max-w-sm">
-                The Hillside Echo is the student publication, bringing you the
-                latest news, sports, and opinions.
+                The Hillside Echo is the official student publication of Filamer Christian University, Inc.
               </p>
             </div>
 
@@ -331,7 +330,7 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
             <div className="text-sm text-gray-300 text-center md:text-left">
               <p className="font-medium">
-                © 2025 The Hillside Echo All Rights Reserved
+                © 2025 The Hillside Echo All Rights Reserved HSE-Archive is designed and developed in 2025-2026 by R.L. Altavas, J.R. Tabanas, & M.E.A. Vaflor
               </p>
             </div>
             <div className="flex space-x-6">

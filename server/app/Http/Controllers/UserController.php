@@ -223,4 +223,39 @@ class UserController extends Controller
             'message' => 'User request declined and removed successfully'
         ], 200);
     }
+
+    public function changePassword(Request $request, $id): JsonResponse
+    {
+        $currentUser = $request->user();
+        $user = User::findOrFail($id);
+        
+        $isOwner = $currentUser->id === $user->id;
+        
+        if (!$isOwner) {
+            return response()->json(['message' => 'You are not authorized to change this password.'], 403);
+        }
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => [
+                'required', 
+                'string',
+                PasswordRule::min(8)->mixedCase()->numbers()->symbols(),
+                'confirmed'
+            ],
+        ]);
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'errors' => ['current_password' => ['The provided current password does not match.']]
+            ], 422);
+        }
+
+        $user->password = Hash::make($validated['new_password']);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password changed successfully'
+        ]);
+    }
 }

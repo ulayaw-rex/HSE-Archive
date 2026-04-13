@@ -21,15 +21,19 @@ class PasswordResetController extends Controller
             'email' => 'required|email',
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => 'Password reset link sent to your email.']);
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json(['message' => 'Unable to send reset link. Please check the email address.'], 422);
         }
 
-        return response()->json(['message' => 'Unable to send reset link. Please check the email address.'], 422);
+        // Generate reset token
+        $token = \Illuminate\Support\Facades\Password::getRepository()->create($user);
+        
+        // Send custom notification
+        $user->sendPasswordResetNotification($token);
+
+        return response()->json(['message' => 'Password reset link sent to your email.']);
     }
 
     /**

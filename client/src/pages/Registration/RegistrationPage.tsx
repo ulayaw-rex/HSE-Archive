@@ -519,6 +519,7 @@ const RegistrationPage: React.FC = () => {
                 suffix={
                   <button
                     type="button"
+                    tabIndex={-1}
                     onClick={() => setShowPassword(!showPassword)}
                     className="focus:outline-none hover:text-green-800 dark:hover:text-green-400 transition-colors"
                   >
@@ -545,6 +546,7 @@ const RegistrationPage: React.FC = () => {
                 suffix={
                   <button
                     type="button"
+                    tabIndex={-1}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="focus:outline-none hover:text-green-800 dark:hover:text-green-400 transition-colors"
                   >

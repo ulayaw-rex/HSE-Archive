@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AxiosInstance from "../../AxiosInstance";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../../context/AuthContext";
 
 export interface Notification {
   id: string;
@@ -112,6 +113,7 @@ const NotificationDropdown = ({ variant = "dark-bg" }: NotificationDropdownProps
   const [ringing, setRinging] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const prevUnreadRef = useRef(0);
 
   const { data: notificationsData, refetch: fetchNotifications } = useQuery({
@@ -170,7 +172,12 @@ const NotificationDropdown = ({ variant = "dark-bg" }: NotificationDropdownProps
   const handleNotificationClick = (notification: Notification) => {
     handleMarkAsRead(notification.id);
     setIsOpen(false);
-    navigate(`/news/${notification.data.publication_id}`);
+    
+    if (notification.data.action === "published") {
+      navigate(`/news/${notification.data.publication_id}`);
+    } else {
+      navigate(`/profile/${user?.id}`);
+    }
   };
 
   const getActionMeta = (action: string) =>
@@ -289,10 +296,15 @@ const NotificationDropdown = ({ variant = "dark-bg" }: NotificationDropdownProps
                 </div>
               </div>
 
-              {unreadCount > 0 && (
+              {notifications.length > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="text-[11px] font-semibold text-green-200 hover:text-white px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-white/10 flex-shrink-0"
+                  disabled={unreadCount === 0}
+                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all duration-150 flex-shrink-0 ${
+                    unreadCount > 0
+                      ? "text-green-200 hover:text-white hover:bg-white/10"
+                      : "text-green-200/50 cursor-not-allowed"
+                  }`}
                 >
                   Mark all read
                 </button>

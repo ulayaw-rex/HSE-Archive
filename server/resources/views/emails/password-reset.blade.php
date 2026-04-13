@@ -2,23 +2,46 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Your Password</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; }
+        .wrapper { background-color: #f4f7f6; padding: 40px 20px; }
+        .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .header { background-color: #008543; padding: 30px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px; }
+        .body { padding: 40px; color: #333333; line-height: 1.6; }
+        .body p { margin-top: 0; margin-bottom: 20px; font-size: 16px; }
+        .btn-container { text-align: center; margin: 35px 0; }
+        .btn { display: inline-block; background-color: #008543; color: #ffffff !important; text-decoration: none; font-size: 18px; font-weight: bold; padding: 15px 35px; border-radius: 30px; box-shadow: 0 4px 6px rgba(0, 133, 67, 0.2); transition: background-color 0.3s; }
+        .btn:hover { background-color: #006e36; }
+        .footer { background-color: #fafafa; padding: 20px; text-align: center; color: #888888; font-size: 13px; border-top: 1px solid #eeeeee; }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: #166534; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 1.25rem;">The Hillside Echo</h1>
-    </div>
-    <div style="border: 1px solid #e5e7eb; border-top: none; padding: 30px; border-radius: 0 0 8px 8px;">
-        <h2 style="margin-top: 0;">Password Reset Request</h2>
-        <p>You are receiving this email because we received a password reset request for your account.</p>
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $url }}" 
-               style="background: #166534; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-                Reset Password
-            </a>
+<body>
+    <div class="wrapper">
+        <div class="email-container">
+            <div class="header">
+                <h1>HSE-Archive</h1>
+            </div>
+            <div class="body">
+                <p>Hello,</p>
+                <p>We received a request to reset your password for your HSE-Archive account. Click the button below to create a new password. This link will expire in <strong>60 minutes</strong>.</p>
+                
+                <div class="btn-container">
+                    <a href="{{ $url }}" class="btn">Reset Password</a>
+                </div>
+                
+                <p>If you did not request a password reset, you can safely ignore this email and your password will remain unchanged.</p>
+                
+                <p>Thank you for being part of the Hillsider community!</p>
+            </div>
+            <div class="footer">
+                &copy; {{ date('Y') }} HSE-Archive. All rights reserved.
+            </div>
         </div>
-        <p>This password reset link will expire in 60 minutes.</p>
-        <p style="color: #6b7280; font-size: 0.875rem;">If you did not request a password reset, no further action is required.</p>
     </div>
 </body>
 </html>
+
+

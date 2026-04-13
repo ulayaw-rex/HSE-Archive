@@ -38,7 +38,7 @@ const CategoryPublicationCard: React.FC<CategoryPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="group flex bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-transparent dark:border-gray-700"
+      className="group flex bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] overflow-hidden hover:shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-500 border border-transparent dark:border-gray-700/50 hover:-translate-y-2"
     >
       <div className="w-1/3 flex-shrink-0">
         <img

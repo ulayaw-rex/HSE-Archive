@@ -74,6 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/search/users', [UserController::class, 'search']);
     Route::put('/users/{id}', [UserController::class, 'update']); 
+    Route::post('/users/{id}/change-password', [UserController::class, 'changePassword']);
 
 
     // Notifications

@@ -90,13 +90,13 @@ const Chatbot: React.FC = () => {
         {isOpen && (
           <div
             className="
-              fixed inset-0 w-full h-full bg-white z-[10000] flex flex-col
+              fixed inset-0 w-full h-full bg-white dark:bg-gray-900 z-[10000] flex flex-col
               md:absolute md:bottom-[calc(100%+1rem)] md:right-0 md:inset-auto
-              md:w-96 md:h-[500px] md:rounded-2xl md:shadow-2xl md:border md:border-gray-200 
-              animate-fadeIn overflow-hidden
+              md:w-96 md:h-[500px] md:rounded-2xl md:shadow-2xl md:border md:border-gray-200 dark:md:border-gray-800
+              animate-fadeIn overflow-hidden transition-colors duration-300
             "
           >
-            <div className="bg-green-800 text-white p-4 flex justify-between items-center shadow-md flex-shrink-0">
+            <div className="bg-green-800 dark:bg-gray-900 dark:border-b dark:border-gray-800 text-white p-4 flex justify-between items-center shadow-md flex-shrink-0 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
                   <FaRobot className="text-white" size={20} />
@@ -119,7 +119,7 @@ const Chatbot: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 custom-scrollbar space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 custom-scrollbar space-y-4 transition-colors">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -130,8 +130,8 @@ const Chatbot: React.FC = () => {
                   <div
                     className={`max-w-[85%] p-3.5 rounded-2xl text-sm md:text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap ${
                       msg.sender === "user"
-                        ? "bg-green-700 text-white rounded-tr-none"
-                        : "bg-white text-gray-800 border border-gray-200 rounded-tl-none"
+                        ? "bg-green-700 dark:bg-green-600/80 text-white rounded-tr-none"
+                        : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-tl-none"
                     }`}
                   >
                     {msg.text}
@@ -141,7 +141,7 @@ const Chatbot: React.FC = () => {
 
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center transition-colors">
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-3 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center transition-colors">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
@@ -153,19 +153,19 @@ const Chatbot: React.FC = () => {
 
             <form
               onSubmit={handleSend}
-              className="p-3 bg-white dark:bg-gray-800 border-t dark:border-t-gray-700 border-gray-100 flex gap-2 flex-shrink-0 safe-area-bottom transition-colors"
+              className="p-3 bg-white dark:bg-gray-900 border-t dark:border-t-gray-800 border-gray-100 flex gap-2 flex-shrink-0 safe-area-bottom transition-colors"
             >
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question..."
-                className="flex-1 bg-gray-100 border-0 rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-shadow"
+                className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 border-0 rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-shadow"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isTyping}
-                className="bg-green-700 text-white p-3 rounded-full hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 flex items-center justify-center w-11 h-11"
+                className="bg-green-700 dark:bg-green-600 text-white p-3 rounded-full hover:bg-green-800 dark:hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 flex items-center justify-center w-11 h-11"
               >
                 <FaPaperPlane size={15} className="-ml-0.5" />
               </button>
@@ -179,10 +179,10 @@ const Chatbot: React.FC = () => {
             shadow-lg hover:shadow-green-900/30 transition-all duration-300 transform hover:scale-110 items-center justify-center
             ${
               isOpen
-                ? "hidden md:flex bg-red-500 rotate-90"
-                : "flex bg-green-700 rotate-0"
+                ? "hidden md:flex bg-red-500 dark:bg-gray-800 text-white dark:text-gray-300 dark:hover:text-red-400 rotate-90"
+                : "flex bg-green-700 dark:bg-green-600 text-white rotate-0"
             }
-            text-white p-4 rounded-full
+            p-4 rounded-full
           `}
           title={isOpen ? "Close Chat" : "Open Chat Support"}
         >

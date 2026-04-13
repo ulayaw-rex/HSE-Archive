@@ -24,8 +24,8 @@ import { adminSidebarItems } from "./pages/Admin/SidebarItems";
 import SiteRoutes from "./routes/SiteRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import Maintenance from "./pages/Maintenance";
-import LoginPage from "./pages/Maintenance/LoginPage";
 import VerifyEmailPage from "./pages/Maintenance/VerifyEmailPage";
+import ResetPasswordPage from "./pages/Maintenance/ResetPasswordPage";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -81,7 +81,10 @@ const AppContent = () => {
   }, []);
 
   if (isLocked && user?.role !== "admin") {
-    if (location.pathname !== "/login") {
+    if (
+      location.pathname !== "/reset-password" &&
+      location.pathname !== "/verify-email"
+    ) {
       return <Maintenance />;
     }
   }
@@ -89,8 +92,9 @@ const AppContent = () => {
   return (
     <>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route element={<SiteLayout />}>
           {SiteRoutes}
@@ -123,8 +127,8 @@ const AppContent = () => {
       </Routes>
 
       {!location.pathname.startsWith("/admin") &&
-        location.pathname !== "/login" &&
-        location.pathname !== "/register" && <Chatbot />}
+        location.pathname !== "/register" &&
+        location.pathname !== "/reset-password" && <Chatbot />}
 
       {location.pathname.startsWith("/admin") && (
         <ToastContainer position="top-right" autoClose={3000} />

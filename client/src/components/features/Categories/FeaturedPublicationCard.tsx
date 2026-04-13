@@ -12,7 +12,7 @@ const FeaturedPublicationCard: React.FC<FeaturedPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="featured-publication-card group block relative h-[500px] w-full overflow-hidden rounded-lg"
+      className="featured-publication-card group block relative h-[500px] w-full overflow-hidden rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.7)] transition-all duration-500 hover:-translate-y-2"
     >
       <div className="absolute inset-0">
         <img

@@ -42,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
             return $frontendUrl . '/verify-email?verify_url=' . urlencode($verifyUrl);
         });
 
+        \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function ($notifiable, $token) {
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+            return $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
+        });
+
         Mail::extend('brevo', function () {
             return new BrevoApiTransport(env('BREVO_KEY'));
         });

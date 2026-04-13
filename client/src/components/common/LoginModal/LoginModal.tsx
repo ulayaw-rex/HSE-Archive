@@ -25,6 +25,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   const [error, setError] = useState<string | null>(null);
   const [isPendingError, setIsPendingError] = useState(false);
+  const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<{
     email?: string;
@@ -61,6 +63,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isForgotPasswordMode) {
+      await handleForgotPassword();
+      return;
+    }
     setError(null);
     setIsPendingError(false);
 
@@ -119,6 +125,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    setError(null);
+    setForgotPasswordMessage(null);
+    setFieldErrors({ email: "", password: "" });
+
+    if (!credentials.email) {
+      setFieldErrors({ email: "Please enter your email address to reset your password." });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await AxiosInstance.post('/forgot-password', { email: credentials.email });
+      setForgotPasswordMessage(response.data.message || "Password reset link sent to your email.");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.response?.data?.errors?.email?.[0] || "Failed to send reset link.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -126,14 +153,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           <div className="modal-overlay" onClick={onClose} />
           {/* Added 'relative' here so the absolute button stays inside */}
           <div
-            className={`modal-content login-modal__container relative ${
+            className={`modal-content login-modal__container relative bg-white dark:bg-gray-900 ${
               isOpen ? "open" : ""
             }`}
           >
             {/* THE NEW CLOSE BUTTON */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 focus:outline-none z-50 md:hidden"
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none z-50 md:hidden"
               aria-label="Close modal"
             >
               <FaTimes size={24} />
@@ -147,16 +174,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   className="login-modal__logo ml-10"
                 />
                 <span className="login-modal__divider" aria-hidden="true" />
-                <span className="login-modal__brand">HSE-ARCHIVE</span>
+                <span className="login-modal__brand text-[#0b4b35] dark:text-green-400">HSE-ARCHIVE</span>
               </div>
 
               <form onSubmit={handleSubmit} className="login-modal__form">
-                <h1 className="login-modal__title">LOG IN</h1>
+                <h1 className="login-modal__title text-gray-900 dark:text-white">
+                  {isForgotPasswordMode ? "RESET PASSWORD" : "LOG IN"}
+                </h1>
 
                 <div className="login-modal__group mb-4">
                   <input
-                    className={`login-modal__input ${
-                      fieldErrors.email ? "border-2 border-red-500" : ""
+                    className={`login-modal__input bg-[#f5f5f5] dark:bg-gray-800 border-2 border-[#efefef] dark:border-gray-700 text-gray-900 dark:text-gray-100 ${
+                      fieldErrors.email ? "border-red-500 dark:border-red-500" : ""
                     }`}
                     type="email"
                     placeholder="Email"
@@ -173,44 +202,47 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   )}
                 </div>
 
-                <div className="login-modal__group relative mb-4">
-                  <input
-                    className={`login-modal__input login-modal__input--password pr-10 ${
-                      fieldErrors.password ? "border-2 border-red-500" : ""
-                    }`}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={credentials.password}
-                    onChange={(e) => {
-                      setCredentials({
-                        ...credentials,
-                        password: e.target.value,
-                      });
-                      clearFieldError("password");
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-5 text-gray-400 hover:text-gray-600 focus:outline-none"
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {showPassword ? (
-                      <FaEyeSlash size={18} />
-                    ) : (
-                      <FaEye size={18} />
+                {!isForgotPasswordMode && (
+                  <div className="login-modal__group relative mb-4">
+                    <input
+                      className={`login-modal__input login-modal__input--password pr-10 bg-[#f5f5f5] dark:bg-gray-800 border-2 border-[#efefef] dark:border-gray-700 text-gray-900 dark:text-gray-100 ${
+                        fieldErrors.password ? "border-red-500 dark:border-red-500" : ""
+                      }`}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={credentials.password}
+                      onChange={(e) => {
+                        setCredentials({
+                          ...credentials,
+                          password: e.target.value,
+                        });
+                        clearFieldError("password");
+                      }}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-5 text-gray-400 hover:text-gray-600 focus:outline-none"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash size={18} />
+                      ) : (
+                        <FaEye size={18} />
+                      )}
+                    </button>
+                    {fieldErrors.password && (
+                      <p className="text-red-500 text-xs mt-1 text-left">
+                        {fieldErrors.password}
+                      </p>
                     )}
-                  </button>
-                  {fieldErrors.password && (
-                    <p className="text-red-500 text-xs mt-1 text-left">
-                      {fieldErrors.password}
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {error && (
                   <div
@@ -233,18 +265,51 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                <a href="#" className="login-modal__forgot pl-37"></a>
+                {forgotPasswordMessage && (
+                  <div className="text-sm p-3 rounded-md mb-4 text-center bg-green-50 text-green-800 border border-green-200">
+                    {forgotPasswordMessage}
+                  </div>
+                )}
+
+                <div className="flex justify-end mb-4">
+                  {!isForgotPasswordMode ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsForgotPasswordMode(true);
+                        setError(null);
+                        setFieldErrors({ email: "", password: "" });
+                      }}
+                      className="text-sm font-medium text-gray-500 hover:text-green-700 transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsForgotPasswordMode(false);
+                        setError(null);
+                        setForgotPasswordMessage(null);
+                        setFieldErrors({ email: "", password: "" });
+                      }}
+                      className="text-sm font-medium text-gray-500 hover:text-green-700 transition-colors"
+                    >
+                      Back to login
+                    </button>
+                  )}
+                </div>
 
                 <button
                   type="submit"
-                  className="login-modal__submit mb-15"
+                  className="login-modal__submit mb-10"
                   disabled={loading}
                 >
-                  {loading ? "Signing in..." : "LOG IN"}
+                  {loading ? "Processing..." : isForgotPasswordMode ? "SEND RESET LINK" : "LOG IN"}
                 </button>
 
                 <div className="text-center mt-4">
-                  <span className="text-gray-600 text-sm">
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">
                     No account yet?{" "}
                   </span>
                   <button
@@ -253,7 +318,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       onClose();
                       navigate("/register");
                     }}
-                    className="text-green-700 font-bold hover:underline text-sm ml-1"
+                    className="text-green-700 dark:text-green-500 font-bold hover:underline text-sm ml-1"
                   >
                     Register Account
                   </button>

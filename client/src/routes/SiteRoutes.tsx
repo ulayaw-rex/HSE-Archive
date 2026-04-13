@@ -15,30 +15,49 @@ const lazyRoute = (factory: () => Promise<{ default: ComponentType<any> }>) => {
 const SiteRoutes = (
   <>
     {/* Home */}
-    <Route path="/" element={lazyRoute(() => import("../pages/HomePage/HomePage"))} />
+    <Route
+      path="/"
+      element={lazyRoute(() => import("../pages/HomePage/HomePage"))}
+    />
 
     {/* Dynamic Categories */}
-    <Route path="/category/:category" element={lazyRoute(() => import("../pages/News/DynamicCategoryPage"))} />
+    <Route
+      path="/category/:category"
+      element={lazyRoute(() => import("../pages/News/DynamicCategoryPage"))}
+    />
 
     {/* Single Article View (Public Read) */}
-    <Route path="/news/:idOrSlug" element={lazyRoute(() => import("../pages/News/ArticleDetail"))} />
+    <Route
+      path="/news/:idOrSlug"
+      element={lazyRoute(() => import("../pages/News/ArticleDetail"))}
+    />
 
     {/* Main Sections */}
     <Route path="/news" element={lazyRoute(() => import("../pages/News"))} />
-    <Route path="/print-media" element={lazyRoute(() => import("../pages/PrintMedia"))} />
+    <Route
+      path="/print-media"
+      element={lazyRoute(() => import("../pages/PrintMedia"))}
+    />
     <Route path="/about" element={lazyRoute(() => import("../pages/About"))} />
 
     {/* Utilities */}
-    <Route path="/search" element={lazyRoute(() => import("../pages/HomePage/SearchResults"))} />
-    <Route path="/register" element={lazyRoute(() => import("../pages/Registration/RegistrationPage"))} />
-
-    {/* Login Route */}
-    <Route path="/login" element={lazyRoute(() => import("../pages/Maintenance/LoginPage"))} />
+    <Route
+      path="/search"
+      element={lazyRoute(() => import("../pages/HomePage/SearchResults"))}
+    />
+    <Route
+      path="/register"
+      element={lazyRoute(
+        () => import("../pages/Registration/RegistrationPage"),
+      )}
+    />
 
     {/* Public Author Profile */}
-    <Route path="/profile/:userId" element={lazyRoute(() => import("../pages/Profiles/UserProfile"))} />
+    <Route
+      path="/profile/:userId"
+      element={lazyRoute(() => import("../pages/Profiles/UserProfile"))}
+    />
   </>
 );
 
 export default SiteRoutes;
-

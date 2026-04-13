@@ -114,4 +114,12 @@ class User extends Authenticatable
      * Send the email verification notification in the background.
      */
 
+    /**
+     * Send the password reset notification using custom template.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
+
 }

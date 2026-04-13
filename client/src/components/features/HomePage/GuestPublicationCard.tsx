@@ -42,7 +42,7 @@ const GuestPublicationCard: React.FC<GuestPublicationCardProps> = ({
   return (
     <Link
       to={`/news/${publication.publication_id}`}
-      className="group max-w-sm overflow-hidden bg-white dark:bg-gray-900 hover:shadow-2xl transition-all duration-500 rounded-xl border border-gray-100 dark:border-gray-800 flex flex-col h-full hover:-translate-y-2"
+      className="group max-w-sm overflow-hidden bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm shadow-[0_4px_15px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-500 rounded-xl border border-gray-100 dark:border-gray-700/50 flex flex-col h-full hover:-translate-y-2"
     >
       <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 shrink-0 overflow-hidden relative">
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 z-10" />

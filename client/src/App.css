@@ -309,7 +309,7 @@ input:focus:not(:focus-visible) {
 }
 
 .modal-content {
-  @apply bg-white rounded-lg shadow-2xl w-full max-w-md mx-auto transform transition-all;
+  @apply bg-white dark:bg-gray-900 rounded-lg shadow-2xl w-full max-w-md mx-auto transform transition-all;
   min-width: min(90vw, 32rem);
 }
 
@@ -431,31 +431,6 @@ input:focus:not(:focus-visible) {
   background-color: rgba(255, 255, 255, 0.7);
 }
 
-/* Remove any hover text color changes on publication cards */
-/* --- PREVENT TEXT COLOR CHANGE ON PUBLICATION CARD HOVER --- */
-
-/* Keeps the main title dark */
-.max-w-sm:hover .font-bold.text-xl {
-  color: #1f2937 !important; /* Tailwind's gray-800 is a good default */
-}
-
-/* Keeps the category text blue */
-.max-w-sm:hover .text-blue-700 {
-  color: #1d4ed8 !important; /* Tailwind's default blue-700 */
-}
-
-/* Keeps the body text gray */
-.max-w-sm:hover .text-gray-700 {
-  color: #374151 !important; /* Tailwind's default gray-700 */
-}
-
-/* Keeps the date and photo credit text light gray */
-.max-w-sm:hover .text-gray-500 {
-  color: #6b7280 !important; /* Tailwind's default gray-500 */
-}
-.max-w-sm:hover .text-gray-400 {
-  color: #9ca3af !important; /* Tailwind's default gray-400 */
-}
 
 /* Modal background blur for publication view modal */
 .publication-view-modal-backdrop {
@@ -548,7 +523,7 @@ input:-webkit-autofill:active {
   width: 100%;
   max-width: 400px;
   height: 100%;
-  background-color: white;
+  @apply bg-white dark:bg-gray-900;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   transform: translateX(100%);
@@ -679,7 +654,7 @@ input:-webkit-autofill:active {
 .login-modal__brand {
   font-size: 28px;
   font-weight: 700;
-  color: #0b4b35;
+  @apply text-[#0b4b35] dark:text-green-500;
   letter-spacing: 0.5px;
 }
 
@@ -691,7 +666,7 @@ input:-webkit-autofill:active {
   font-size: 28px;
   font-weight: 700;
   text-align: left;
-  color: #111827;
+  @apply text-gray-900 dark:text-white;
   margin: 12px 0 18px;
 }
 
@@ -703,8 +678,7 @@ input:-webkit-autofill:active {
   width: 100%;
   padding: 16px 18px;
   border-radius: 12px;
-  border: 2px solid #efefef;
-  background: #f5f5f5;
+  @apply border-2 border-[#efefef] dark:border-gray-700 bg-[#f5f5f5] dark:bg-gray-800 text-gray-900 dark:text-gray-100;
   font-size: 18px;
   outline: none;
   transition:
@@ -727,7 +701,7 @@ input:-webkit-autofill:active {
 .login-modal__forgot {
   display: inline-block;
   margin: 8px 0 28px;
-  color: #111827;
+  @apply text-gray-900 dark:text-gray-300;
   text-decoration: underline;
 }
 
@@ -738,7 +712,7 @@ input:-webkit-autofill:active {
 .login-modal .login-modal__forgot:hover,
 .login-modal .login-modal__forgot:active,
 .login-modal .login-modal__forgot:focus {
-  color: #111827 !important;
+  @apply !text-gray-900 dark:!text-gray-300;
   text-decoration: underline;
 }
 
@@ -957,6 +931,6 @@ input:-webkit-autofill:active {
 .login-modal__divider {
   width: 3px;
   height: 48px;
-  background: #0b4b35;
+  @apply bg-[#0b4b35] dark:bg-green-600;
   display: inline-block;
 }

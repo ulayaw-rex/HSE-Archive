@@ -84,7 +84,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="hidden lg:block bg-green-800 border-b border-white/5 transition-colors duration-200">
+      <div className="hidden lg:block bg-green-800 dark:bg-gray-900/90 dark:backdrop-blur-md border-b border-white/5 dark:border-gray-800 transition-colors duration-200">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-center relative">
             <Link to="/" className="cursor-pointer">
@@ -98,7 +98,7 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      <div className="hidden lg:block sticky top-12 z-[100] bg-green-700 text-white shadow-xl border-b border-white/5 transition-colors duration-200">
+      <div className="hidden lg:block sticky top-12 z-[100] bg-green-700 dark:bg-gray-900/80 dark:backdrop-blur-lg text-white shadow-xl border-b border-white/5 dark:border-gray-800 transition-colors duration-200">
         <div className="container mx-auto px-4 py-3 w-[90%]">
           <div className="flex items-center justify-between">
             <nav className="flex items-center flex-1">
@@ -123,8 +123,8 @@ const Navbar: React.FC = () => {
                           px-4 py-2 rounded-md flex items-center gap-1 whitespace-nowrap
                           ${
                             isActive || isDropdownOpen
-                              ? "bg-green-800 text-green-100 shadow-inner"
-                              : "hover:bg-green-600"
+                              ? "bg-green-800 dark:bg-green-500/20 text-green-100 dark:text-green-400 shadow-inner"
+                              : "hover:bg-green-600 dark:hover:bg-gray-800 dark:hover:text-green-400"
                           }
                         `;
                       }}
@@ -141,7 +141,7 @@ const Navbar: React.FC = () => {
 
                     {link.hasDropdown && hoveredDropdown === link.id && (
                       <div className="absolute top-full left-0 pt-2 w-56 z-50">
-                        <div className="w-full bg-white dark:bg-gray-800 border border-green-600 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden animate-fadeIn transition-colors duration-200">
+                        <div className="w-full bg-white dark:bg-gray-900/95 dark:backdrop-blur-xl border border-green-600 dark:border-gray-700/50 rounded-lg shadow-xl overflow-hidden animate-fadeIn transition-colors duration-200">
                           <div className="py-1">
                             {link.dropdownItems?.map((item) => (
                               <NavLink
@@ -151,8 +151,8 @@ const Navbar: React.FC = () => {
                                   `block px-4 py-3 text-sm transition-colors duration-200 border-b border-gray-100 dark:border-gray-700 last:border-b-0 cursor-pointer
                                   ${
                                     isActive
-                                      ? "!bg-green-100 dark:!bg-gray-700 !text-green-900 dark:!text-white font-bold"
-                                      : "!text-gray-700 dark:!text-gray-300 hover:!bg-green-50 dark:hover:!bg-gray-600 hover:!text-green-800 dark:hover:!text-white"
+                                      ? "!bg-green-100 dark:!bg-green-900/30 !text-green-900 dark:!text-green-400 font-bold"
+                                      : "!text-gray-700 dark:!text-gray-300 hover:!bg-green-50 dark:hover:!bg-gray-800 hover:!text-green-800 dark:hover:!text-green-400"
                                   }`
                                 }
                               >
@@ -195,13 +195,13 @@ const Navbar: React.FC = () => {
                       transition-all duration-300 ease-in-out cursor-pointer
                       focus:outline-none focus:ring-2 focus:ring-green-400
                       bg-transparent
-                      hover:bg-white/10
-                      focus:bg-white/10
-                      hover:border-white/20
-                      focus:border-white/20
+                      hover:bg-white/10 dark:hover:bg-gray-800/80
+                      focus:bg-white/10 dark:focus:bg-gray-800/80
+                      hover:border-white/20 dark:hover:border-gray-700
+                      focus:border-white/20 dark:focus:border-green-500
                       placeholder-transparent
-                      focus:placeholder-green-100/50
-                      hover:placeholder-green-100/50
+                      focus:placeholder-green-100/50 dark:focus:placeholder-gray-400
+                      hover:placeholder-green-100/50 dark:hover:placeholder-gray-400
                       ${isSearchFocused ? "text-white" : "text-white"}
                     `}
                   />

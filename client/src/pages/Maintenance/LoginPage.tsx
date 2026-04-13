@@ -19,9 +19,17 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPendingError, setIsPendingError] = useState(false);
+  const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState<
+    string | null
+  >(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isForgotPasswordMode) {
+      await handleForgotPassword();
+      return;
+    }
     setError(null);
     setIsPendingError(false);
     setLoading(true);
@@ -31,7 +39,7 @@ const LoginPage: React.FC = () => {
         `${
           import.meta.env.VITE_API_URL || "http://localhost:8000"
         }/sanctum/csrf-cookie`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       await AxiosInstance.post(
@@ -40,7 +48,7 @@ const LoginPage: React.FC = () => {
           email: credentials.email,
           password: credentials.password,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const user = await checkAuth();
@@ -52,7 +60,7 @@ const LoginPage: React.FC = () => {
         await AxiosInstance.post("/logout");
         await checkAuth();
         setError(
-          "System is currently under maintenance. Only administrators can log in."
+          "System is currently under maintenance. Only administrators can log in.",
         );
         setLoading(false);
         return;
@@ -80,16 +88,50 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    setError(null);
+    setForgotPasswordMessage(null);
+
+    if (!credentials.email) {
+      setError("Please enter your email address to reset your password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await AxiosInstance.post("/forgot-password", {
+        email: credentials.email,
+      });
+      setForgotPasswordMessage(
+        response.data.message || "Password reset link sent to your email.",
+      );
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.errors?.email?.[0] ||
+          "Failed to send reset link.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 transition-colors duration-200">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row border border-transparent dark:border-gray-700">
         <div className="hidden md:flex flex-col justify-center items-center bg-gray-50 dark:bg-gray-900/50 w-1/2 p-8 border-r border-gray-100 dark:border-gray-700">
-          <img src={LoginArt} alt="HSE" className="max-w-[200px] mb-6 dark:opacity-80 transition-opacity" />
+          <img
+            src={LoginArt}
+            alt="HSE"
+            className="max-w-[200px] mb-6 dark:opacity-80 transition-opacity"
+          />
           <div className="text-center">
             <h2 className="text-2xl font-bold text-green-800 dark:text-green-500 tracking-wider">
               HSE-ARCHIVE
             </h2>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2 font-medium">Admin Portal</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2 font-medium">
+              Admin Portal
+            </p>
           </div>
         </div>
 
@@ -99,8 +141,8 @@ const LoginPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center md:text-left">
-              LOG IN
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center md:text-left uppercase">
+              {isForgotPasswordMode ? "Reset Password" : "LOG IN"}
             </h1>
 
             <div className="flex flex-col gap-1">
@@ -116,28 +158,35 @@ const LoginPage: React.FC = () => {
               />
             </div>
 
-            <div className="relative">
-              <input
-                className="w-full p-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all pr-10"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={credentials.password}
-                onChange={(e) =>
-                  setCredentials({
-                    ...credentials,
-                    password: e.target.value,
-                  })
-                }
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
-              >
-                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-              </button>
-            </div>
+            {!isForgotPasswordMode && (
+              <div className="relative">
+                <input
+                  className="w-full p-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all pr-10"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={credentials.password}
+                  onChange={(e) =>
+                    setCredentials({
+                      ...credentials,
+                      password: e.target.value,
+                    })
+                  }
+                  required
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
+                >
+                  {showPassword ? (
+                    <FaEyeSlash size={18} />
+                  ) : (
+                    <FaEye size={18} />
+                  )}
+                </button>
+              </div>
+            )}
 
             {error && (
               <div
@@ -158,12 +207,49 @@ const LoginPage: React.FC = () => {
               </div>
             )}
 
+            {forgotPasswordMessage && (
+              <div className="text-sm p-3 rounded-md mb-4 text-center bg-green-50 text-green-800 border border-green-200">
+                {forgotPasswordMessage}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              {!isForgotPasswordMode ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPasswordMode(true);
+                    setError(null);
+                  }}
+                  className="text-sm font-medium text-gray-500 hover:text-green-700 transition-colors"
+                >
+                  Forgot password?
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPasswordMode(false);
+                    setError(null);
+                    setForgotPasswordMessage(null);
+                  }}
+                  className="text-sm font-medium text-gray-500 hover:text-green-700 transition-colors"
+                >
+                  Back to login
+                </button>
+              )}
+            </div>
+
             <button
               type="submit"
               className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-800 transition-colors mt-2"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "LOG IN"}
+              {loading
+                ? "Processing..."
+                : isForgotPasswordMode
+                  ? "SEND RESET LINK"
+                  : "LOG IN"}
             </button>
 
             <div className="text-center mt-4">
