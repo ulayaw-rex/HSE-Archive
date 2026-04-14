@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import AxiosInstance from "../../AxiosInstance";
 import { PrintMediaSkeleton } from "../../components/common/Skeleton";
 import PDFViewerModal from "../../components/common/PDFViewerModal";
@@ -24,8 +30,6 @@ import "../../App.css";
 
 import { useNavigate } from "react-router-dom";
 import { usePolling } from "../../hooks/usePolling";
-
-
 
 interface StatusModalState {
   isOpen: boolean;
@@ -59,22 +63,17 @@ const PrintMediaPage: React.FC = () => {
   const { cache, updateCache } = useDataCache();
 
   const [printMediaList, setPrintMediaList] = useState<PrintMedia[]>(
-    Array.isArray(cache.printMedia)
-      ? (cache.printMedia as PrintMedia[])
-      : [],
+    Array.isArray(cache.printMedia) ? (cache.printMedia as PrintMedia[]) : [],
   );
 
   const [loading, setLoading] = useState(!cache.printMedia);
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(
-    null,
-  );
-  const [claimTarget, setClaimTarget] = useState<PrintMedia | null>(
-    null,
-  );
+  const [selectedMedia, setSelectedMedia] = useState<PrintMedia | null>(null);
+  const [claimTarget, setClaimTarget] = useState<PrintMedia | null>(null);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [requestingCredit, setRequestingCredit] = useState(false);
 
@@ -87,6 +86,26 @@ const PrintMediaPage: React.FC = () => {
 
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [pendingRequestIds, setPendingRequestIds] = useState<number[]>([]);
+
+  const yearDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close year dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        yearDropdownRef.current &&
+        !yearDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsYearDropdownOpen(false);
+      }
+    };
+
+    if (isYearDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isYearDropdownOpen]);
 
   const fetchPrintMedia = useCallback(async () => {
     try {
@@ -177,10 +196,7 @@ const PrintMediaPage: React.FC = () => {
     return filePath?.toLowerCase().endsWith(".pdf");
   };
 
-  const handleDownload = async (
-    e: React.MouseEvent,
-    item: PrintMedia,
-  ) => {
+  const handleDownload = async (e: React.MouseEvent, item: PrintMedia) => {
     e.stopPropagation();
 
     setDownloadingId(item.print_media_id);
@@ -324,7 +340,9 @@ const PrintMediaPage: React.FC = () => {
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               {statusModal.title}
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-8">{statusModal.message}</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-8">
+              {statusModal.message}
+            </p>
 
             <button
               onClick={closeStatusModal}
@@ -364,24 +382,40 @@ const PrintMediaPage: React.FC = () => {
             </nav>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative">
+              <div className="relative" ref={yearDropdownRef}>
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaCalendarAlt className="text-gray-400" />
                 </div>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className="w-full sm:w-32 pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 text-sm appearance-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                <button
+                  onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+                  className="w-full sm:w-32 pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 text-sm appearance-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
                 >
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
+                  {selectedYear}
+                </button>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <FaFilter className="text-xs text-gray-400" />
                 </div>
+
+                {isYearDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+                    {availableYears.map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => {
+                          setSelectedYear(year);
+                          setIsYearDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                          selectedYear === year
+                            ? "bg-green-600 text-white"
+                            : "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="relative w-full sm:w-64">
@@ -433,7 +467,9 @@ const PrintMediaPage: React.FC = () => {
           <>
             {filteredMedia.length === 0 ? (
               <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                <div className="text-gray-300 dark:text-gray-700 text-6xl mb-4">📂</div>
+                <div className="text-gray-300 dark:text-gray-700 text-6xl mb-4">
+                  📂
+                </div>
                 <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">
                   No archives found
                 </h3>
@@ -502,7 +538,9 @@ const PrintMediaPage: React.FC = () => {
                           />
                         ) : (
                           <div className="flex flex-col items-center">
-                            <span className="text-6xl opacity-20 dark:opacity-40 mb-2">📄</span>
+                            <span className="text-6xl opacity-20 dark:opacity-40 mb-2">
+                              📄
+                            </span>
                             <span className="text-xs text-gray-400 dark:text-gray-500">
                               No Preview
                             </span>
@@ -511,7 +549,7 @@ const PrintMediaPage: React.FC = () => {
 
                         <div className="absolute bottom-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
                           {isOwner && (
-                           <button
+                            <button
                               onClick={(e) => handleDownload(e, item)}
                               className={`bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 p-2 rounded-full shadow-lg transition-colors ${
                                 isDownloading
@@ -595,7 +633,9 @@ const PrintMediaPage: React.FC = () => {
                           </span>
                           <span
                             className={`font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300 ${
-                              fileIsPdf ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"
+                              fileIsPdf
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-blue-600 dark:text-blue-400"
                             }`}
                           >
                             {isDownloading

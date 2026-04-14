@@ -22,7 +22,7 @@ class AnalyticsController extends Controller
             ->whereRaw("COALESCE(date_published, created_at) BETWEEN ? AND ?", [$startDate, $endDate])
             ->whereIn('status', ['approved', 'published'])
             ->orderBy('views', 'desc')
-            ->paginate(10);
+            ->paginate(100);
 
         $stats->through(function ($pub) {
             $publishedDate = $pub->date_published ? Carbon::parse($pub->date_published) : null;
@@ -55,7 +55,7 @@ class AnalyticsController extends Controller
                       ->whereIn('status', ['approved', 'published']);
             })
             ->orderBy('publications_count', 'desc')
-            ->paginate(10); 
+            ->paginate(100); 
 
         $stats->through(function ($user) {
             $lastActive = $user->updated_at ? Carbon::parse($user->updated_at)->format('Y-m-d') : 'N/A';

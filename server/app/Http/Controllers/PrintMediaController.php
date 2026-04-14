@@ -57,11 +57,12 @@ class PrintMediaController extends Controller
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = min($request->get('per_page', 100), 500); // Max 500 to prevent abuse
         $media = PrintMedia::with(['user', 'owners']) 
             ->orderBy('date_published', 'desc')
-            ->paginate(9);
+            ->paginate($perPage);
 
         $media->through(function ($item) {
             return $this->transformMedia($item);

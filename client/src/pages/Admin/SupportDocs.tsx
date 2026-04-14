@@ -3,16 +3,11 @@ import {
   FaBook,
   FaChevronDown,
   FaChevronUp,
-  FaCode,
   FaEnvelope,
   FaLifeRing,
   FaPhone,
   FaSearch,
   FaCopy,
-  FaCheckCircle,
-  FaServer,
-  FaDatabase,
-  FaDesktop,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -303,60 +298,6 @@ const SupportDocs: React.FC = () => {
                   Response Time: Within 24 Hours
                 </span>
               </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 text-gray-300 rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-
-            <div className="flex flex-col md:flex-row items-center justify-between mb-6 relative z-10 gap-4 text-center md:text-left">
-              <div className="flex items-center gap-3">
-                <FaCode className="text-2xl text-green-400" />
-                <h3 className="text-xl font-bold text-white">
-                  System Information
-                </h3>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1 bg-gray-800 rounded-full border border-gray-700">
-                <FaCheckCircle className="text-green-500 text-sm" />
-                <span className="text-xs font-bold text-white">
-                  System Healthy
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 relative z-10">
-              <div className="flex items-center gap-3 bg-gray-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
-                <FaDesktop className="text-gray-500" />
-                <div>
-                  <p className="text-xs text-gray-500 uppercase">Version</p>
-                  <p className="text-white font-medium">v1.0.2 (Beta)</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-gray-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
-                <FaServer className="text-gray-500" />
-                <div>
-                  <p className="text-xs text-gray-500 uppercase">Backend</p>
-                  <p className="text-white font-medium">Laravel 12 (PHP)</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-gray-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
-                <FaCode className="text-gray-500" />
-                <div>
-                  <p className="text-xs text-gray-500 uppercase">Frontend</p>
-                  <p className="text-white font-medium">React + TypeScript</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-gray-800/50 p-3 rounded-lg md:bg-transparent md:p-0">
-                <FaDatabase className="text-gray-500" />
-                <div>
-                  <p className="text-xs text-gray-500 uppercase">Database</p>
-                  <p className="text-white font-medium">MySQL</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-800 text-xs text-gray-500 text-center relative z-10">
-              Last System Update: January 2026
             </div>
           </div>
         </div>
